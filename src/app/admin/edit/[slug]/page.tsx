@@ -19,6 +19,19 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
     .eq('page_id', page.id)
     .order('position');
 
+  // Entity options powering the editor's dropdowns (staff / program pickers).
+  const [{ data: staffRows }, { data: programRows }] = await Promise.all([
+    supabase.from('staff').select('id, name').order('name'),
+    supabase.from('programs').select('id, slug, title'),
+  ]);
+  const entities = {
+    staff: (staffRows ?? []).map((s) => ({ id: s.id as string, label: (s.name as string) ?? s.id })),
+    programs: (programRows ?? []).map((pr) => ({
+      id: pr.id as string,
+      label: t(pr.title as LocaleMap, 'en') || (pr.slug as string) || (pr.id as string),
+    })),
+  };
+
   const p = page as PageRecord;
 
   return (
@@ -27,7 +40,7 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
         <Link href="/admin/pages" className="text-ink/60 hover:text-navy">← Pages</Link>
         <span className="font-medium">{t(p.title as LocaleMap, 'en')}</span>
       </div>
-      <Editor pageId={p.id} slug={p.slug} initialBlocks={(blocks ?? []) as Block[]} initialStatus={p.status} />
+      <Editor pageId={p.id} slug={p.slug} initialBlocks={(blocks ?? []) as Block[]} initialStatus={p.status} entities={entities} />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -17,7 +17,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { BLOCK_META, BLOCK_META_LIST } from '@/components/blocks/registry.meta';
-import { BlockForm } from './BlockForm';
+import { BlockForm, type EntityOptions } from './BlockForm';
 import {
   addBlock,
   updateBlock,
@@ -29,17 +29,20 @@ import {
 import type { Block, BlockType, PageStatus } from '@/lib/types';
 
 type Dict = Record<string, unknown>;
+type SaveState = 'idle' | 'dirty' | 'saving' | 'saved';
 
 export function Editor({
   pageId,
   slug,
   initialBlocks,
   initialStatus,
+  entities,
 }: {
   pageId: string;
   slug: string;
   initialBlocks: Block[];
   initialStatus: PageStatus;
+  entities: EntityOptions;
 }) {
   const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
   const [status, setStatus] = useState<PageStatus>(initialStatus);
@@ -47,15 +50,50 @@ export function Editor({
   const [locale, setLocale] = useState<'en' | 'id'>('en');
   const [previewKey, setPreviewKey] = useState(0);
   const [picking, setPicking] = useState(false);
+  const [saveState, setSaveState] = useState<SaveState>('idle');
   const [pending, startTransition] = useTransition();
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
   const selected = useMemo(() => blocks.find((b) => b.id === selectedId) ?? null, [blocks, selectedId]);
   const reloadPreview = () => setPreviewKey((k) => k + 1);
 
+  // ---- Debounced autosave -------------------------------------------------
+  // Edits update local state instantly; a pending change is flushed to the
+  // server ~700ms after typing stops (or immediately when switching blocks /
+  // structural actions), then the preview refreshes. No manual save needed.
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingRef = useRef<{ id: string; config: Dict; content: Dict } | null>(null);
+
+  const flushSave = (refresh = true) => {
+    if (timer.current) { clearTimeout(timer.current); timer.current = null; }
+    const p = pendingRef.current;
+    if (!p) return;
+    pendingRef.current = null;
+    setSaveState('saving');
+    startTransition(async () => {
+      await updateBlock(p.id, slug, { config: p.config, content: p.content });
+      setSaveState('saved');
+      if (refresh) reloadPreview();
+    });
+  };
+
+  const scheduleSave = (id: string, config: Dict, content: Dict) => {
+    // Switching to a different block? flush the previous one first.
+    if (pendingRef.current && pendingRef.current.id !== id) flushSave(false);
+    pendingRef.current = { id, config, content };
+    setSaveState('dirty');
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => flushSave(true), 700);
+  };
+
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+
+  const selectBlock = (id: string | null) => { flushSave(false); setSelectedId(id); };
+
   const onDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
+    flushSave(false);
     const oldIndex = blocks.findIndex((b) => b.id === active.id);
     const newIndex = blocks.findIndex((b) => b.id === over.id);
     const next = arrayMove(blocks, oldIndex, newIndex);
@@ -68,6 +106,7 @@ export function Editor({
 
   const onAdd = (type: BlockType) => {
     setPicking(false);
+    flushSave(false);
     startTransition(async () => {
       const res = await addBlock(pageId, type, slug);
       if (res?.ok && res.id) {
@@ -83,30 +122,30 @@ export function Editor({
   const onFormChange = (next: { config: Dict; content: Dict }) => {
     if (!selected) return;
     setBlocks((prev) => prev.map((b) => (b.id === selected.id ? { ...b, config: next.config as Block['config'], content: next.content } : b)));
+    scheduleSave(selected.id, next.config, next.content);
   };
 
-  const onSaveBlock = () => {
-    if (!selected) return;
-    startTransition(async () => {
-      await updateBlock(selected.id, slug, { config: selected.config, content: selected.content });
-      reloadPreview();
-    });
-  };
-
-  const onDuplicate = (id: string) => startTransition(async () => { await duplicateBlock(id, slug); location.reload(); });
-  const onDelete = (id: string) =>
+  const onDuplicate = (id: string) => { flushSave(false); startTransition(async () => { await duplicateBlock(id, slug); location.reload(); }); };
+  const onDelete = (id: string) => {
+    if (pendingRef.current?.id === id) pendingRef.current = null;
     startTransition(async () => {
       await deleteBlock(id, slug);
       setBlocks((prev) => prev.filter((b) => b.id !== id));
       if (selectedId === id) setSelectedId(null);
       reloadPreview();
     });
+  };
 
   const togglePublish = () => {
     const next: PageStatus = status === 'published' ? 'draft' : 'published';
     setStatus(next);
     startTransition(async () => { await setPageStatus(pageId, next, slug); });
   };
+
+  const saveLabel =
+    saveState === 'saving' ? 'Saving…' :
+    saveState === 'dirty' ? 'Unsaved changes' :
+    saveState === 'saved' ? 'All changes saved ✓' : '';
 
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col">
@@ -115,7 +154,7 @@ export function Editor({
         <div className="flex items-center gap-2">
           <span className="font-condensed uppercase tracking-wide text-ink/60">Editing</span>
           <span className="font-medium">/{slug}</span>
-          {pending && <span className="text-xs text-ink/40">saving…</span>}
+          {saveLabel && <span className="text-xs text-ink/40">{saveLabel}</span>}
         </div>
         <div className="flex items-center gap-2">
           <div className="flex overflow-hidden rounded-md border border-ink/20 text-sm">
@@ -132,7 +171,7 @@ export function Editor({
         </div>
       </div>
 
-      <div className="grid flex-1 grid-cols-[260px_1fr_320px] overflow-hidden">
+      <div className="grid flex-1 grid-cols-[260px_1fr_340px] overflow-hidden">
         {/* Block list */}
         <div className="overflow-y-auto border-r border-ink/10 bg-paper p-3">
           <button onClick={() => setPicking((v) => !v)} className="mb-3 w-full rounded-md bg-magenta py-2 font-condensed uppercase tracking-wide text-white">+ Add block</button>
@@ -145,7 +184,7 @@ export function Editor({
                     key={b.id}
                     block={b}
                     selected={b.id === selectedId}
-                    onSelect={() => setSelectedId(b.id)}
+                    onSelect={() => selectBlock(b.id)}
                     onDuplicate={() => onDuplicate(b.id)}
                     onDelete={() => onDelete(b.id)}
                   />
@@ -167,12 +206,13 @@ export function Editor({
             <>
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="font-condensed text-lg uppercase tracking-wide">{BLOCK_META[selected.type].label}</h2>
-                <button onClick={onSaveBlock} className="rounded-md bg-navy px-3 py-1.5 text-sm text-white">Save block</button>
+                <span className="text-xs text-ink/40">{saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved ✓' : ''}</span>
               </div>
               <BlockForm
                 schema={BLOCK_META[selected.type].editor}
                 config={selected.config as Dict}
                 content={selected.content as Dict}
+                entities={entities}
                 onChange={onFormChange}
               />
             </>

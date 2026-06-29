@@ -292,7 +292,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         { key: 'layout', label: 'Layout', type: 'select', options: [
           { value: 'grid', label: 'Grid' }, { value: 'carousel', label: 'Carousel' },
         ] },
-        { key: 'programId', label: 'Filter by program ID', type: 'text' },
+        { key: 'programId', label: 'Filter by program', type: 'entity', entity: 'programs', help: 'Leave blank to show all testimonials.' },
         ...UNIVERSAL,
       ],
       content: [],
@@ -324,7 +324,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           { value: 'single', label: 'Single ("Talk to…")' },
           { value: 'directory', label: 'Directory' },
         ] },
-        { key: 'staffId', label: 'Staff ID (single; blank = page owner)', type: 'text' },
+        { key: 'staffId', label: 'Staff member (single)', type: 'entity', entity: 'staff', help: 'Leave blank to use the page owner.' },
         ...UNIVERSAL,
       ],
       content: [],
@@ -340,8 +340,8 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           { value: 'partner', label: 'Partner (meeting request)' },
           { value: 'outbound', label: 'Outbound (internal)' },
         ] },
-        { key: 'programId', label: 'Program ID (routes to owner)', type: 'text' },
-        { key: 'recipientStaffId', label: 'Recipient staff ID', type: 'text' },
+        { key: 'programId', label: 'Program (routes to its owner)', type: 'entity', entity: 'programs', help: 'Optional. Inquiries route to this program’s owner.' },
+        { key: 'recipientStaffId', label: 'Recipient staff member', type: 'entity', entity: 'staff', help: 'Optional. Overrides who receives the inquiry.' },
         ...UNIVERSAL,
       ],
       content: [

@@ -46,6 +46,7 @@ export type EditorField =
   | { key: string; label: string; type: 'number' }
   | { key: string; label: string; type: 'boolean' }
   | { key: string; label: string; type: 'select'; options: { value: string; label: string }[] }
+  | { key: string; label: string; type: 'entity'; entity: 'staff' | 'programs'; help?: string }
   | { key: string; label: string; type: 'list'; itemFields: EditorField[] };
 
 export interface EditorSchema {
