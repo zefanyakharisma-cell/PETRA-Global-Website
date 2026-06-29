@@ -41,7 +41,7 @@ export function HeroBlock({ block, locale }: BlockComponentProps) {
             layout === 'left' && 'text-left',
           )}
         >
-          <div>
+          <div className={clsx(layout === 'centered' && 'flex flex-col items-center')}>
             {c.eyebrow && (
               <Reveal>
                 <p className="font-condensed text-lg uppercase tracking-widest text-cyan">
