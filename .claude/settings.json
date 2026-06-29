@@ -47,7 +47,8 @@
       "Bash(echo \"EXIT=$?\")",
       "Bash(git check-ignore *)",
       "Bash(echo \"rc=$?\")",
-      "Bash(py --version)"
+      "Bash(py --version)",
+      "Bash(node -e \"console.log\\(process.version\\)\")"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview"
