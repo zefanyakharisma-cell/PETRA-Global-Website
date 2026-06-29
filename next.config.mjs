@@ -13,10 +13,10 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
-      // Supabase Storage public buckets
+      // Supabase Storage public bucket — PETRA Global project (uploads go here)
       {
         protocol: 'https',
-        hostname: 'nvwwkehglccokobxwelp.supabase.co',
+        hostname: 'qxuvcopjyixdbtibxxjm.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
     ],

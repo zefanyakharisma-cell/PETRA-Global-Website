@@ -2,12 +2,14 @@
 
 import { useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { ImageCropModal } from './ImageCropModal';
 
 const BUCKET = 'petra-io-media';
 
 /**
  * Visual image control: drag-and-drop or click to upload a file to Supabase
- * storage, then store + preview its public URL. No URL-pasting required, though
+ * storage, then store + preview its public URL. Images can also be cropped
+ * in-browser (pan/zoom/aspect) before saving. No URL-pasting required, though
  * pasting a URL still works for externally-hosted images.
  */
 export function ImageField({
@@ -23,6 +25,19 @@ export function ImageField({
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [crop, setCrop] = useState<{ src: string; mime: string } | null>(null);
+
+  /** Upload any image blob and return its public URL. */
+  const uploadBlob = async (blob: Blob): Promise<string> => {
+    const supabase = createClient();
+    const ext = (blob.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+    const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage
+      .from(BUCKET)
+      .upload(path, blob, { cacheControl: '31536000', upsert: false, contentType: blob.type });
+    if (error) throw error;
+    return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  };
 
   const upload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -32,19 +47,45 @@ export function ImageField({
     setErr(null);
     setUploading(true);
     try {
-      const supabase = createClient();
-      const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
-      const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage
-        .from(BUCKET)
-        .upload(path, file, { cacheControl: '31536000', upsert: false });
-      if (error) throw error;
-      const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-      onChange(data.publicUrl);
+      onChange(await uploadBlob(file));
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Upload failed.');
     } finally {
       setUploading(false);
+    }
+  };
+
+  /** Pull the current image into the cropper (as a same-origin object URL). */
+  const openCrop = async () => {
+    if (!value) return;
+    setErr(null);
+    setUploading(true);
+    try {
+      const res = await fetch(value, { mode: 'cors' });
+      if (!res.ok) throw new Error('Could not load image.');
+      const blob = await res.blob();
+      setCrop({ src: URL.createObjectURL(blob), mime: blob.type || 'image/png' });
+    } catch {
+      setErr('Could not load this image for cropping (it may block cross-origin access).');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const closeCrop = () => {
+    if (crop) URL.revokeObjectURL(crop.src);
+    setCrop(null);
+  };
+
+  const onCropped = async (blob: Blob) => {
+    setUploading(true);
+    try {
+      onChange(await uploadBlob(blob));
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'Upload failed.');
+    } finally {
+      setUploading(false);
+      closeCrop();
     }
   };
 
@@ -57,21 +98,13 @@ export function ImageField({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={value} alt="" className="h-32 w-full bg-paper object-contain" />
           <div className="absolute inset-x-0 bottom-0 flex justify-between gap-1 bg-ink/70 p-1.5 opacity-0 transition group-hover:opacity-100">
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              className="rounded bg-white/90 px-2 py-0.5 text-xs font-medium text-ink"
-            >
-              Replace
-            </button>
-            <button
-              type="button"
-              onClick={() => onChange('')}
-              className="rounded bg-white/90 px-2 py-0.5 text-xs font-medium text-magenta"
-            >
-              Remove
-            </button>
+            <button type="button" onClick={openCrop} className="rounded bg-white/90 px-2 py-0.5 text-xs font-medium text-ink">Crop</button>
+            <button type="button" onClick={() => inputRef.current?.click()} className="rounded bg-white/90 px-2 py-0.5 text-xs font-medium text-ink">Replace</button>
+            <button type="button" onClick={() => onChange('')} className="rounded bg-white/90 px-2 py-0.5 text-xs font-medium text-magenta">Remove</button>
           </div>
+          {uploading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/70 text-xs font-medium text-ink/70">Working…</div>
+          )}
         </div>
       ) : (
         <button
@@ -121,6 +154,10 @@ export function ImageField({
         onChange={(e) => onChange(e.target.value)}
       />
       {err && <span className="mt-1 block text-xs text-magenta">{err}</span>}
+
+      {crop && (
+        <ImageCropModal src={crop.src} mime={crop.mime} onCancel={closeCrop} onCropped={onCropped} />
+      )}
     </div>
   );
 }
