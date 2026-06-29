@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { getNavigation } from '@/lib/queries';
@@ -17,10 +18,14 @@ export async function Footer() {
     <footer className="bg-navy text-white">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-[1.4fr_2fr] md:px-8">
         <div>
-          <p className="font-display text-3xl tracking-wide">
-            PETRA<span className="text-magenta">·</span>IO
-          </p>
-          <p className="mt-3 max-w-xs text-white/80">{t('tagline')}</p>
+          <Image
+            src="/brand/petra-logo-white.png"
+            alt="Petra Christian University"
+            width={842}
+            height={296}
+            className="h-14 w-auto"
+          />
+          <p className="mt-4 max-w-xs text-white/80">{t('tagline')}</p>
           <p className="mt-6 font-condensed uppercase tracking-widest text-cyan">{t('values')}</p>
         </div>
 

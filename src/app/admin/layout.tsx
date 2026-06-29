@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
@@ -30,7 +31,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex min-h-screen bg-paper text-ink">
       <aside className="w-56 shrink-0 bg-navy text-white">
-        <div className="px-5 py-5 font-display text-2xl">PETRA·IO</div>
+        <Link href="/admin" className="block px-5 py-5">
+          <Image
+            src="/brand/petra-logo-white.png"
+            alt="Petra Christian University"
+            width={842}
+            height={296}
+            className="h-9 w-auto"
+          />
+        </Link>
         <nav className="px-3">
           {NAV.map((item) => (
             <Link key={item.href} href={item.href} className="block rounded-md px-3 py-2 font-condensed uppercase tracking-wide text-white/80 hover:bg-white/10 hover:text-white">

@@ -25,7 +25,20 @@
       "Bash(ls -la assets)",
       "Bash(ls -la \"assets/Petra Fonts\")",
       "mcp__claude_ai_Supabase__list_tables",
-      "mcp__claude_ai_Supabase__get_advisors"
+      "mcp__claude_ai_Supabase__get_advisors",
+      "Bash(file \"e:/PETRA-Global-Website/assets/PETRA logo/\"*.png)",
+      "Bash(identify \"e:/PETRA-Global-Website/assets/PETRA logo/\"*.png)",
+      "Bash(ls node_modules/sharp)",
+      "Bash(node -e \"console.log\\('node', process.version\\)\")",
+      "Bash(node __TRACKED_VAR__/crop-crest.mjs 'assets/PETRA logo/01 - Logo Petra Inter.png' __TRACKED_VAR__/crest.png)",
+      "Bash(node --input-type=module -e ' *)",
+      "Bash(node __TRACKED_VAR__/make-apple-icon.mjs __TRACKED_VAR__/crest.png __TRACKED_VAR__/apple-icon.png)",
+      "Bash(cp __TRACKED_VAR__/crest.png src/app/icon.png)",
+      "Bash(cp __TRACKED_VAR__/apple-icon.png src/app/apple-icon.png)",
+      "Bash(cp __TRACKED_VAR__/crest.png public/brand/petra-crest.png)",
+      "Bash(node --input-type=module -e \"import fs from 'node:fs';for\\(const f of ['petra-logo-white.png','petra-logo-dark.png']\\){const b=fs.readFileSync\\('public/brand/'+f\\);console.log\\(f,b.readUInt32BE\\(16\\)+'x'+b.readUInt32BE\\(20\\)\\);}\")",
+      "WebFetch(domain:petra.ac.id)",
+      "WebSearch"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview"

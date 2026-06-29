@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { getNavigation } from '@/lib/queries';
@@ -26,8 +27,15 @@ export async function Navbar({ locale }: { locale: string }) {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-navy text-white">
       <nav className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-5 md:px-8" aria-label="Primary">
-        <Link href="/" className="font-display text-2xl leading-none tracking-wide">
-          PETRA<span className="text-magenta">·</span>IO
+        <Link href="/" className="flex items-center" aria-label="Petra Christian University — home">
+          <Image
+            src="/brand/petra-logo-white.png"
+            alt="Petra Christian University"
+            width={842}
+            height={296}
+            priority
+            className="h-10 w-auto"
+          />
         </Link>
 
         <ul className="ml-4 hidden items-center gap-1 md:flex">

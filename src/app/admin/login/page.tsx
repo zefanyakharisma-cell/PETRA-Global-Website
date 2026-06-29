@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useFormState, useFormStatus } from 'react-dom';
 import { useSearchParams } from 'next/navigation';
 import { signIn } from '../actions/auth';
@@ -11,8 +12,15 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-navy px-4">
       <form action={action} className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-2xl">
-        <p className="font-display text-3xl text-navy">PETRA·IO Admin</p>
-        <p className="mt-1 text-sm text-ink/60">Sign in to manage the site.</p>
+        <Image
+          src="/brand/petra-logo-dark.png"
+          alt="Petra Christian University"
+          width={842}
+          height={296}
+          priority
+          className="h-12 w-auto"
+        />
+        <p className="mt-4 text-sm text-ink/60">Sign in to manage the site.</p>
         <input type="hidden" name="next" value={next} />
 
         <label className="mt-6 block text-sm font-medium text-ink/70">Email</label>
