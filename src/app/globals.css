@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ----------------------------------------------------------------------------
+   Self-hosted brand fonts. Files live in /public/fonts (see README there).
+   `font-display: swap` keeps text visible during load; system fallbacks keep
+   the site legible before the licensed binaries are committed.
+---------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Bebas Neue';
+  src: url('/fonts/Bebas-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Bebas Neue';
+  src: url('/fonts/BebasNeue_Bold.otf') format('opentype');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DIN Condensed';
+  src: url('/fonts/DINCondensed-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Bold.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Baskerville';
+  src: url('/fonts/baskerville_bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  /* Brand color tokens (mirrored in tailwind.config.ts). Navy is load-bearing. */
+  --navy: #133256;
+  --navy-2: #245484;
+  --magenta: #ec008c;
+  --amber: #ffbc00;
+  --cyan: #54feeb;
+  --blue: #3880d0;
+  --paper: #f0f0f0;
+  --ink: #111111;
+
+  /* Font-family bindings consumed by tailwind's fontFamily tokens. */
+  --font-display: 'Bebas Neue', 'DIN Condensed', system-ui, sans-serif;
+  --font-condensed: 'DIN Condensed', 'Bebas Neue', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-editorial: 'Baskerville', Georgia, serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-paper text-ink font-body antialiased;
+  }
+  h1, h2, h3, .display {
+    @apply font-display tracking-wide;
+  }
+  /* Visible focus for keyboard nav (WCAG 2.1 AA). */
+  :focus-visible {
+    @apply outline-none ring-2 ring-magenta ring-offset-2 ring-offset-paper;
+  }
+}
+
+@layer components {
+  /* Styling for Tiptap rich-text output (RichTextBlock). */
+  .prose-block {
+    @apply text-lg leading-relaxed text-ink/85;
+  }
+  .prose-block h2 { @apply mt-8 text-3xl text-navy; }
+  .prose-block h3 { @apply mt-6 text-2xl text-navy; }
+  .prose-block p { @apply mt-4; }
+  .prose-block ul { @apply mt-4 list-disc space-y-1 pl-6; }
+  .prose-block ol { @apply mt-4 list-decimal space-y-1 pl-6; }
+  .prose-block a { @apply text-magenta underline underline-offset-2; }
+  .prose-block blockquote { @apply my-6 border-l-4 border-magenta pl-4 font-editorial text-2xl text-navy; }
+  .prose-on-navy { @apply text-white/85; }
+  .prose-on-navy h2, .prose-on-navy h3 { @apply text-white; }
+  .prose-on-navy a { @apply text-cyan; }
+  .prose-on-navy blockquote { @apply border-cyan text-white; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

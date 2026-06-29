@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm --version)",
+      "Bash(npx tsc *)",
+      "Bash(awk '/type GenericSchema = \\\\{/{f=1} f{print NR\": \"$0} f&&/\\\\};/{c++; if\\(c>=1\\){exit}}' node_modules/@supabase/postgrest-js/dist/index.d.cts)",
+      "Bash(xargs grep -l \"createServerClient\")",
+      "Bash(awk 'NR>=70 && NR<=128' node_modules/@supabase/postgrest-js/dist/index.d.cts)",
+      "Bash(awk 'NR>=55 && NR<=72' node_modules/@supabase/postgrest-js/dist/index.d.cts)",
+      "Bash(npx --prefix e:/PETRA-Global-Website tsc --noEmit --strict --skipLibCheck probe.ts)",
+      "Bash(node -e \"const p=require\\('@supabase/supabase-js/package.json'\\); console.log\\(JSON.stringify\\(p.exports['.'],null,2\\)\\)\")",
+      "Bash(node -e \"const p=require\\('@supabase/ssr/package.json'\\); console.log\\(JSON.stringify\\(p.exports['.'],null,2\\)\\)\")",
+      "Bash(node -e \"const p=require\\('@supabase/postgrest-js/package.json'\\); console.log\\(JSON.stringify\\(p.exports['.'],null,2\\)\\)\")",
+      "Bash(rm -f src/__probe.ts)",
+      "Bash(cd e:/PETRA-Global-Website && rm -rf src/app/admin/preview && mkdir -p \"src/app/editor-preview/[slug]\")",
+      "Bash(node -e \"console.log\\('next', require\\('next/package.json'\\).version\\)\")",
+      "Bash(npm view *)",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const fs=require\\('fs'\\); try{ fs.readlinkSync\\('src/app/not-found.tsx'\\); }catch\\(e\\){ console.log\\('readlinkSync code:', e.code\\); }\")",
+      "Bash(rm -rf .next)",
+      "Bash(NODE_OPTIONS=\"--require ./scripts/patch-readlink.cjs\" npx next build)"
+    ],
+    "additionalDirectories": [
+      "E:\\PETRA-Global-Website\\src\\app\\editor-preview"
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "nav": {
+    "about": "About",
+    "mobility": "Mobility",
+    "partnership": "Partnership",
+    "life": "Life at Petra",
+    "news": "News",
+    "home": "Home",
+    "menu": "Menu",
+    "skipToContent": "Skip to content"
+  },
+  "sections": {
+    "about": "About",
+    "mobility": "International Mobility",
+    "partnership": "Partnership",
+    "life": "Life at Petra",
+    "news": "News"
+  },
+  "footer": {
+    "tagline": "A caring and global university.",
+    "values": "Love · Integrity · Growth · Humility · Truth",
+    "office": "International Office",
+    "university": "Petra Christian University",
+    "rights": "All rights reserved.",
+    "exploreLabel": "Explore"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "id": "Bahasa Indonesia"
+  },
+  "search": {
+    "label": "Search",
+    "placeholder": "Search the site…",
+    "noResults": "Nothing matched your search yet.",
+    "hint": "Try a program, partner, or topic."
+  },
+  "notFound": {
+    "title": "We couldn't find that page",
+    "body": "The page may have moved. Let's get you back on track.",
+    "cta": "Back to home"
+  },
+  "thankYou": {
+    "title": "Thank you!",
+    "body": "We've received your message. Our team will be in touch soon.",
+    "cta": "Back to home"
+  }
+}

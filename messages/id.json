@@ -1,0 +1,48 @@
+{
+  "nav": {
+    "about": "Tentang",
+    "mobility": "Mobilitas",
+    "partnership": "Kemitraan",
+    "life": "Kehidupan di Petra",
+    "news": "Berita",
+    "home": "Beranda",
+    "menu": "Menu",
+    "skipToContent": "Lewati ke konten"
+  },
+  "sections": {
+    "about": "Tentang",
+    "mobility": "Mobilitas Internasional",
+    "partnership": "Kemitraan",
+    "life": "Kehidupan di Petra",
+    "news": "Berita"
+  },
+  "footer": {
+    "tagline": "Universitas yang peduli dan global.",
+    "values": "Kasih · Integritas · Bertumbuh · Kerendahan Hati · Kebenaran",
+    "office": "International Office",
+    "university": "Universitas Kristen Petra",
+    "rights": "Hak cipta dilindungi.",
+    "exploreLabel": "Jelajahi"
+  },
+  "language": {
+    "label": "Bahasa",
+    "en": "English",
+    "id": "Bahasa Indonesia"
+  },
+  "search": {
+    "label": "Cari",
+    "placeholder": "Cari di situs ini…",
+    "noResults": "Belum ada hasil yang cocok.",
+    "hint": "Coba nama program, mitra, atau topik."
+  },
+  "notFound": {
+    "title": "Halaman tidak ditemukan",
+    "body": "Halaman mungkin telah dipindahkan. Mari kembali ke jalur yang benar.",
+    "cta": "Kembali ke beranda"
+  },
+  "thankYou": {
+    "title": "Terima kasih!",
+    "body": "Pesan Anda sudah kami terima. Tim kami akan segera menghubungi Anda.",
+    "cta": "Kembali ke beranda"
+  }
+}
