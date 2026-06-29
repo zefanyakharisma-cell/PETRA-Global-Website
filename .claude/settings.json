@@ -55,7 +55,10 @@
       "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\gen_sql.cjs\")",
       "Bash(node -e \"console.log\\('tsx:', !!require.resolve\\('tsx'\\)\\); console.log\\('supabase:', require\\('@supabase/supabase-js/package.json'\\).version\\)\")",
       "Bash(npx tsx *)",
-      "Bash(rm -f _check_partners.ts)"
+      "Bash(rm -f _check_partners.ts)",
+      "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\prep.cjs\")",
+      "Bash(rm -f _rename_intl.ts)",
+      "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\gen2.cjs\")"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview"

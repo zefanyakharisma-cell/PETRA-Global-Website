@@ -72,6 +72,26 @@ function parseDate(s: string): Date | null {
 const isTrue = (v: string) => ['TRUE', '1', 'YES'].includes((v || '').trim().toUpperCase());
 const norm = (s: string) => (s || '').replace(/\s+/g, ' ').trim();
 
+// Strip a trailing country suffix from a name for cleaner display, e.g.
+// "Anhui University, China" -> "Anhui University". Only removes the last
+// comma-segment when it resolves to a known country/alias.
+const COUNTRY_ALIASES = new Set(['australia', 'thailand', 'malaysia', 'poland', 'netherlands', 'china', 'japan', 'india', 'korea', 'philippines', 'phillipines', 'philippine', 'cambodia', 'hong kong', 'hongkong', 'taiwan', 'bangladesh', 'usa', 'singapore', 'switzerland', 'germany', 'mongolia', 'new zealand', 'latvia', 'lithuania', 'france', 'romania', 'united arab emirates', 'uae', 'timor-leste', 'timor leste', 'uk', 'canada', 'macau', 'indonesia', 'seoul']);
+function normSeg(seg: string): string {
+  let s = seg.trim().toLowerCase();
+  s = s.replace(/\([^)]*\)/g, '').trim();
+  s = s.replace(/^(the|rep\.?\s+of|republic\s+of|p\.?\s*r\.?\s*o?f?\.?|p\.?\s*r\.?)\s+/, '').trim();
+  s = s.replace(/[.\s]+$/, '').trim();
+  return s;
+}
+function stripCountrySuffix(name: string, extra?: string): string {
+  const extras = new Set((extra ? [extra] : []).map(normSeg).filter(Boolean));
+  const i = name.lastIndexOf(',');
+  if (i < 0) return name;
+  const n = normSeg(name.slice(i + 1));
+  if (n && (COUNTRY_ALIASES.has(n) || extras.has(n))) return name.slice(0, i).replace(/[\s,]+$/, '').trim();
+  return name;
+}
+
 const REGION: Record<string, string> = {
   China: 'Asia', Taiwan: 'Asia', Malaysia: 'Asia', Korea: 'Asia', Philippines: 'Asia', Japan: 'Asia', India: 'Asia', Thailand: 'Asia', Singapore: 'Asia', Cambodia: 'Asia', 'Hong Kong': 'Asia', Bangladesh: 'Asia', Mongolia: 'Asia', 'Timor-Leste': 'Asia', Indonesia: 'Asia', Macau: 'Asia',
   Germany: 'Europe', Netherlands: 'Europe', Poland: 'Europe', Switzerland: 'Europe', Latvia: 'Europe', Lithuania: 'Europe', France: 'Europe', Romania: 'Europe', UK: 'Europe',
@@ -104,8 +124,10 @@ function buildPartners(): Partner[] {
     else { const d = [parseDate(ber), parseDate(ar)].filter(Boolean).sort((a, b) => +b! - +a!)[0]; active = d ? d >= TODAY : true; }
     if (!active) continue;
 
-    const key = name.toLowerCase();
-    if (!groups.has(key)) groups.set(key, { name, country: norm(r[I.neg]) || null, kind: 'international', region: regionFor(norm(r[I.neg])) });
+    const country = norm(r[I.neg]);
+    const display = stripCountrySuffix(name, country);
+    const key = display.toLowerCase();
+    if (!groups.has(key)) groups.set(key, { name: display, country: country || null, kind: 'international', region: regionFor(country) });
   }
   return [...groups.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
