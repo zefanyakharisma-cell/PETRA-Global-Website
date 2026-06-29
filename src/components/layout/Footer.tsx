@@ -47,7 +47,12 @@ export async function Footer() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-col gap-1 px-5 py-6 text-sm text-white/60 md:flex-row md:items-center md:justify-between md:px-8">
           <span>{t('office')} · {t('university')}</span>
-          <span>© {new Date().getFullYear()} {t('university')}. {t('rights')}</span>
+          <div className="flex items-center gap-4">
+            <Link href="/admin/login" className="text-white/60 hover:text-white">
+              Admin
+            </Link>
+            <span>© {new Date().getFullYear()} {t('university')}. {t('rights')}</span>
+          </div>
         </div>
       </div>
     </footer>
