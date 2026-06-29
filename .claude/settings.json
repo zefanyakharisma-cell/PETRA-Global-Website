@@ -51,7 +51,8 @@
       "Bash(node -e \"console.log\\(process.version\\)\")",
       "Bash(node -e \"try{require.resolve\\('csv-parse'\\);console.log\\('csv-parse OK'\\)}catch\\(e\\){console.log\\('no csv-parse'\\)}; try{require.resolve\\('papaparse'\\);console.log\\('papaparse OK'\\)}catch\\(e\\){console.log\\('no papaparse'\\)}\")",
       "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\explore.cjs\")",
-      "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\process.cjs\")"
+      "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\process.cjs\")",
+      "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\gen_sql.cjs\")"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview"
