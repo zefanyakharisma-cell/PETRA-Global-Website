@@ -1,11 +1,22 @@
+import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { getPageBySlug } from '@/lib/queries';
 import { defaultHomeBlocks } from '@/lib/defaultHome';
+import { localeAlternates } from '@/lib/seo';
 import type { Locale } from '@/lib/types';
 
 // ISR — revalidate public pages periodically.
 export const revalidate = 60;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return { alternates: localeAlternates(locale as Locale, '') };
+}
 
 export default async function HomePage({
   params,

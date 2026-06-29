@@ -28,6 +28,7 @@ export async function generateMetadata({
   return {
     title: t(program.title as LocaleMap, locale as Locale),
     description: t(program.summary as LocaleMap, locale as Locale),
+    alternates: localeAlternates(locale as Locale, `/programs/${slug}`),
   };
 }
 

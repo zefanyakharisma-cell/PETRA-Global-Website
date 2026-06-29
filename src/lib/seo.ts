@@ -1,6 +1,18 @@
 import type { Metadata } from 'next';
 import { t, type Locale, type PageRecord } from '@/lib/types';
 
+/** hreflang alternates for a path (en/id now; zh-ready). */
+export function localeAlternates(locale: Locale, path: string) {
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+  return {
+    canonical: `${base}/${locale}${path}`,
+    languages: {
+      en: `${base}/en${path}`,
+      id: `${base}/id${path}`,
+    },
+  };
+}
+
 /** Build Next Metadata from a page's `seo` JSONB + hreflang alternates. */
 export function pageMetadata(page: PageRecord, locale: Locale, path: string): Metadata {
   const seo = page.seo ?? {};
