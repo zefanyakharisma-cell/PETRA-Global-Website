@@ -20,7 +20,12 @@
       "Bash(rm -rf .next)",
       "Bash(NODE_OPTIONS=\"--require ./scripts/patch-readlink.cjs\" npx next build)",
       "Bash(curl -s \"http://localhost:3000/en?x=$\\(date +%s\\)\")",
-      "Bash(curl -s http://localhost:3000/en)"
+      "Bash(curl -s http://localhost:3000/en)",
+      "Bash(find . -path ./node_modules -prune -o -type d -iname \"*font*\" -print)",
+      "Bash(ls -la assets)",
+      "Bash(ls -la \"assets/Petra Fonts\")",
+      "mcp__claude_ai_Supabase__list_tables",
+      "mcp__claude_ai_Supabase__get_advisors"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview"

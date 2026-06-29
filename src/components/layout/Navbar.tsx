@@ -27,7 +27,7 @@ export async function Navbar({ locale }: { locale: string }) {
     <header className="sticky top-0 z-40 border-b border-white/10 bg-navy text-white">
       <nav className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-5 md:px-8" aria-label="Primary">
         <Link href="/" className="font-display text-2xl leading-none tracking-wide">
-          PCU<span className="text-magenta">·</span>IO
+          PETRA<span className="text-magenta">·</span>IO
         </Link>
 
         <ul className="ml-4 hidden items-center gap-1 md:flex">

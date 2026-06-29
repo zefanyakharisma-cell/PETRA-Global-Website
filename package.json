@@ -2,7 +2,7 @@
   "name": "petra-io-website",
   "version": "0.1.0",
   "private": true,
-  "description": "Public website for the International Office of Petra Christian University (PCU)",
+  "description": "Public website for the International Office of Petra Christian University (PETRA)",
   "scripts": {
     "dev": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs next dev",
     "build": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs next build",

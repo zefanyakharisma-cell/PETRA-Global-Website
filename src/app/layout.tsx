@@ -6,10 +6,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
   title: {
     default: 'Petra Christian University — International Office',
-    template: '%s · PCU International Office',
+    template: '%s · PETRA International Office',
   },
   description:
-    'The International Office of Petra Christian University (PCU), Surabaya — a caring and global university.',
+    'The International Office of Petra Christian University (PETRA), Surabaya — a caring and global university.',
 };
 
 /**

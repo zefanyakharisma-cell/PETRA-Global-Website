@@ -11,7 +11,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-navy px-4">
       <form action={action} className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-2xl">
-        <p className="font-display text-3xl text-navy">PCU·IO Admin</p>
+        <p className="font-display text-3xl text-navy">PETRA·IO Admin</p>
         <p className="mt-1 text-sm text-ink/60">Sign in to manage the site.</p>
         <input type="hidden" name="next" value={next} />
 

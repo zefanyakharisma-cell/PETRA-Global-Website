@@ -5,7 +5,7 @@ import { signOut } from './actions/auth';
 import '../globals.css';
 
 export const metadata: Metadata = {
-  title: 'Admin · PCU International Office',
+  title: 'Admin · PETRA International Office',
   robots: { index: false, follow: false },
 };
 
@@ -30,7 +30,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex min-h-screen bg-paper text-ink">
       <aside className="w-56 shrink-0 bg-navy text-white">
-        <div className="px-5 py-5 font-display text-2xl">PCU·IO</div>
+        <div className="px-5 py-5 font-display text-2xl">PETRA·IO</div>
         <nav className="px-3">
           {NAV.map((item) => (
             <Link key={item.href} href={item.href} className="block rounded-md px-3 py-2 font-condensed uppercase tracking-wide text-white/80 hover:bg-white/10 hover:text-white">

@@ -18,7 +18,7 @@ export async function Footer() {
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-[1.4fr_2fr] md:px-8">
         <div>
           <p className="font-display text-3xl tracking-wide">
-            PCU<span className="text-magenta">·</span>IO
+            PETRA<span className="text-magenta">·</span>IO
           </p>
           <p className="mt-3 max-w-xs text-white/80">{t('tagline')}</p>
           <p className="mt-6 font-condensed uppercase tracking-widest text-cyan">{t('values')}</p>

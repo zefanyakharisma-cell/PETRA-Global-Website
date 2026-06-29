@@ -198,21 +198,29 @@ alter table petra_io.inquiries    enable row level security;
 alter table petra_io.pages        enable row level security;
 alter table petra_io.blocks       enable row level security;
 
+-- Policies use drop-if-exists guards so this migration is safely re-runnable.
 -- Public read of active entities ------------------------------------------------
+drop policy if exists "public read active staff" on petra_io.staff;
 create policy "public read active staff" on petra_io.staff
   for select to anon using (is_active = true);
+drop policy if exists "public read programs" on petra_io.programs;
 create policy "public read programs" on petra_io.programs
   for select to anon using (true);
+drop policy if exists "public read partners" on petra_io.partners;
 create policy "public read partners" on petra_io.partners
   for select to anon using (true);
+drop policy if exists "public read published news" on petra_io.news;
 create policy "public read published news" on petra_io.news
   for select to anon using (published_at is not null and published_at <= now());
+drop policy if exists "public read testimonials" on petra_io.testimonials;
 create policy "public read testimonials" on petra_io.testimonials
   for select to anon using (true);
 
 -- Public read of published pages + their blocks --------------------------------
+drop policy if exists "public read published pages" on petra_io.pages;
 create policy "public read published pages" on petra_io.pages
   for select to anon using (status = 'published');
+drop policy if exists "public read blocks of published pages" on petra_io.blocks;
 create policy "public read blocks of published pages" on petra_io.blocks
   for select to anon using (
     exists (select 1 from petra_io.pages p
@@ -220,6 +228,7 @@ create policy "public read blocks of published pages" on petra_io.blocks
   );
 
 -- Public may submit inquiries (insert only, no read) ---------------------------
+drop policy if exists "public insert inquiries" on petra_io.inquiries;
 create policy "public insert inquiries" on petra_io.inquiries
   for insert to anon with check (true);
 
@@ -229,6 +238,7 @@ declare t text;
 begin
   foreach t in array array['staff','programs','partners','news','testimonials','inquiries','pages','blocks']
   loop
+    execute format('drop policy if exists "admin all %1$s" on petra_io.%1$I;', t);
     execute format(
       'create policy "admin all %1$s" on petra_io.%1$I
          for all to authenticated using (true) with check (true);', t);
@@ -253,8 +263,11 @@ values
 on conflict (id) do nothing;
 
 -- Public can read media; only authenticated admins can write.
+-- (Scoped to the petra-io-media bucket so the shared project's storage is untouched.)
+drop policy if exists "petra-io media public read" on storage.objects;
 create policy "petra-io media public read" on storage.objects
   for select to anon using (bucket_id = 'petra-io-media');
+drop policy if exists "petra-io media admin write" on storage.objects;
 create policy "petra-io media admin write" on storage.objects
   for all to authenticated
   using (bucket_id = 'petra-io-media')

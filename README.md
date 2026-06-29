@@ -1,7 +1,7 @@
 # Petra Christian University — International Office website
 
 Public website + custom block-based CMS for the **International Office (IO)** of
-**Petra Christian University (PCU)**, Surabaya. Next.js 14 (App Router) ·
+**Petra Christian University (PETRA)**, Surabaya. Next.js 14 (App Router) ·
 TypeScript · Tailwind · next-intl (en/id, zh-ready) · Supabase · Resend.
 
 > Per the client brief, **no real content is seeded.** Every list/entity block
