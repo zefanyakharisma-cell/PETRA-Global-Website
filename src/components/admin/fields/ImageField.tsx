@@ -61,7 +61,12 @@ export function ImageField({
     setErr(null);
     setUploading(true);
     try {
-      const res = await fetch(value, { mode: 'cors' });
+      // Route our own storage images through the same-origin proxy so the
+      // cropper's canvas is never cross-origin tainted. External (pasted) URLs
+      // are fetched directly as a best effort.
+      const base = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''}/storage/v1/object/public/${BUCKET}/`;
+      const fetchUrl = base.length > 1 && value.startsWith(base) ? `/api/media?url=${encodeURIComponent(value)}` : value;
+      const res = await fetch(fetchUrl, { mode: 'cors' });
       if (!res.ok) throw new Error('Could not load image.');
       const blob = await res.blob();
       setCrop({ src: URL.createObjectURL(blob), mime: blob.type || 'image/png' });
