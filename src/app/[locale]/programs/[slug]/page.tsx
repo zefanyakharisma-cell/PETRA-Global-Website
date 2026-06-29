@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { createClient } from '@/lib/supabase/server';
+import { localeAlternates } from '@/lib/seo';
 import { t, type Block, type Locale, type LocaleMap } from '@/lib/types';
 
 export const revalidate = 60;

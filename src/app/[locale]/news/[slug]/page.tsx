@@ -5,6 +5,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { Container } from '@/components/ui/Section';
 import { NewsFeedBlock } from '@/components/blocks/NewsFeedBlock';
 import { createClient } from '@/lib/supabase/server';
+import { localeAlternates } from '@/lib/seo';
 import { t, type Locale, type LocaleMap } from '@/lib/types';
 
 export const revalidate = 60;
@@ -30,6 +31,7 @@ export async function generateMetadata({
   if (!article) return {};
   return {
     title: t(article.title as LocaleMap, locale as Locale),
+    alternates: localeAlternates(locale as Locale, `/news/${slug}`),
     openGraph: { images: article.cover_url ? [{ url: article.cover_url }] : undefined },
   };
 }

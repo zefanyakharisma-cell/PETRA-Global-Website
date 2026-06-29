@@ -18,7 +18,9 @@
       "Bash(node -e ' *)",
       "Bash(node -e \"const fs=require\\('fs'\\); try{ fs.readlinkSync\\('src/app/not-found.tsx'\\); }catch\\(e\\){ console.log\\('readlinkSync code:', e.code\\); }\")",
       "Bash(rm -rf .next)",
-      "Bash(NODE_OPTIONS=\"--require ./scripts/patch-readlink.cjs\" npx next build)"
+      "Bash(NODE_OPTIONS=\"--require ./scripts/patch-readlink.cjs\" npx next build)",
+      "Bash(curl -s \"http://localhost:3000/en?x=$\\(date +%s\\)\")",
+      "Bash(curl -s http://localhost:3000/en)"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview"
