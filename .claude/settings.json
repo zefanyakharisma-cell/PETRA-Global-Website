@@ -40,7 +40,14 @@
       "WebFetch(domain:petra.ac.id)",
       "WebSearch",
       "mcp__claude_ai_Vercel__get_runtime_errors",
-      "Bash(node -e \"const p=require\\('fs'\\).readFileSync\\('node_modules/react-easy-crop/package.json','utf8'\\); const j=JSON.parse\\(p\\); console.log\\(JSON.stringify\\(j.exports,null,2\\)\\); console.log\\('main:',j.main,'module:',j.module\\)\")"
+      "Bash(node -e \"const p=require\\('fs'\\).readFileSync\\('node_modules/react-easy-crop/package.json','utf8'\\); const j=JSON.parse\\(p\\); console.log\\(JSON.stringify\\(j.exports,null,2\\)\\); console.log\\('main:',j.main,'module:',j.module\\)\")",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Id 10164,11788,22940,22984,19188,21828,24076 -Force -ErrorAction SilentlyContinue)",
+      "PowerShell(\"killed\")",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(git check-ignore *)",
+      "Bash(echo \"rc=$?\")",
+      "Bash(py --version)"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview"
