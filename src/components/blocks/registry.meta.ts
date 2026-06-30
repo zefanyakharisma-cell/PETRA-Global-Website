@@ -28,7 +28,7 @@ const UNIVERSAL: EditorField[] = [
  */
 export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
   hero: {
-    type: 'hero', label: 'Hero', category: 'Layout & hero', defaultConfig: { background: 'navy', spacing: 'spacious', layout: 'centered' },
+    type: 'hero', label: 'Hero', category: 'Layout & hero', defaultConfig: { background: 'navy', spacing: 'spacious', layout: 'centered', bgType: 'image', bgSource: 'programs' },
     defaultContent: { eyebrow: {}, heading: {}, subcopy: {}, ctas: [] },
     editor: {
       config: [
@@ -37,13 +37,22 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           { value: 'left', label: 'Left' },
           { value: 'split-with-image', label: 'Split with image' },
         ] },
+        { key: 'bgType', label: 'Background (centered/left)', type: 'select', options: [
+          { value: 'none', label: 'Solid colour' },
+          { value: 'image', label: 'Uploaded image' },
+          { value: 'carousel', label: 'Carousel (auto-rotating)' },
+        ] },
+        { key: 'bgSource', label: 'Carousel source', type: 'select', options: [
+          { value: 'programs', label: 'Programs (featured first)' },
+          { value: 'news', label: 'News & announcements' },
+        ] },
         ...UNIVERSAL,
       ],
       content: [
         { key: 'eyebrow', label: 'Eyebrow', type: 'text', localized: true },
         { key: 'heading', label: 'Headline', type: 'text', localized: true },
         { key: 'subcopy', label: 'Subcopy', type: 'textarea', localized: true },
-        { key: 'image_url', label: 'Background / split image', type: 'image' },
+        { key: 'image_url', label: 'Background image (“Uploaded image”) / split image', type: 'image' },
         { key: 'ctas', label: 'Buttons (max 2)', type: 'list', itemFields: [
           { key: 'label', label: 'Label', type: 'text', localized: true },
           { key: 'href', label: 'Link', type: 'url' },

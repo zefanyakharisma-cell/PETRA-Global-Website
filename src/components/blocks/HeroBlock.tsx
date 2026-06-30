@@ -2,9 +2,11 @@ import Image from 'next/image';
 import { Section, Container } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { Cta } from '@/components/ui/Cta';
+import { createClient } from '@/lib/supabase/server';
 import { clsx } from '@/lib/clsx';
-import { t, type LocaleMap } from '@/lib/types';
+import { t, type LocaleMap, type Locale } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
+import { HeroCarousel, type HeroSlide } from './HeroCarousel';
 
 interface HeroContent {
   eyebrow?: LocaleMap;
@@ -14,25 +16,69 @@ interface HeroContent {
   ctas?: { label: LocaleMap; href: string; variant?: 'magenta' | 'amber' | 'blue' | 'outline' }[];
 }
 
+/** Resolve cover images for the carousel background from a chosen entity source. */
+async function carouselSlides(source: string, locale: Locale, limit = 6): Promise<HeroSlide[]> {
+  const supabase = await createClient();
+  if (source === 'news') {
+    const { data } = await supabase
+      .from('news')
+      .select('slug,title,cover_url,published_at')
+      .not('published_at', 'is', null)
+      .not('cover_url', 'is', null)
+      .order('published_at', { ascending: false })
+      .limit(limit);
+    return (data ?? [])
+      .filter((n) => n.cover_url)
+      .map((n) => ({ image_url: n.cover_url as string, title: t(n.title as LocaleMap, locale), href: `/news/${n.slug}` }));
+  }
+  // Default: programs (featured first).
+  const { data } = await supabase
+    .from('programs')
+    .select('slug,title,cover_url,is_featured')
+    .not('cover_url', 'is', null)
+    .order('is_featured', { ascending: false })
+    .limit(limit);
+  return (data ?? [])
+    .filter((p) => p.cover_url)
+    .map((p) => ({ image_url: p.cover_url as string, title: t(p.title as LocaleMap, locale), href: `/programs/${p.slug}` }));
+}
+
 /** Full-bleed hero. Staggered reveal: eyebrow -> headline -> subcopy -> CTAs. */
-export function HeroBlock({ block, locale }: BlockComponentProps) {
+export async function HeroBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as HeroContent;
   const layout = (block.config.layout as string) ?? 'centered';
   const split = layout === 'split-with-image';
-  const onImage = !!c.image_url && !split;
+
+  // Background mode. Back-compat: when `bgType` is unset, fall back to the
+  // single uploaded image if one exists (the pre-carousel behaviour).
+  const bgType = (block.config.bgType as string) ?? (c.image_url ? 'image' : 'none');
+  const bgSource = (block.config.bgSource as string) ?? 'programs';
+
+  const slides = !split && bgType === 'carousel' ? await carouselSlides(bgSource, locale) : [];
+  const showImageBg = !split && bgType === 'image' && !!c.image_url;
+  const showCarouselBg = !split && bgType === 'carousel' && slides.length > 0;
+  const hasBg = showImageBg || showCarouselBg;
 
   return (
     <Section
       config={{ ...block.config, background: block.config.background ?? 'navy' }}
       className="relative overflow-hidden"
     >
-      {onImage && (
-        <div className="absolute inset-0 -z-10">
-          <Image src={c.image_url!} alt="" fill priority className="object-cover" />
-          <div className="absolute inset-0 bg-navy/70" />
+      {hasBg && (
+        // z-0 (not negative): the section sets `relative` without a z-index, so a
+        // negative-z child would slip behind the opaque section background and
+        // vanish. Keep it at 0 and lift the copy to z-10 instead.
+        <div className="absolute inset-0 z-0">
+          {showImageBg && (
+            <>
+              <Image src={c.image_url!} alt="" fill priority sizes="100vw" className="object-cover" />
+              <div className="absolute inset-0 bg-navy/70" />
+            </>
+          )}
+          {showCarouselBg && <HeroCarousel slides={slides} />}
         </div>
       )}
-      <Container>
+      <Container className="relative z-10">
         <div
           className={clsx(
             'grid items-center gap-10',
