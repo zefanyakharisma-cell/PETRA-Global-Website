@@ -22,6 +22,19 @@ const config: Config = {
         blue: '#3880d0', // PARTNER door accent (pairs with navy)
         paper: '#f0f0f0', // light neutral surface
         ink: '#111111', // near-black text/neutral
+
+        // shadcn-style semantic tokens — consumed by dropped-in ui/ components
+        // (e.g. mapcn-map-arc). Additive; brand tokens above remain canonical.
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
+        popover: 'var(--popover)',
+        'popover-foreground': 'var(--popover-foreground)',
+        muted: 'var(--muted)',
+        'muted-foreground': 'var(--muted-foreground)',
+        accent: 'var(--accent)',
+        'accent-foreground': 'var(--accent-foreground)',
+        border: 'var(--border)',
+        ring: 'var(--ring)',
       },
       fontFamily: {
         // Bound to next/font/local CSS variables (see src/lib/fonts.ts).
@@ -38,9 +51,21 @@ const config: Config = {
           from: { opacity: '0', transform: 'translateY(12px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
+        // Marquee scrolls one full copy width; the track holds two copies so
+        // the loop is seamless (-50% lands the second copy where the first was).
+        'marquee-left': {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(-50%)' },
+        },
+        'marquee-right': {
+          from: { transform: 'translateX(-50%)' },
+          to: { transform: 'translateX(0)' },
+        },
       },
       animation: {
         'fade-up': 'fade-up 0.5s ease-out both',
+        'marquee-left': 'marquee-left var(--marquee-duration, 40s) linear infinite',
+        'marquee-right': 'marquee-right var(--marquee-duration, 40s) linear infinite',
       },
     },
   },

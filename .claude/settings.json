@@ -65,7 +65,8 @@
       "Bash(curl -s -o /tmp/partnership.html -w \"%{http_code}\" http://localhost:3000/en/partnership)",
       "Bash(curl -s -o /dev/null -w \"logo HTTP: %{http_code}, bytes: %{size_download}\\\\n\" \"http://localhost:3000/partners/china-anhui-university-china.jpg\")",
       "Bash(pkill -f \"next dev\")",
-      "Bash(pkill -f \"next-server\")"
+      "Bash(pkill -f \"next-server\")",
+      "Bash(node -e \"const l=require\\('lucide-react'\\); console.log\\('version ok:', ['X','Minus','Plus','Locate','Maximize','Loader2'].map\\(k=>k+'='+\\(typeof l[k]\\)\\).join\\(', '\\)\\)\")"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview"

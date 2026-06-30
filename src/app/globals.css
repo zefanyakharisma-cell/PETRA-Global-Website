@@ -61,6 +61,19 @@
   --paper: #f0f0f0;
   --ink: #111111;
 
+  /* shadcn-style semantic tokens (mirrored in tailwind.config.ts) used by
+     dropped-in ui/ components such as the map controls/popups. */
+  --background: #ffffff;
+  --foreground: #111111;
+  --popover: #ffffff;
+  --popover-foreground: #111111;
+  --muted: #f0f0f0;
+  --muted-foreground: #6b7280;
+  --accent: #f0f0f0;
+  --accent-foreground: #111111;
+  --border: #e5e7eb;
+  --ring: #ec008c;
+
   /* Font-family bindings consumed by tailwind's fontFamily tokens. */
   --font-display: 'Bebas Neue', 'DIN Condensed', system-ui, sans-serif;
   --font-condensed: 'DIN Condensed', 'Bebas Neue', system-ui, sans-serif;

@@ -5,6 +5,7 @@ import { cityToCoords } from '@/lib/cityCoords';
 import { t, type LocaleMap } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
 import { PartnerMapLoader } from './partner-map/PartnerMapLoader';
+import { PartnerArcMapLoader } from './partner-map/PartnerArcMapLoader';
 
 interface PartnerMapContent {
   heading?: LocaleMap;
@@ -87,6 +88,13 @@ export async function PartnerMapBlock({ block, locale }: BlockComponentProps) {
             onDark
             title={locale === 'id' ? 'Belum ada mitra dipetakan' : 'No partners mapped yet'}
             hint={locale === 'id' ? 'Mitra dengan koordinat akan muncul di peta.' : 'Partners with coordinates will plot here.'}
+          />
+        ) : filterKind === 'international' ? (
+          // International partners render as an arc-globe radiating from Petra.
+          <PartnerArcMapLoader
+            markers={markers}
+            defaultZoom={Number(block.config.defaultZoom ?? 1.4)}
+            center={block.config.center as [number, number] | undefined}
           />
         ) : (
           <PartnerMapLoader
