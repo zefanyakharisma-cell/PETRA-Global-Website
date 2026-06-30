@@ -26,6 +26,7 @@ export const BLOCK_TYPES = [
   'events',
   // Entity-bound
   'partner_map',
+  'partner_marquee',
   'testimonials',
   'news_feed',
   'staff',

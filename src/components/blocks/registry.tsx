@@ -22,6 +22,7 @@ import { EmbedBlock } from './EmbedBlock';
 import { DownloadsBlock } from './DownloadsBlock';
 import { EventsBlock } from './EventsBlock';
 import { PartnerMapBlock } from './PartnerMapBlock';
+import { PartnerMarqueeBlock } from './PartnerMarqueeBlock';
 import { TestimonialsBlock } from './TestimonialsBlock';
 import { NewsFeedBlock } from './NewsFeedBlock';
 import { StaffBlock } from './StaffBlock';
@@ -56,6 +57,7 @@ const COMPONENTS: Record<BlockMeta['type'], ComponentType<BlockComponentProps>> 
   downloads: DownloadsBlock,
   events: EventsBlock,
   partner_map: PartnerMapBlock,
+  partner_marquee: PartnerMarqueeBlock,
   testimonials: TestimonialsBlock,
   news_feed: NewsFeedBlock,
   staff: StaffBlock,

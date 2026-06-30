@@ -433,6 +433,21 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
       content: [{ key: 'heading', label: 'Heading', type: 'text', localized: true }],
     },
   },
+  partner_marquee: {
+    type: 'partner_marquee', label: 'Partner logo marquee', category: 'Entity-bound', defaultConfig: { background: 'navy', spacing: 'normal', filterKind: 'all' },
+    defaultContent: { heading: {} },
+    editor: {
+      config: [
+        { key: 'filterKind', label: 'Logos to show', type: 'select', options: [
+          { value: 'all', label: 'All partners' },
+          { value: 'international', label: 'International' },
+          { value: 'domestic', label: 'Domestic' },
+        ] },
+        ...UNIVERSAL,
+      ],
+      content: [{ key: 'heading', label: 'Heading', type: 'text', localized: true }],
+    },
+  },
   testimonials: {
     type: 'testimonials', label: 'Testimonials', category: 'Entity-bound', defaultConfig: { background: 'navy', spacing: 'normal', layout: 'grid' },
     defaultContent: {},
