@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { setRequestLocale } from 'next-intl/server';
 import { Section, Container } from '@/components/ui/Section';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Reveal } from '@/components/ui/Reveal';
 import { createClient } from '@/lib/supabase/server';
 import { localeAlternates } from '@/lib/seo';
+import { partnerLogo } from '@/lib/partnerLogos';
 import { clsx } from '@/lib/clsx';
 
 export const revalidate = 60;
@@ -149,10 +151,10 @@ export default async function PartnershipPage({
                           {list.length} {copy.partners}
                         </span>
                       </div>
-                      <ul className="mt-6 grid gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+                      <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {list.map((p, i) => (
-                          <li key={`${p.name}-${i}`}>
-                            <PartnerItem partner={p} />
+                          <li key={`${p.name}-${i}`} className="h-full">
+                            <PartnerCard partner={p} />
                           </li>
                         ))}
                       </ul>
@@ -168,32 +170,56 @@ export default async function PartnershipPage({
   );
 }
 
-function PartnerItem({ partner }: { partner: PartnerRow }) {
+function monogram(name: string): string {
+  return name
+    .replace(/\(.*?\)/g, '')
+    .split(/\s+/)
+    .filter((w) => /^[A-Za-z]/.test(w) && !['of', 'and', 'the', 'for', 'de'].includes(w.toLowerCase()))
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase())
+    .join('');
+}
+
+function PartnerCard({ partner }: { partner: PartnerRow }) {
+  const logo = partnerLogo(partner.name);
   const inner = (
-    <>
-      <span
-        className={clsx(
-          'block font-medium text-ink',
-          partner.url && 'transition group-hover:text-magenta',
+    <div
+      className={clsx(
+        'flex h-full flex-col overflow-hidden rounded-xl border border-ink/10 bg-white transition',
+        partner.url && 'group-hover:-translate-y-0.5 group-hover:border-magenta/40 group-hover:shadow-md',
+      )}
+    >
+      <div className="flex h-24 items-center justify-center border-b border-ink/5 bg-paper px-6 py-4">
+        {logo ? (
+          <div className="relative h-full w-full">
+            <Image src={logo} alt={partner.name} fill className="object-contain" sizes="(max-width: 640px) 100vw, 320px" />
+          </div>
+        ) : (
+          <span className="font-condensed text-2xl uppercase tracking-wide text-ink/30">
+            {monogram(partner.name)}
+          </span>
         )}
-      >
-        {partner.name}
-      </span>
-      {partner.country && <span className="mt-0.5 block text-sm text-ink/55">{partner.country}</span>}
-    </>
+      </div>
+      <div className="flex flex-1 flex-col p-4">
+        <span
+          className={clsx(
+            'text-sm font-medium leading-snug text-ink',
+            partner.url && 'transition group-hover:text-magenta',
+          )}
+        >
+          {partner.name}
+        </span>
+        {partner.country && <span className="mt-1 text-xs text-ink/55">{partner.country}</span>}
+      </div>
+    </div>
   );
 
   if (partner.url) {
     return (
-      <a
-        href={partner.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group block border-l-2 border-ink/10 pl-3 transition hover:border-magenta"
-      >
+      <a href={partner.url} target="_blank" rel="noopener noreferrer" className="group block h-full">
         {inner}
       </a>
     );
   }
-  return <div className="border-l-2 border-ink/10 pl-3">{inner}</div>;
+  return <div className="h-full">{inner}</div>;
 }

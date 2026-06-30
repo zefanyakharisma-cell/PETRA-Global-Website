@@ -60,6 +60,15 @@ export type PartnerRow = Timestamps & {
   url: string | null;
 };
 
+export type DomesticPartnerRow = Timestamps & {
+  id: string;
+  name: string;
+  city: string | null;
+  region: string | null;
+  logo_url: string | null;
+  url: string | null;
+};
+
 export type NewsRow = Timestamps & {
   id: string;
   slug: string;
@@ -126,6 +135,7 @@ export interface Database {
       staff: TableShape<StaffRow, 'name' | 'email'>;
       programs: TableShape<ProgramRow, 'slug' | 'kind'>;
       partners: TableShape<PartnerRow, 'name'>;
+      domestic_partners: TableShape<DomesticPartnerRow, 'name'>;
       news: TableShape<NewsRow, 'slug'>;
       testimonials: TableShape<TestimonialRow, 'person_name'>;
       inquiries: TableShape<InquiryRow, 'kind' | 'payload'>;

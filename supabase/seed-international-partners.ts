@@ -133,7 +133,7 @@ function buildPartners(): Partner[] {
 }
 
 async function main() {
-  const supabase = createClient(url, key, { db: { schema: 'petra_io' } });
+  const supabase = createClient(url!, key!, { db: { schema: 'petra_io' } });
   const partners = buildPartners();
   console.log(`Built ${partners.length} active international institutions from CSV.`);
 

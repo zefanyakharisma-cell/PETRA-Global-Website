@@ -58,7 +58,8 @@
       "Bash(rm -f _check_partners.ts)",
       "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\prep.cjs\")",
       "Bash(rm -f _rename_intl.ts)",
-      "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\gen2.cjs\")"
+      "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\gen2.cjs\")",
+      "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\gen_dom.cjs\")"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview"

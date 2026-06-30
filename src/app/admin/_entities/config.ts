@@ -1,5 +1,5 @@
 /** Field schema driving the generic entity admin (list + create form). */
-export type EntityTable = 'staff' | 'programs' | 'partners' | 'news' | 'testimonials';
+export type EntityTable = 'staff' | 'programs' | 'partners' | 'domestic_partners' | 'news' | 'testimonials';
 
 export type FieldKind =
   | 'text'
@@ -59,15 +59,27 @@ export const ENTITY_CONFIG: Record<EntityTable, EntityConfig> = {
   },
   partners: {
     table: 'partners',
-    title: 'Partners',
-    list: ['name', 'country', 'kind', 'region'],
+    title: 'International Partners',
+    list: ['name', 'country', 'region'],
     fields: [
       { key: 'name', label: 'Name', kind: 'text', required: true },
       { key: 'country', label: 'Country', kind: 'text' },
-      { key: 'kind', label: 'Kind', kind: 'select', options: ['international', 'domestic'] },
+      { key: 'kind', label: 'Kind', kind: 'select', options: ['international'] },
       { key: 'region', label: 'Region', kind: 'text' },
       { key: 'lat', label: 'Latitude', kind: 'number' },
       { key: 'lng', label: 'Longitude', kind: 'number' },
+      { key: 'logo_url', label: 'Logo URL', kind: 'url' },
+      { key: 'url', label: 'Website', kind: 'url' },
+    ],
+  },
+  domestic_partners: {
+    table: 'domestic_partners',
+    title: 'Domestic Partners',
+    list: ['name', 'city', 'region'],
+    fields: [
+      { key: 'name', label: 'Name', kind: 'text', required: true },
+      { key: 'city', label: 'City', kind: 'text' },
+      { key: 'region', label: 'Region', kind: 'text' },
       { key: 'logo_url', label: 'Logo URL', kind: 'url' },
       { key: 'url', label: 'Website', kind: 'url' },
     ],

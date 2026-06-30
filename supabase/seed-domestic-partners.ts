@@ -1,5 +1,6 @@
 /**
- * Seed ACTIVE domestic (Indonesian) partners into petra_io.partners.
+ * Seed ACTIVE domestic (Indonesian) partners into petra_io.domestic_partners
+ * — a table INDEPENDENT of petra_io.partners (which holds international only).
  *
  * Source : assets/Data/Domestic Partners.csv
  * Criteria:
@@ -7,9 +8,10 @@
  *      "years to come", open-ended auto-renew, or an undetermined end date).
  *   2. Has a MoU and/or MoA (IA-only agreements are excluded).
  *   3. One row per institution — multiple agreements merged; the trailing
- *      city suffix is stripped from the display name (e.g. "X, Surabaya" -> "X").
+ *      city suffix is stripped from the display name (e.g. "X, Surabaya" -> "X")
+ *      and stored in the `city` column.
  *
- * All rows are country = 'Indonesia', region = 'Asia', kind = 'domestic'.
+ * Requires the petra_io.domestic_partners table (migration 0003).
  * Idempotent: skips any domestic partner whose name already exists.
  * Run with:  npx tsx supabase/seed-domestic-partners.ts
  */
@@ -77,7 +79,7 @@ function stripCity(name: string, kota: string): string {
   return name;
 }
 
-type Partner = { name: string; country: string; kind: 'domestic'; region: string };
+type Partner = { name: string; city: string | null };
 
 function buildPartners(): Partner[] {
   const rows = parseCSV(readFileSync(resolve(process.cwd(), 'assets/Data/Domestic Partners.csv'), 'utf8'));
@@ -100,20 +102,21 @@ function buildPartners(): Partner[] {
     else { const d = [parseDate(ber), parseDate(ar)].filter(Boolean).sort((a, b) => +b! - +a!)[0]; active = d ? d >= TODAY : true; }
     if (!active) continue;
 
+    const city = norm(r[I.kota]) || null;
     const name = stripCity(raw, norm(r[I.kota]));
     const key = name.toLowerCase();                 // group by stripped name (merges city-variants)
-    if (!groups.has(key)) groups.set(key, { name, country: 'Indonesia', kind: 'domestic', region: 'Asia' });
+    if (!groups.has(key)) groups.set(key, { name, city });
   }
   return [...groups.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 async function main() {
-  const supabase = createClient(url, key, { db: { schema: 'petra_io' } });
+  const supabase = createClient(url!, key!, { db: { schema: 'petra_io' } });
   const partners = buildPartners();
   console.log(`Built ${partners.length} active domestic institutions from CSV.`);
 
-  const { data: existing, error: exErr } = await supabase.from('partners').select('name').eq('kind', 'domestic');
-  if (exErr) { console.error('Read existing failed:', exErr.message); process.exit(1); }
+  const { data: existing, error: exErr } = await supabase.from('domestic_partners').select('name');
+  if (exErr) { console.error('Read existing failed:', exErr.message, '\n(Did you apply migration 0003_domestic_partners.sql?)'); process.exit(1); }
   const have = new Set((existing ?? []).map((p: { name: string }) => p.name));
   const toInsert = partners.filter((p) => !have.has(p.name));
   console.log(`${have.size} already present; inserting ${toInsert.length} new rows.`);
@@ -121,7 +124,7 @@ async function main() {
 
   for (let i = 0; i < toInsert.length; i += 100) {
     const batch = toInsert.slice(i, i + 100);
-    const { error } = await supabase.from('partners').insert(batch);
+    const { error } = await supabase.from('domestic_partners').insert(batch);
     if (error) { console.error(`Batch ${i / 100 + 1} failed:`, error.message); process.exit(1); }
     console.log(`Inserted ${Math.min(i + 100, toInsert.length)}/${toInsert.length}`);
   }
