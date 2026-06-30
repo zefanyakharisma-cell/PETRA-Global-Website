@@ -4,11 +4,45 @@ import { createClient } from '@/lib/supabase/server';
 import { cityToCoords } from '@/lib/cityCoords';
 import { t, type LocaleMap } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
-import { PartnerMapLoader } from './partner-map/PartnerMapLoader';
-import { PartnerArcMapLoader } from './partner-map/PartnerArcMapLoader';
+import { PartnerWorldMapLoader } from './partner-map/PartnerWorldMapLoader';
+import type { WorldMapDot } from '@/components/ui/world-map';
 
 interface PartnerMapContent {
   heading?: LocaleMap;
+}
+
+/** Petra Christian University — Surabaya. Every arc radiates from here. */
+const PETRA = { lat: -7.2575, lng: 112.7521 } as const;
+
+/** Indonesia bounding box used to zoom the domestic dotted map. */
+const INDONESIA_REGION = { lat: { min: -11, max: 6 }, lng: { min: 95, max: 141 } } as const;
+
+/**
+ * Collapse the (160+ international / 450+ domestic) partner rows into one arc
+ * per destination so the animated map stays legible. International partners are
+ * grouped by country (arc lands on the country's average coordinate); domestic
+ * partners are grouped by city. The label carries the partner count.
+ */
+function buildDots(markers: PartnerMarker[]): WorldMapDot[] {
+  const groups = new Map<string, { sumLat: number; sumLng: number; n: number }>();
+  for (const m of markers) {
+    const key = (m.country ?? '').trim() || 'Other';
+    const g = groups.get(key) ?? { sumLat: 0, sumLng: 0, n: 0 };
+    g.sumLat += m.lat;
+    g.sumLng += m.lng;
+    g.n += 1;
+    groups.set(key, g);
+  }
+  return [...groups.entries()]
+    .sort((a, b) => b[1].n - a[1].n)
+    .map(([label, g]) => ({
+      start: { ...PETRA, label: '★ Petra (Surabaya)' },
+      end: {
+        lat: g.sumLat / g.n,
+        lng: g.sumLng / g.n,
+        label: `${label} (${g.n})`,
+      },
+    }));
 }
 
 export interface PartnerMarker {
@@ -22,9 +56,10 @@ export interface PartnerMarker {
 }
 
 /**
- * Signature feature (goal #5): interactive world map plotting the partner
- * network. The heavy map runtime is code-split out of the public bundle via
- * next/dynamic(ssr:false) inside PartnerMapLoader.
+ * Signature feature (goal #5): an animated dotted world map plotting the
+ * partner network as arcs radiating from Petra (Surabaya). Rendering lives in
+ * the client `WorldMap` (see PartnerWorldMapLoader); this server component only
+ * fetches + aggregates the partner rows.
  */
 /** International partners carry lat/lng directly on petra_io.partners. */
 async function internationalMarkers(
@@ -79,31 +114,26 @@ export async function PartnerMapBlock({ block, locale }: BlockComponentProps) {
     markers = [...(await internationalMarkers(supabase)), ...(await domesticMarkers(supabase))];
   }
 
+  const dots = buildDots(markers);
+  const isDomestic = filterKind === 'domestic';
+
   return (
     <Section config={{ ...block.config, background: block.config.background ?? 'navy' }}>
       <Container>
         {c.heading && <h2 className="mb-8 text-center text-3xl md:text-4xl">{t(c.heading, locale)}</h2>}
-        {markers.length === 0 ? (
+        {dots.length === 0 ? (
           <EmptyState
             onDark
             title={locale === 'id' ? 'Belum ada mitra dipetakan' : 'No partners mapped yet'}
             hint={locale === 'id' ? 'Mitra dengan koordinat akan muncul di peta.' : 'Partners with coordinates will plot here.'}
           />
-        ) : filterKind === 'international' ? (
-          // International partners render as an arc-globe radiating from Petra.
-          <PartnerArcMapLoader
-            markers={markers}
-            defaultZoom={Number(block.config.defaultZoom ?? 1.4)}
-            center={block.config.center as [number, number] | undefined}
-          />
         ) : (
-          <PartnerMapLoader
-            markers={markers}
-            defaultZoom={Number(block.config.defaultZoom ?? (filterKind === 'domestic' ? 3 : 1))}
-            center={
-              (block.config.center as [number, number] | undefined) ??
-              (filterKind === 'domestic' ? [118, -2] : undefined)
-            }
+          // Both networks render as animated arcs radiating from Petra. The
+          // domestic map zooms the dotted canvas to the Indonesian archipelago.
+          <PartnerWorldMapLoader
+            dots={dots}
+            region={isDomestic ? INDONESIA_REGION : undefined}
+            loop={!isDomestic}
           />
         )}
       </Container>
