@@ -13,7 +13,7 @@ interface HeroContent {
   heading?: LocaleMap;
   subcopy?: LocaleMap;
   image_url?: string;
-  ctas?: { label: LocaleMap; href: string; variant?: 'magenta' | 'amber' | 'blue' | 'outline' }[];
+  ctas?: { label: LocaleMap; href: string; variant?: 'magenta' | 'amber' | 'blue' | 'navy' | 'outline'; newTab?: boolean }[];
 }
 
 /** Resolve cover images for the carousel background from a chosen entity source. */
@@ -116,7 +116,7 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
                   )}
                 >
                   {c.ctas.slice(0, 2).map((cta, i) => (
-                    <Cta key={i} href={cta.href || '#'} variant={cta.variant ?? (i === 0 ? 'magenta' : 'outline')}>
+                    <Cta key={i} href={cta.href || '#'} variant={cta.variant || (i === 0 ? 'magenta' : 'outline')} newTab={cta.newTab}>
                       {t(cta.label, locale)}
                     </Cta>
                   ))}

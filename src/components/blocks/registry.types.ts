@@ -22,6 +22,8 @@ export const BLOCK_TYPES = [
   'pull_quote',
   'logo_wall',
   'embed',
+  'downloads',
+  'events',
   // Entity-bound
   'partner_map',
   'testimonials',
@@ -49,6 +51,9 @@ export type EditorField =
   | { key: string; label: string; type: 'richtext'; localized?: boolean }
   | { key: string; label: string; type: 'image' }
   | { key: string; label: string; type: 'url' }
+  | { key: string; label: string; type: 'link'; help?: string }
+  | { key: string; label: string; type: 'file'; help?: string }
+  | { key: string; label: string; type: 'date'; help?: string }
   | { key: string; label: string; type: 'number' }
   | { key: string; label: string; type: 'boolean' }
   | { key: string; label: string; type: 'select'; options: { value: string; label: string }[] }

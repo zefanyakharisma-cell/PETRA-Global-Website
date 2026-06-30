@@ -9,7 +9,7 @@ interface CtaBannerContent {
   eyebrow?: LocaleMap;
   heading?: LocaleMap;
   subcopy?: LocaleMap;
-  ctas?: { label: LocaleMap; href: string; variant?: 'magenta' | 'amber' | 'blue' | 'outline' }[];
+  ctas?: { label: LocaleMap; href: string; variant?: 'magenta' | 'amber' | 'blue' | 'navy' | 'outline'; newTab?: boolean }[];
 }
 
 const ACCENT_TEXT: Record<string, string> = {
@@ -68,7 +68,7 @@ export function CtaBannerBlock({ block, locale }: BlockComponentProps) {
             <Reveal delay={0.18}>
               <div className={clsx('flex flex-wrap gap-3', center && 'justify-center')}>
                 {c.ctas.slice(0, 2).map((cta, i) => (
-                  <Cta key={i} href={cta.href || '#'} variant={cta.variant ?? (i === 0 ? 'magenta' : 'outline')}>
+                  <Cta key={i} href={cta.href || '#'} variant={cta.variant || (i === 0 ? 'magenta' : 'outline')} newTab={cta.newTab}>
                     {t(cta.label, locale)}
                   </Cta>
                 ))}

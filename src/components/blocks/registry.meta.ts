@@ -25,6 +25,21 @@ const UNIVERSAL: EditorField[] = [
   ] },
 ];
 
+// Reusable button definition — label + smart link + style + new-tab toggle.
+const BUTTON_FIELDS: EditorField[] = [
+  { key: 'label', label: 'Label', type: 'text', localized: true },
+  { key: 'href', label: 'Link', type: 'link' },
+  { key: 'variant', label: 'Style', type: 'select', options: [
+    { value: '', label: 'Default (auto)' },
+    { value: 'magenta', label: 'Magenta (solid)' },
+    { value: 'blue', label: 'Blue (solid)' },
+    { value: 'amber', label: 'Amber (solid)' },
+    { value: 'navy', label: 'Navy (solid)' },
+    { value: 'outline', label: 'Outline' },
+  ] },
+  { key: 'newTab', label: 'Open in new tab', type: 'boolean' },
+];
+
 /**
  * Block registry — the single source of truth mapping each block `type` to its
  * Component, EditorSchema, and defaults. The same registry drives the public
@@ -57,10 +72,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         { key: 'heading', label: 'Headline', type: 'text', localized: true },
         { key: 'subcopy', label: 'Subcopy', type: 'textarea', localized: true },
         { key: 'image_url', label: 'Background image (“Uploaded image”) / split image', type: 'image' },
-        { key: 'ctas', label: 'Buttons (max 2)', type: 'list', itemFields: [
-          { key: 'label', label: 'Label', type: 'text', localized: true },
-          { key: 'href', label: 'Link', type: 'url' },
-        ] },
+        { key: 'ctas', label: 'Buttons (max 2)', type: 'list', itemFields: BUTTON_FIELDS },
       ],
     },
   },
@@ -151,10 +163,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         { key: 'heading', label: 'Heading', type: 'text', localized: true },
         { key: 'body', label: 'Body', type: 'textarea', localized: true },
         { key: 'image_url', label: 'Image', type: 'image' },
-        { key: 'cta', label: 'CTA', type: 'list', itemFields: [
-          { key: 'label', label: 'Label', type: 'text', localized: true },
-          { key: 'href', label: 'Link', type: 'url' },
-        ] },
+        { key: 'cta', label: 'CTA', type: 'list', itemFields: BUTTON_FIELDS },
       ],
     },
   },
@@ -370,6 +379,44 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
       ],
     },
   },
+  downloads: {
+    type: 'downloads', label: 'Downloads', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', columns: 1, accent: 'magenta' },
+    defaultContent: { heading: {}, intro: {}, items: [] },
+    editor: {
+      config: [{ key: 'columns', label: 'Columns', type: 'number' }, ...UNIVERSAL],
+      content: [
+        { key: 'heading', label: 'Heading', type: 'text', localized: true },
+        { key: 'intro', label: 'Intro', type: 'textarea', localized: true },
+        { key: 'items', label: 'Files', type: 'list', itemFields: [
+          { key: 'title', label: 'Title', type: 'text', localized: true },
+          { key: 'description', label: 'Description', type: 'text', localized: true },
+          { key: 'file', label: 'File', type: 'file' },
+        ] },
+      ],
+    },
+  },
+  events: {
+    type: 'events', label: 'Events / key dates', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', hidePast: false, accent: 'magenta' },
+    defaultContent: { heading: {}, intro: {}, items: [] },
+    editor: {
+      config: [
+        { key: 'hidePast', label: 'Hide past events', type: 'boolean' },
+        ...UNIVERSAL,
+      ],
+      content: [
+        { key: 'heading', label: 'Heading', type: 'text', localized: true },
+        { key: 'intro', label: 'Intro', type: 'textarea', localized: true },
+        { key: 'items', label: 'Events', type: 'list', itemFields: [
+          { key: 'date', label: 'Date', type: 'date' },
+          { key: 'endDate', label: 'End date (optional)', type: 'date' },
+          { key: 'title', label: 'Title', type: 'text', localized: true },
+          { key: 'location', label: 'Location', type: 'text', localized: true },
+          { key: 'description', label: 'Description', type: 'textarea', localized: true },
+          { key: 'href', label: 'Details / register link', type: 'link' },
+        ] },
+      ],
+    },
+  },
   partner_map: {
     type: 'partner_map', label: 'Partner map', category: 'Entity-bound', defaultConfig: { background: 'navy', spacing: 'normal', filterKind: 'all', defaultZoom: 1 },
     defaultContent: { heading: {} },
@@ -466,10 +513,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         { key: 'eyebrow', label: 'Eyebrow', type: 'text', localized: true },
         { key: 'heading', label: 'Heading', type: 'text', localized: true },
         { key: 'subcopy', label: 'Subcopy', type: 'textarea', localized: true },
-        { key: 'ctas', label: 'Buttons (max 2)', type: 'list', itemFields: [
-          { key: 'label', label: 'Label', type: 'text', localized: true },
-          { key: 'href', label: 'Link', type: 'url' },
-        ] },
+        { key: 'ctas', label: 'Buttons (max 2)', type: 'list', itemFields: BUTTON_FIELDS },
       ],
     },
   },

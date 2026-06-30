@@ -2,6 +2,8 @@
 
 import type { EditorField, EditorSchema } from '@/components/blocks/registry.types';
 import { ImageField } from './fields/ImageField';
+import { FileField, type FileValue } from './fields/FileField';
+import { LinkField } from './fields/LinkField';
 import { RichTextEditor } from './fields/RichTextField';
 
 type Dict = Record<string, unknown>;
@@ -129,6 +131,12 @@ function FieldEditor({
       return <label className="block">{label}<textarea className={input} rows={4} value={(value as string) ?? ''} onChange={(e) => onChange(e.target.value)} />{help}</label>;
     case 'image':
       return <ImageField label={field.label} value={(value as string) ?? ''} onChange={onChange} />;
+    case 'file':
+      return <FileField label={field.label} value={(value as FileValue) ?? {}} onChange={onChange} />;
+    case 'link':
+      return <LinkField label={field.label} help={'help' in field ? field.help : undefined} value={(value as string) ?? ''} onChange={onChange} />;
+    case 'date':
+      return <label className="block">{label}<input type="date" className={input} value={(value as string) ?? ''} onChange={(e) => onChange(e.target.value)} />{help}</label>;
     case 'number':
       return <label className="block">{label}<input type="number" className={input} value={(value as number | undefined) ?? ''} onChange={(e) => onChange(e.target.value === '' ? undefined : Number(e.target.value))} />{help}</label>;
     case 'boolean':
@@ -166,6 +174,7 @@ function blankItem(fields: EditorField[]): Dict {
   const o: Dict = {};
   for (const f of fields) {
     if (f.type === 'list') o[f.key] = [];
+    else if (f.type === 'file') o[f.key] = {};
     else if (f.type === 'boolean') o[f.key] = false;
     else if (f.type === 'select') o[f.key] = f.options[0]?.value ?? '';
     else if ('localized' in f && f.localized) o[f.key] = {};

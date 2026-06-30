@@ -19,6 +19,8 @@ import { GalleryBlock } from './GalleryBlock';
 import { PullQuoteBlock } from './PullQuoteBlock';
 import { LogoWallBlock } from './LogoWallBlock';
 import { EmbedBlock } from './EmbedBlock';
+import { DownloadsBlock } from './DownloadsBlock';
+import { EventsBlock } from './EventsBlock';
 import { PartnerMapBlock } from './PartnerMapBlock';
 import { TestimonialsBlock } from './TestimonialsBlock';
 import { NewsFeedBlock } from './NewsFeedBlock';
@@ -51,6 +53,8 @@ const COMPONENTS: Record<BlockMeta['type'], ComponentType<BlockComponentProps>> 
   pull_quote: PullQuoteBlock,
   logo_wall: LogoWallBlock,
   embed: EmbedBlock,
+  downloads: DownloadsBlock,
+  events: EventsBlock,
   partner_map: PartnerMapBlock,
   testimonials: TestimonialsBlock,
   news_feed: NewsFeedBlock,

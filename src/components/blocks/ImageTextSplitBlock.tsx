@@ -6,17 +6,21 @@ import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
 
+type CtaItem = { label?: LocaleMap; href?: string; variant?: 'magenta' | 'amber' | 'blue' | 'navy' | 'outline'; newTab?: boolean };
+
 interface SplitContent {
   heading?: LocaleMap;
   body?: LocaleMap;
   image_url?: string;
-  cta?: { label: LocaleMap; href: string };
+  // Stored as a list in the registry; we render the first button.
+  cta?: CtaItem[] | CtaItem;
 }
 
 export function ImageTextSplitBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as SplitContent;
   const imageRight = (block.config.imageSide as string) === 'right';
   const onNavy = block.config.background === 'navy';
+  const cta = Array.isArray(c.cta) ? c.cta[0] : c.cta;
 
   return (
     <Section config={block.config}>
@@ -40,10 +44,10 @@ export function ImageTextSplitBlock({ block, locale }: BlockComponentProps) {
                 {t(c.body, locale)}
               </p>
             )}
-            {c.cta?.href && (
+            {cta?.href && (
               <div className="mt-6">
-                <Cta href={c.cta.href} variant={onNavy ? 'amber' : 'navy'}>
-                  {t(c.cta.label, locale)}
+                <Cta href={cta.href} variant={cta.variant || (onNavy ? 'amber' : 'navy')} newTab={cta.newTab}>
+                  {t(cta.label, locale)}
                 </Cta>
               </div>
             )}
