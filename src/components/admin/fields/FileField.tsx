@@ -101,12 +101,17 @@ export function FileField({
         onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ''; }}
       />
 
-      {/* Manual URL entry for externally-hosted documents. */}
+      {/* Manual URL entry for externally-hosted documents. Derive the name from
+          the URL and drop the now-stale uploaded size so the card stays accurate. */}
       <input
         className="mt-1.5 w-full rounded-md border border-ink/15 px-2 py-1 text-xs text-ink/60"
         placeholder="…or paste a file URL"
         value={v.url ?? ''}
-        onChange={(e) => onChange({ ...v, url: e.target.value })}
+        onChange={(e) => {
+          const url = e.target.value;
+          const name = url.split('?')[0].split('/').pop() || undefined;
+          onChange({ url, name });
+        }}
       />
       {err && <span className="mt-1 block text-xs text-magenta">{err}</span>}
     </div>

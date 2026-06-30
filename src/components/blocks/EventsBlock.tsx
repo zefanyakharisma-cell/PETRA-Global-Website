@@ -56,7 +56,9 @@ export function EventsBlock({ block, locale }: BlockComponentProps) {
   const accent = (block.config.accent as string) ?? 'magenta';
   const hidePast = !!block.config.hidePast;
   const onNavy = block.config.background === 'navy';
-  const today = new Date().toISOString().slice(0, 10);
+  // "Today" in the university's timezone (en-CA gives YYYY-MM-DD), so events flip
+  // to "past" at local midnight regardless of the server's timezone (UTC on Vercel).
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date());
 
   const dated = (c.items ?? []).filter((it) => it.date);
   const isPast = (it: EventItem) => (it.endDate || it.date || '') < today;

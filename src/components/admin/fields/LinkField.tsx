@@ -11,7 +11,7 @@ type Kind = 'page' | 'url' | 'email' | 'phone' | 'whatsapp';
 
 const KINDS: { value: Kind; label: string; placeholder: string }[] = [
   { value: 'page', label: 'Page on this site', placeholder: '/partnership' },
-  { value: 'url', label: 'External URL', placeholder: 'https://…' },
+  { value: 'url', label: 'External URL', placeholder: 'example.com/page' },
   { value: 'email', label: 'Email', placeholder: 'name@petra.ac.id' },
   { value: 'phone', label: 'Phone', placeholder: '+62 31 …' },
   { value: 'whatsapp', label: 'WhatsApp', placeholder: '6281…' },
@@ -19,14 +19,18 @@ const KINDS: { value: Kind; label: string; placeholder: string }[] = [
 
 const input = 'w-full rounded-md border border-ink/20 px-2.5 py-1.5 text-sm';
 
-/** Split a stored href back into its editable kind + bare value. */
+/**
+ * Split a stored href back into its editable kind + bare value. The scheme is
+ * implicit for every kind except `page`, so the bare value shown in the input is
+ * the part the editor actually types (e.g. `example.com`, not `https://…`).
+ */
 function parse(href: string): { kind: Kind; bare: string } {
   const v = (href ?? '').trim();
   if (v.startsWith('mailto:')) return { kind: 'email', bare: v.slice(7) };
   if (v.startsWith('tel:')) return { kind: 'phone', bare: v.slice(4) };
   const wa = v.match(/^https?:\/\/wa\.me\/(.+)$/);
   if (wa) return { kind: 'whatsapp', bare: wa[1] };
-  if (/^https?:\/\//i.test(v)) return { kind: 'url', bare: v };
+  if (/^https?:\/\//i.test(v)) return { kind: 'url', bare: v.replace(/^https?:\/\//i, '') };
   return { kind: 'page', bare: v };
 }
 
@@ -38,7 +42,10 @@ function build(kind: Kind, bare: string): string {
     case 'email': return `mailto:${b}`;
     case 'phone': return `tel:${b.replace(/\s+/g, '')}`;
     case 'whatsapp': return `https://wa.me/${b.replace(/[^\d]/g, '')}`;
-    default: return b; // page + url stored verbatim
+    // Always emit an absolute URL so an external link is never mistaken for an
+    // internal page (which would render as a broken localized route).
+    case 'url': return `https://${b.replace(/^https?:\/\//i, '').replace(/^\/+/, '')}`;
+    default: return b; // internal page path stored verbatim
   }
 }
 

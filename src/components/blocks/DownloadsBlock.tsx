@@ -72,7 +72,7 @@ export function DownloadsBlock({ block, locale }: BlockComponentProps) {
                 href={it.file!.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                download
+                download={it.file!.name || true}
                 className={clsx(
                   'group flex items-center gap-4 rounded-xl border p-4 transition hover:-translate-y-0.5',
                   onNavy ? 'border-white/15 bg-white/5 hover:bg-white/10' : 'border-ink/10 bg-white hover:border-ink/20',
