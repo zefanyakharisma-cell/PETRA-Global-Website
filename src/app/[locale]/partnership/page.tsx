@@ -4,6 +4,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { Section, Container } from '@/components/ui/Section';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Reveal } from '@/components/ui/Reveal';
+import { PartnerMapBlock } from '@/components/blocks/PartnerMapBlock';
 import { createClient } from '@/lib/supabase/server';
 import { localeAlternates } from '@/lib/seo';
 import { partnerLogo } from '@/lib/partnerLogos';
@@ -37,6 +38,8 @@ const COPY = {
     countries: 'countries',
     regions: 'regions',
     other: 'Other',
+    mapHeading: 'Our global network',
+    domesticMapHeading: 'Our partners across Indonesia',
     emptyTitle: 'No partners published yet',
     emptyHint: 'Partner institutions will appear here once they are added.',
   },
@@ -48,6 +51,8 @@ const COPY = {
     countries: 'negara',
     regions: 'kawasan',
     other: 'Lainnya',
+    mapHeading: 'Jaringan global kami',
+    domesticMapHeading: 'Mitra kami di seluruh Indonesia',
     emptyTitle: 'Belum ada mitra',
     emptyHint: 'Institusi mitra akan tampil di sini setelah ditambahkan.',
   },
@@ -131,6 +136,34 @@ export default async function PartnershipPage({
           )}
         </Container>
       </Section>
+
+      {partners.length > 0 && (
+        <PartnerMapBlock
+          block={{
+            id: 'partnership-map',
+            page_id: 'partnership',
+            type: 'partner_map',
+            position: 0,
+            config: { background: 'navy', spacing: 'normal', filterKind: 'international', defaultZoom: 1 },
+            content: { heading: { en: COPY.en.mapHeading, id: COPY.id.mapHeading } },
+          }}
+          locale={loc}
+          mode="public"
+        />
+      )}
+
+      <PartnerMapBlock
+        block={{
+          id: 'partnership-map-domestic',
+          page_id: 'partnership',
+          type: 'partner_map',
+          position: 1,
+          config: { background: 'navy', spacing: 'normal', filterKind: 'domestic', defaultZoom: 3, center: [118, -2] },
+          content: { heading: { en: COPY.en.domesticMapHeading, id: COPY.id.domesticMapHeading } },
+        }}
+        locale={loc}
+        mode="public"
+      />
 
       <Section config={{ background: 'paper', spacing: 'normal' }}>
         <Container>

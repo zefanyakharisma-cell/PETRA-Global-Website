@@ -9,14 +9,22 @@ const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
 
 const ACCENT = { international: '#ec008c', domestic: '#ffbc00' } as const;
 
-export function PartnerMap({ markers, defaultZoom }: { markers: PartnerMarker[]; defaultZoom: number }) {
+export function PartnerMap({
+  markers,
+  defaultZoom,
+  center = [10, 25],
+}: {
+  markers: PartnerMarker[];
+  defaultZoom: number;
+  center?: [number, number];
+}) {
   const [hover, setHover] = useState<PartnerMarker | null>(null);
 
   return (
     <div className="relative">
       <div className="overflow-hidden rounded-2xl bg-navy-2/30 ring-1 ring-white/10">
         <ComposableMap projectionConfig={{ scale: 150 }} className="h-auto w-full">
-          <ZoomableGroup zoom={defaultZoom} center={[10, 25]}>
+          <ZoomableGroup zoom={defaultZoom} center={center}>
             <Geographies geography={GEO_URL}>
               {({ geographies }: { geographies: any[] }) =>
                 geographies.map((geo) => (

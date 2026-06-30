@@ -59,7 +59,13 @@
       "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\prep.cjs\")",
       "Bash(rm -f _rename_intl.ts)",
       "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\gen2.cjs\")",
-      "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\gen_dom.cjs\")"
+      "Bash(node \"C:\\\\Users\\\\KUI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--PETRA-Global-Website\\\\e083836f-af96-4907-b1d7-be6b776a68b7\\\\scratchpad\\\\gen_dom.cjs\")",
+      "Bash(sed -n '/export interface Block /,/^}/p' src/lib/types.ts)",
+      "Bash(grep -nA12 \"interface Block \" src/lib/types.ts)",
+      "Bash(curl -s -o /tmp/partnership.html -w \"%{http_code}\" http://localhost:3000/en/partnership)",
+      "Bash(curl -s -o /dev/null -w \"logo HTTP: %{http_code}, bytes: %{size_download}\\\\n\" \"http://localhost:3000/partners/china-anhui-university-china.jpg\")",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pkill -f \"next-server\")"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview"

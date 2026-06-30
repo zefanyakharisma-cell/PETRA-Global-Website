@@ -1,6 +1,7 @@
 import { Section, Container } from '@/components/ui/Section';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { createClient } from '@/lib/supabase/server';
+import { cityToCoords } from '@/lib/cityCoords';
 import { t, type LocaleMap } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
 import { PartnerMapLoader } from './partner-map/PartnerMapLoader';
@@ -24,23 +25,58 @@ export interface PartnerMarker {
  * network. The heavy map runtime is code-split out of the public bundle via
  * next/dynamic(ssr:false) inside PartnerMapLoader.
  */
+/** International partners carry lat/lng directly on petra_io.partners. */
+async function internationalMarkers(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<PartnerMarker[]> {
+  const { data } = await supabase
+    .from('partners')
+    .select('name,country,lat,lng,kind,region,url')
+    .eq('kind', 'international')
+    .not('lat', 'is', null)
+    .not('lng', 'is', null);
+  return (data ?? []) as PartnerMarker[];
+}
+
+/**
+ * Domestic partners live in petra_io.domestic_partners and are positioned by
+ * their City (resolved to coordinates via cityToCoords). Rows whose city is
+ * blank or unmapped are skipped.
+ */
+async function domesticMarkers(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<PartnerMarker[]> {
+  const { data } = await supabase.from('domestic_partners').select('name,city,region,url');
+  const markers: PartnerMarker[] = [];
+  for (const r of data ?? []) {
+    const coords = cityToCoords(r.city);
+    if (!coords) continue;
+    markers.push({
+      name: r.name,
+      country: r.city, // tooltip shows the city for domestic partners
+      lat: coords.lat,
+      lng: coords.lng,
+      kind: 'domestic',
+      region: r.region,
+      url: r.url,
+    });
+  }
+  return markers;
+}
+
 export async function PartnerMapBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as PartnerMapContent;
   const supabase = await createClient();
 
-  let query = supabase
-    .from('partners')
-    .select('name,country,lat,lng,kind,region,url')
-    .not('lat', 'is', null)
-    .not('lng', 'is', null);
-
   const filterKind = block.config.filterKind as string | undefined;
-  if (filterKind === 'international' || filterKind === 'domestic') {
-    query = query.eq('kind', filterKind);
+  let markers: PartnerMarker[];
+  if (filterKind === 'domestic') {
+    markers = await domesticMarkers(supabase);
+  } else if (filterKind === 'international') {
+    markers = await internationalMarkers(supabase);
+  } else {
+    markers = [...(await internationalMarkers(supabase)), ...(await domesticMarkers(supabase))];
   }
-
-  const { data } = await query;
-  const markers = (data ?? []) as PartnerMarker[];
 
   return (
     <Section config={{ ...block.config, background: block.config.background ?? 'navy' }}>
@@ -53,7 +89,14 @@ export async function PartnerMapBlock({ block, locale }: BlockComponentProps) {
             hint={locale === 'id' ? 'Mitra dengan koordinat akan muncul di peta.' : 'Partners with coordinates will plot here.'}
           />
         ) : (
-          <PartnerMapLoader markers={markers} defaultZoom={Number(block.config.defaultZoom ?? 1)} />
+          <PartnerMapLoader
+            markers={markers}
+            defaultZoom={Number(block.config.defaultZoom ?? (filterKind === 'domestic' ? 3 : 1))}
+            center={
+              (block.config.center as [number, number] | undefined) ??
+              (filterKind === 'domestic' ? [118, -2] : undefined)
+            }
+          />
         )}
       </Container>
     </Section>

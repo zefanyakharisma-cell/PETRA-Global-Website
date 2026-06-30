@@ -16,9 +16,11 @@ const PartnerMap = dynamic(() => import('./PartnerMap').then((m) => m.PartnerMap
 export function PartnerMapLoader({
   markers,
   defaultZoom,
+  center,
 }: {
   markers: PartnerMarker[];
   defaultZoom: number;
+  center?: [number, number];
 }) {
-  return <PartnerMap markers={markers} defaultZoom={defaultZoom} />;
+  return <PartnerMap markers={markers} defaultZoom={defaultZoom} center={center} />;
 }
