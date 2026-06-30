@@ -9,7 +9,7 @@ import type { Locale } from '@/lib/types';
 export const revalidate = 60;
 
 // Reserved segments handled by their own routes.
-const RESERVED = new Set(['programs', 'news', 'partnership', 'thank-you', 'api', 'admin']);
+const RESERVED = new Set(['programs', 'news', 'thank-you', 'api', 'admin']);
 
 export async function generateMetadata({
   params,

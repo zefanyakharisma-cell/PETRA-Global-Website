@@ -66,10 +66,15 @@
       "Bash(curl -s -o /dev/null -w \"logo HTTP: %{http_code}, bytes: %{size_download}\\\\n\" \"http://localhost:3000/partners/china-anhui-university-china.jpg\")",
       "Bash(pkill -f \"next dev\")",
       "Bash(pkill -f \"next-server\")",
-      "Bash(node -e \"const l=require\\('lucide-react'\\); console.log\\('version ok:', ['X','Minus','Plus','Locate','Maximize','Loader2'].map\\(k=>k+'='+\\(typeof l[k]\\)\\).join\\(', '\\)\\)\")"
+      "Bash(node -e \"const l=require\\('lucide-react'\\); console.log\\('version ok:', ['X','Minus','Plus','Locate','Maximize','Loader2'].map\\(k=>k+'='+\\(typeof l[k]\\)\\).join\\(', '\\)\\)\")",
+      "Bash(cd 'e:\\\\PETRA-Global-Website' && rm -rf \"src/app/[locale]/partnership\" && echo \"removed bespoke route\" && ls \"src/app/[locale]\")",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(curl -s \"http://localhost:3001/en\" -o /tmp/home.html -w \"home HTTP: %{http_code}\\\\n\")"
     ],
     "additionalDirectories": [
-      "E:\\PETRA-Global-Website\\src\\app\\editor-preview"
+      "E:\\PETRA-Global-Website\\src\\app\\editor-preview",
+      "E:\\PETRA-Global-Website\\src\\app\\[locale]\\partnership"
     ]
   }
 }
