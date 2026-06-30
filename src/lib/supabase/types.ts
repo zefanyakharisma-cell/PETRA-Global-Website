@@ -142,7 +142,7 @@ export type PageRow = Timestamps & {
   nav_section: 'about' | 'mobility' | 'partnership' | 'life' | 'news' | 'none';
   nav_order: number;
   parent_id: string | null;
-  status: 'draft' | 'published';
+  status: 'draft' | 'published' | 'archived';
   owner_staff_id: string | null;
   seo: Json;
 };
@@ -186,7 +186,7 @@ export interface Database {
     Functions: Record<string, never>;
     Enums: {
       nav_section: 'about' | 'mobility' | 'partnership' | 'life' | 'news' | 'none';
-      page_status: 'draft' | 'published';
+      page_status: 'draft' | 'published' | 'archived';
       program_kind: 'inbound' | 'outbound';
       partner_kind: 'international' | 'domestic';
       inquiry_kind: 'student' | 'partner' | 'outbound';

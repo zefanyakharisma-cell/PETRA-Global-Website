@@ -25,7 +25,7 @@ export type NavSection =
   | 'news'
   | 'none';
 
-export type PageStatus = 'draft' | 'published';
+export type PageStatus = 'draft' | 'published' | 'archived';
 export type ProgramKind = 'inbound' | 'outbound';
 export type PartnerKind = 'international' | 'domestic';
 export type NewsTag = 'inbound' | 'outbound' | 'partnership';

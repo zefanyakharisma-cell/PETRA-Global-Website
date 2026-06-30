@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { BLOCK_META } from '@/components/blocks/registry.meta';
-import type { BlockType, NavSection, PageStatus } from '@/lib/types';
+import type { BlockType, LocaleMap, NavSection, PageStatus } from '@/lib/types';
 
 /** Refresh public ISR for a page (both locales) plus the home. */
 function revalidatePublic(slug?: string) {
@@ -31,6 +31,7 @@ export async function createPage(formData: FormData) {
     status: 'draft',
   });
   if (error) return { error: error.message };
+  revalidatePath('/admin/pages');
   revalidatePublic(slug);
   return { ok: true };
 }
@@ -38,18 +39,69 @@ export async function createPage(formData: FormData) {
 export async function setPageStatus(id: string, status: PageStatus, slug: string) {
   const supabase = await createClient();
   await supabase.from('pages').update({ status }).eq('id', id);
+  revalidatePath('/admin/pages');
   revalidatePublic(slug);
 }
 
 export async function updatePageMeta(id: string, slug: string, patch: Record<string, unknown>) {
   const supabase = await createClient();
   await supabase.from('pages').update(patch as never).eq('id', id);
+  revalidatePath('/admin/pages');
   revalidatePublic(slug);
+}
+
+/**
+ * Flexible page edit used by the Pages admin: title, slug, section, order and
+ * status in one call. `oldSlug` is needed to revalidate the public route when
+ * the slug itself changes. Returns `{ error }` so the UI can surface conflicts
+ * (e.g. a duplicate slug) inline.
+ */
+export async function updatePage(
+  id: string,
+  oldSlug: string,
+  patch: {
+    slug?: string;
+    title?: LocaleMap;
+    nav_section?: NavSection;
+    nav_order?: number;
+    status?: PageStatus;
+  },
+) {
+  const supabase = await createClient();
+
+  const update: Record<string, unknown> = {};
+  if (patch.title !== undefined) update.title = patch.title;
+  if (patch.nav_section !== undefined) update.nav_section = patch.nav_section;
+  if (patch.status !== undefined) update.status = patch.status;
+  if (patch.nav_order !== undefined && Number.isFinite(patch.nav_order)) {
+    update.nav_order = patch.nav_order;
+  }
+
+  let newSlug: string | undefined;
+  if (patch.slug !== undefined) {
+    newSlug = patch.slug.trim();
+    if (!newSlug) return { error: 'Slug cannot be empty.' };
+    update.slug = newSlug;
+  }
+
+  if (Object.keys(update).length === 0) return { ok: true };
+
+  const { error } = await supabase.from('pages').update(update as never).eq('id', id);
+  if (error) {
+    if (error.code === '23505') return { error: 'That slug is already in use.' };
+    return { error: error.message };
+  }
+
+  revalidatePath('/admin/pages');
+  revalidatePublic(oldSlug);
+  if (newSlug && newSlug !== oldSlug) revalidatePublic(newSlug);
+  return { ok: true };
 }
 
 export async function deletePage(id: string, slug: string) {
   const supabase = await createClient();
   await supabase.from('pages').delete().eq('id', id); // blocks cascade
+  revalidatePath('/admin/pages');
   revalidatePublic(slug);
 }
 
