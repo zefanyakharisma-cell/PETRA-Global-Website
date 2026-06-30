@@ -3,7 +3,23 @@
 import { useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createPage, updatePage, deletePage } from '@/app/admin/actions/cms';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { GripVertical } from 'lucide-react';
+import { createPage, updatePage, deletePage, reorderPages } from '@/app/admin/actions/cms';
 import type { LocaleMap, NavSection, PageRecord, PageStatus } from '@/lib/types';
 
 const SECTIONS: NavSection[] = ['none', 'about', 'mobility', 'partnership', 'life', 'news'];
@@ -33,6 +49,8 @@ const STATUS_STYLES: Record<PageStatus, string> = {
   archived: 'text-ink/40',
 };
 
+const CELL = 'rounded-md border border-ink/20 px-2 py-1.5 w-full';
+
 export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -40,7 +58,8 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
   const [error, setError] = useState<string | null>(null);
   const [showArchived, setShowArchived] = useState(false);
 
-  // Editable working copy, keyed by page id.
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+
   const originals = useMemo(() => {
     const map: Record<string, Draft> = {};
     for (const p of initialPages) map[p.id] = toDraft(p);
@@ -48,19 +67,20 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
   }, [initialPages]);
 
   const [drafts, setDrafts] = useState<Record<string, Draft>>(originals);
+  const [rows, setRows] = useState<PageRecord[]>(initialPages);
 
-  // Re-sync working copy whenever the server data changes (after a refresh).
-  const [snapshot, setSnapshot] = useState(originals);
-  if (snapshot !== originals) {
-    setSnapshot(originals);
+  // Re-sync working copies whenever the server data changes (after a refresh).
+  const [snapshot, setSnapshot] = useState(initialPages);
+  if (snapshot !== initialPages) {
+    setSnapshot(initialPages);
     setDrafts(originals);
+    setRows(initialPages);
   }
 
   const setField = <K extends keyof Draft>(id: string, key: K, value: Draft[K]) =>
     setDrafts((d) => ({ ...d, [id]: { ...d[id], [key]: value } }));
 
-  const isDirty = (id: string) =>
-    JSON.stringify(drafts[id]) !== JSON.stringify(originals[id]);
+  const isDirty = (id: string) => JSON.stringify(drafts[id]) !== JSON.stringify(originals[id]);
 
   const run = (id: string, fn: () => Promise<{ error?: string } | void>) => {
     setError(null);
@@ -113,8 +133,39 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
     });
   };
 
-  const visible = initialPages.filter((p) => showArchived || p.status !== 'archived');
-  const archivedCount = initialPages.filter((p) => p.status === 'archived').length;
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+
+    const activePage = rows.find((p) => p.id === active.id);
+    const overPage = rows.find((p) => p.id === over.id);
+    if (!activePage || !overPage) return;
+
+    // Reordering is per-section (nav builds order within each section). Drop a row
+    // onto another section's row? Use the Section dropdown + Save to move it instead.
+    if (activePage.nav_section !== overPage.nav_section) {
+      setError('Drag reorders within a section. To change section, use the Section dropdown then Save.');
+      return;
+    }
+
+    const next = arrayMove(rows, rows.indexOf(activePage), rows.indexOf(overPage));
+    setRows(next);
+
+    // Resequence nav_order for the affected section from its new visual order.
+    const section = activePage.nav_section;
+    const updates = next
+      .filter((p) => p.nav_section === section)
+      .map((p, index) => ({ id: p.id, nav_order: index }));
+
+    setError(null);
+    startTransition(async () => {
+      await reorderPages(updates);
+      router.refresh();
+    });
+  };
+
+  const visible = rows.filter((p) => showArchived || p.status !== 'archived');
+  const archivedCount = rows.filter((p) => p.status === 'archived').length;
 
   return (
     <div>
@@ -125,10 +176,7 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
       )}
 
       {/* Create */}
-      <form
-        action={create}
-        className="mt-6 grid gap-3 rounded-2xl bg-white p-5 ring-1 ring-ink/10 md:grid-cols-5"
-      >
+      <form action={create} className="mt-6 grid gap-3 rounded-2xl bg-white p-5 ring-1 ring-ink/10 md:grid-cols-5">
         <input name="slug" required placeholder="slug (e.g. semester-exchange)" className="rounded-md border border-ink/20 px-3 py-2" />
         <input name="title_en" required placeholder="Title (EN)" className="rounded-md border border-ink/20 px-3 py-2" />
         <input name="title_id" placeholder="Judul (ID)" className="rounded-md border border-ink/20 px-3 py-2" />
@@ -148,15 +196,11 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
       {/* Toolbar */}
       <div className="mt-6 flex items-center justify-between">
         <p className="text-sm text-ink/50">
-          {visible.length} page{visible.length === 1 ? '' : 's'} · edit any field then press Save
+          {visible.length} page{visible.length === 1 ? '' : 's'} · drag <GripVertical className="inline h-4 w-4 align-text-bottom" /> to reorder within a section · edit a field then Save
         </p>
         {archivedCount > 0 && (
           <label className="flex cursor-pointer items-center gap-2 text-sm text-ink/60">
-            <input
-              type="checkbox"
-              checked={showArchived}
-              onChange={(e) => setShowArchived(e.target.checked)}
-            />
+            <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
             Show archived ({archivedCount})
           </label>
         )}
@@ -167,11 +211,12 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
         <table className="w-full text-left text-sm">
           <thead className="bg-paper text-ink/60">
             <tr>
+              <th className="w-8 px-2 py-3"></th>
               <th className="px-3 py-3">Title (EN)</th>
               <th className="px-3 py-3">Title (ID)</th>
               <th className="px-3 py-3">Slug</th>
               <th className="px-3 py-3">Section</th>
-              <th className="px-3 py-3 w-20">Order</th>
+              <th className="w-20 px-3 py-3">Order</th>
               <th className="px-3 py-3">Status</th>
               <th className="px-3 py-3 text-right">Actions</th>
             </tr>
@@ -179,103 +224,136 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
           <tbody className="divide-y divide-ink/10">
             {visible.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-ink/40">
+                <td colSpan={8} className="px-4 py-8 text-center text-ink/40">
                   No pages yet. Create your first above.
                 </td>
               </tr>
             )}
-            {visible.map((p) => {
-              const d = drafts[p.id] ?? toDraft(p);
-              const dirty = isDirty(p.id);
-              const rowBusy = isPending && busyId === p.id;
-              const archived = p.status === 'archived';
-              const cell = 'rounded-md border border-ink/20 px-2 py-1.5 w-full';
-              return (
-                <tr key={p.id} className={archived ? 'opacity-60' : undefined}>
-                  <td className="px-3 py-2">
-                    <input className={cell} value={d.title_en} onChange={(e) => setField(p.id, 'title_en', e.target.value)} />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input className={cell} value={d.title_id} onChange={(e) => setField(p.id, 'title_id', e.target.value)} />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input className={cell} value={d.slug} onChange={(e) => setField(p.id, 'slug', e.target.value)} />
-                  </td>
-                  <td className="px-3 py-2">
-                    <select
-                      className={cell}
-                      value={d.nav_section}
-                      onChange={(e) => setField(p.id, 'nav_section', e.target.value as NavSection)}
-                    >
-                      {SECTIONS.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      type="number"
-                      className={cell}
-                      value={d.nav_order}
-                      onChange={(e) => setField(p.id, 'nav_order', Number(e.target.value))}
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <span className={STATUS_STYLES[p.status]}>{p.status}</span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex flex-wrap items-center justify-end gap-1.5">
-                      <button
-                        onClick={() => saveRow(p)}
-                        disabled={!dirty || rowBusy}
-                        className="rounded-md bg-navy px-3 py-1.5 text-white disabled:opacity-30"
-                      >
-                        {rowBusy ? 'Saving…' : dirty ? 'Save' : 'Saved'}
-                      </button>
-                      <Link href={`/admin/edit/${p.slug}`} className="rounded-md border border-ink/20 px-3 py-1.5">
-                        Blocks
-                      </Link>
-                      {!archived && (
-                        <button
-                          onClick={() => setStatus(p, p.status === 'published' ? 'draft' : 'published')}
-                          disabled={rowBusy}
-                          className="rounded-md border border-ink/20 px-3 py-1.5 disabled:opacity-40"
-                        >
-                          {p.status === 'published' ? 'Unpublish' : 'Publish'}
-                        </button>
-                      )}
-                      {archived ? (
-                        <button
-                          onClick={() => setStatus(p, 'draft')}
-                          disabled={rowBusy}
-                          className="rounded-md border border-ink/20 px-3 py-1.5 disabled:opacity-40"
-                        >
-                          Restore
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => setStatus(p, 'archived')}
-                          disabled={rowBusy}
-                          className="rounded-md border border-amber-500 px-3 py-1.5 text-amber-600 disabled:opacity-40"
-                        >
-                          Archive
-                        </button>
-                      )}
-                      <button
-                        onClick={() => remove(p)}
-                        disabled={rowBusy}
-                        className="rounded-md border border-magenta px-3 py-1.5 text-magenta disabled:opacity-40"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+              <SortableContext items={visible.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+                {visible.map((p) => (
+                  <SortableRow
+                    key={p.id}
+                    page={p}
+                    draft={drafts[p.id] ?? toDraft(p)}
+                    dirty={isDirty(p.id)}
+                    busy={isPending && busyId === p.id}
+                    onField={setField}
+                    onSave={saveRow}
+                    onStatus={setStatus}
+                    onRemove={remove}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
           </tbody>
         </table>
       </div>
     </div>
+  );
+}
+
+function SortableRow({
+  page,
+  draft,
+  dirty,
+  busy,
+  onField,
+  onSave,
+  onStatus,
+  onRemove,
+}: {
+  page: PageRecord;
+  draft: Draft;
+  dirty: boolean;
+  busy: boolean;
+  onField: <K extends keyof Draft>(id: string, key: K, value: Draft[K]) => void;
+  onSave: (p: PageRecord) => void;
+  onStatus: (p: PageRecord, status: PageStatus) => void;
+  onRemove: (p: PageRecord) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: page.id,
+  });
+  const style = { transform: CSS.Transform.toString(transform), transition };
+  const archived = page.status === 'archived';
+  const id = page.id;
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      className={[archived ? 'opacity-60' : '', isDragging ? 'relative z-10 bg-paper shadow-lg' : ''].join(' ')}
+    >
+      <td className="px-2 py-2 align-middle">
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          aria-label="Drag to reorder"
+          className="cursor-grab text-ink/30 hover:text-ink/60 active:cursor-grabbing"
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+      </td>
+      <td className="px-3 py-2">
+        <input className={CELL} value={draft.title_en} onChange={(e) => onField(id, 'title_en', e.target.value)} />
+      </td>
+      <td className="px-3 py-2">
+        <input className={CELL} value={draft.title_id} onChange={(e) => onField(id, 'title_id', e.target.value)} />
+      </td>
+      <td className="px-3 py-2">
+        <input className={CELL} value={draft.slug} onChange={(e) => onField(id, 'slug', e.target.value)} />
+      </td>
+      <td className="px-3 py-2">
+        <select className={CELL} value={draft.nav_section} onChange={(e) => onField(id, 'nav_section', e.target.value as NavSection)}>
+          {SECTIONS.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+      </td>
+      <td className="px-3 py-2">
+        <input
+          type="number"
+          className={CELL}
+          value={draft.nav_order}
+          onChange={(e) => onField(id, 'nav_order', Number(e.target.value))}
+        />
+      </td>
+      <td className="px-3 py-2">
+        <span className={STATUS_STYLES[page.status]}>{page.status}</span>
+      </td>
+      <td className="px-3 py-2">
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
+          <button onClick={() => onSave(page)} disabled={!dirty || busy} className="rounded-md bg-navy px-3 py-1.5 text-white disabled:opacity-30">
+            {busy ? 'Saving…' : dirty ? 'Save' : 'Saved'}
+          </button>
+          <Link href={`/admin/edit/${page.slug}`} className="rounded-md border border-ink/20 px-3 py-1.5">
+            Blocks
+          </Link>
+          {!archived && (
+            <button
+              onClick={() => onStatus(page, page.status === 'published' ? 'draft' : 'published')}
+              disabled={busy}
+              className="rounded-md border border-ink/20 px-3 py-1.5 disabled:opacity-40"
+            >
+              {page.status === 'published' ? 'Unpublish' : 'Publish'}
+            </button>
+          )}
+          {archived ? (
+            <button onClick={() => onStatus(page, 'draft')} disabled={busy} className="rounded-md border border-ink/20 px-3 py-1.5 disabled:opacity-40">
+              Restore
+            </button>
+          ) : (
+            <button onClick={() => onStatus(page, 'archived')} disabled={busy} className="rounded-md border border-amber-500 px-3 py-1.5 text-amber-600 disabled:opacity-40">
+              Archive
+            </button>
+          )}
+          <button onClick={() => onRemove(page)} disabled={busy} className="rounded-md border border-magenta px-3 py-1.5 text-magenta disabled:opacity-40">
+            Delete
+          </button>
+        </div>
+      </td>
+    </tr>
   );
 }

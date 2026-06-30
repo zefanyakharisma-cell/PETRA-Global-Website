@@ -77,7 +77,8 @@
       "Bash(grep -niA4 \"migrat\\\\|supabase db\\\\|deploy\" README.md)",
       "Bash(npx eslint *)",
       "PowerShell(npx tsc --noEmit 2>&1)",
-      "PowerShell(npx eslint src/components/blocks/CardGridBlock.tsx src/components/blocks/CardGridCard.tsx src/components/blocks/registry.meta.ts 2>&1)"
+      "PowerShell(npx eslint src/components/blocks/CardGridBlock.tsx src/components/blocks/CardGridCard.tsx src/components/blocks/registry.meta.ts 2>&1)",
+      "Bash(node -e \"const l=require\\('e:/PETRA-Global-Website/node_modules/lucide-react'\\); console.log\\('GripVertical' in l, 'version exports count', Object.keys\\(l\\).length\\)\")"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",

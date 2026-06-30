@@ -105,6 +105,16 @@ export async function deletePage(id: string, slug: string) {
   revalidatePublic(slug);
 }
 
+/** Persist a new ordering for pages (id -> nav_order). Used by drag-to-reorder. */
+export async function reorderPages(items: { id: string; nav_order: number }[]) {
+  const supabase = await createClient();
+  await Promise.all(
+    items.map((it) => supabase.from('pages').update({ nav_order: it.nav_order }).eq('id', it.id)),
+  );
+  revalidatePath('/admin/pages');
+  revalidatePublic(); // refresh the auto-built navigation
+}
+
 // ---- Blocks (live editor) --------------------------------------------------
 export async function addBlock(pageId: string, type: BlockType, slug: string) {
   const supabase = await createClient();
