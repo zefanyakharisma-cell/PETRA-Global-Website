@@ -70,7 +70,10 @@
       "Bash(cd 'e:\\\\PETRA-Global-Website' && rm -rf \"src/app/[locale]/partnership\" && echo \"removed bespoke route\" && ls \"src/app/[locale]\")",
       "Bash(git log *)",
       "Bash(git show *)",
-      "Bash(curl -s \"http://localhost:3001/en\" -o /tmp/home.html -w \"home HTTP: %{http_code}\\\\n\")"
+      "Bash(curl -s \"http://localhost:3001/en\" -o /tmp/home.html -w \"home HTTP: %{http_code}\\\\n\")",
+      "PowerShell($f=\"C:/Users/KUI/AppData/Local/Temp/claude/e--PETRA-Global-Website/4e673e82-3912-4faa-8f65-d4e54aa879b5/tasks/bx8dgzm1a.output\"; Write-Output \\(\"size=\" + \\(Get-Item $f\\).Length\\); Get-ChildItem \"e:/PETRA-Global-Website/.next\" -ErrorAction SilentlyContinue | Select-Object Name,LastWriteTime | Format-Table -Auto; $p = Get-Process node -ErrorAction SilentlyContinue; Write-Output \\(\"node procs: \" + \\($p.Count\\)\\))",
+      "PowerShell(npm run typecheck 2>&1)",
+      "PowerShell(npm run lint 2>&1)"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",

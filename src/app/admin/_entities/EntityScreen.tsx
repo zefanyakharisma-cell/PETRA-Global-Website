@@ -3,7 +3,9 @@ import { createClient } from '@/lib/supabase/server';
 import { createEntity, deleteEntity } from '../actions/entities';
 import { ENTITY_CONFIG, type EntityTable, type Field } from './config';
 
-function FieldInput({ f }: { f: Field }) {
+type RelOption = { id: string; label: string };
+
+function FieldInput({ f, relOptions }: { f: Field; relOptions?: RelOption[] }) {
   const base = 'rounded-md border border-ink/20 px-3 py-2 w-full';
   if (f.kind === 'localized') {
     return (
@@ -27,16 +29,50 @@ function FieldInput({ f }: { f: Field }) {
       </select>
     );
   }
+  if (f.kind === 'relation') {
+    return (
+      <select name={f.key} className={base} required={f.required} defaultValue="">
+        <option value="" disabled={f.required}>— {f.label} —</option>
+        {(relOptions ?? []).map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+      </select>
+    );
+  }
   const type = f.kind === 'email' ? 'email' : f.kind === 'number' ? 'number' : f.kind === 'date' ? 'date' : f.kind === 'url' ? 'url' : 'text';
   return <input name={f.key} type={type} step={f.kind === 'number' ? 'any' : undefined} required={f.required} placeholder={f.label} className={base} />;
+}
+
+/** Pull a localized name (or slug) off a parent row for use as a dropdown label. */
+function rowLabel(row: Record<string, unknown>): string {
+  const name = row.name;
+  if (name && typeof name === 'object' && 'en' in (name as object)) {
+    const en = (name as { en?: string }).en;
+    if (en) return en;
+  }
+  return String(row.slug ?? row.code ?? row.id ?? '');
 }
 
 /** Generic list + create form for an entity, driven by ENTITY_CONFIG. */
 export async function EntityScreen({ table }: { table: EntityTable }) {
   const cfg = ENTITY_CONFIG[table];
   const supabase = await createClient();
-  const { data } = await supabase.from(table).select('*').order('created_at', { ascending: false });
+  const orderByPosition = cfg.fields.some((f) => f.key === 'position');
+  const { data } = orderByPosition
+    ? await supabase.from(table).select('*').order('position', { ascending: true })
+    : await supabase.from(table).select('*').order('created_at', { ascending: false });
   const rows = (data ?? []) as Record<string, unknown>[];
+
+  // Load dropdown options + an id→label lookup for every relation field.
+  const relations: Record<string, { options: RelOption[]; labels: Record<string, string> }> = {};
+  for (const f of cfg.fields) {
+    if (f.kind === 'relation' && f.relTable) {
+      const { data: relData } = await supabase.from(f.relTable).select('*');
+      const options = (relData ?? []).map((r) => ({ id: String(r.id), label: rowLabel(r as Record<string, unknown>) }));
+      relations[f.key] = {
+        options,
+        labels: Object.fromEntries(options.map((o) => [o.id, o.label])),
+      };
+    }
+  }
 
   async function create(formData: FormData) {
     'use server';
@@ -51,6 +87,7 @@ export async function EntityScreen({ table }: { table: EntityTable }) {
 
   const cell = (row: Record<string, unknown>, key: string) => {
     const v = row[key];
+    if (relations[key] && v) return relations[key].labels[String(v)] ?? String(v);
     if (v && typeof v === 'object' && 'en' in (v as object)) return String((v as { en?: string }).en ?? '');
     if (typeof v === 'boolean') return v ? '✓' : '—';
     if (key === 'published_at' && v) return new Date(String(v)).toLocaleDateString();
@@ -67,7 +104,7 @@ export async function EntityScreen({ table }: { table: EntityTable }) {
       <form action={create} className="mt-6 grid gap-3 rounded-2xl bg-white p-5 ring-1 ring-ink/10 md:grid-cols-2">
         {cfg.fields.map((f) => (
           <div key={f.key} className={f.kind === 'localized' ? 'md:col-span-2' : ''}>
-            <FieldInput f={f} />
+            <FieldInput f={f} relOptions={relations[f.key]?.options} />
           </div>
         ))}
         <div className="md:col-span-2">

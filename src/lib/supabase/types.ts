@@ -88,6 +88,43 @@ export type TestimonialRow = Timestamps & {
   photo_url: string | null;
 };
 
+export type FacultyRow = Timestamps & {
+  id: string;
+  slug: string;
+  name: Json;
+  tagline: Json;
+  description: Json;
+  url: string | null;
+  logo_url: string | null;
+  cover_url: string | null;
+  accent: string;
+  position: number;
+  is_active: boolean;
+};
+
+export type StudyProgramRow = Timestamps & {
+  id: string;
+  faculty_id: string | null;
+  slug: string;
+  name: Json;
+  degree: string | null;
+  description: Json;
+  url: string | null;
+  position: number;
+  is_active: boolean;
+};
+
+export type CourseRow = Timestamps & {
+  id: string;
+  study_program_id: string | null;
+  code: string | null;
+  name: Json;
+  credits: number | null;
+  semester: string | null;
+  description: Json;
+  position: number;
+};
+
 export type InquiryRow = {
   id: string;
   kind: 'student' | 'partner' | 'outbound';
@@ -138,6 +175,9 @@ export interface Database {
       domestic_partners: TableShape<DomesticPartnerRow, 'name'>;
       news: TableShape<NewsRow, 'slug'>;
       testimonials: TableShape<TestimonialRow, 'person_name'>;
+      faculties: TableShape<FacultyRow, 'slug'>;
+      study_programs: TableShape<StudyProgramRow, 'slug'>;
+      courses: TableShape<CourseRow>;
       inquiries: TableShape<InquiryRow, 'kind' | 'payload'>;
       pages: TableShape<PageRow, 'slug'>;
       blocks: TableShape<BlockRow, 'page_id' | 'type' | 'position'>;

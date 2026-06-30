@@ -1,5 +1,14 @@
 /** Field schema driving the generic entity admin (list + create form). */
-export type EntityTable = 'staff' | 'programs' | 'partners' | 'domestic_partners' | 'news' | 'testimonials';
+export type EntityTable =
+  | 'staff'
+  | 'programs'
+  | 'partners'
+  | 'domestic_partners'
+  | 'news'
+  | 'testimonials'
+  | 'faculties'
+  | 'study_programs'
+  | 'courses';
 
 export type FieldKind =
   | 'text'
@@ -10,13 +19,16 @@ export type FieldKind =
   | 'url'
   | 'tags'
   | 'date'
-  | 'select';
+  | 'select'
+  | 'relation';
 
 export interface Field {
   key: string;
   label: string;
   kind: FieldKind;
   options?: string[];
+  /** For `relation` fields — the parent table whose rows populate the dropdown. */
+  relTable?: EntityTable;
   required?: boolean;
 }
 
@@ -105,6 +117,52 @@ export const ENTITY_CONFIG: Record<EntityTable, EntityConfig> = {
       { key: 'country', label: 'Country', kind: 'text' },
       { key: 'quote', label: 'Quote', kind: 'localized' },
       { key: 'photo_url', label: 'Photo URL', kind: 'url' },
+    ],
+  },
+  faculties: {
+    table: 'faculties',
+    title: 'Faculties',
+    list: ['slug', 'name', 'is_active'],
+    fields: [
+      { key: 'slug', label: 'Slug', kind: 'text', required: true },
+      { key: 'name', label: 'Name', kind: 'localized' },
+      { key: 'tagline', label: 'Tagline', kind: 'localized' },
+      { key: 'description', label: 'Description', kind: 'localized' },
+      { key: 'url', label: 'Faculty website', kind: 'url' },
+      { key: 'logo_url', label: 'Logo URL', kind: 'url' },
+      { key: 'cover_url', label: 'Cover image URL', kind: 'url' },
+      { key: 'accent', label: 'Accent', kind: 'select', options: ['magenta', 'blue', 'amber', 'cyan'] },
+      { key: 'position', label: 'Order', kind: 'number' },
+      { key: 'is_active', label: 'Active', kind: 'bool' },
+    ],
+  },
+  study_programs: {
+    table: 'study_programs',
+    title: 'Study Programs',
+    list: ['slug', 'name', 'degree', 'is_active'],
+    fields: [
+      { key: 'faculty_id', label: 'Faculty', kind: 'relation', relTable: 'faculties', required: true },
+      { key: 'slug', label: 'Slug', kind: 'text', required: true },
+      { key: 'name', label: 'Name', kind: 'localized' },
+      { key: 'degree', label: 'Degree (e.g. Bachelor / S1)', kind: 'text' },
+      { key: 'description', label: 'Description', kind: 'localized' },
+      { key: 'url', label: 'Program website', kind: 'url' },
+      { key: 'position', label: 'Order', kind: 'number' },
+      { key: 'is_active', label: 'Active', kind: 'bool' },
+    ],
+  },
+  courses: {
+    table: 'courses',
+    title: 'Courses',
+    list: ['code', 'name', 'credits', 'semester'],
+    fields: [
+      { key: 'study_program_id', label: 'Study program', kind: 'relation', relTable: 'study_programs', required: true },
+      { key: 'code', label: 'Course code', kind: 'text' },
+      { key: 'name', label: 'Name', kind: 'localized' },
+      { key: 'credits', label: 'Credits (SKS)', kind: 'number' },
+      { key: 'semester', label: 'Semester', kind: 'text' },
+      { key: 'description', label: 'Description', kind: 'localized' },
+      { key: 'position', label: 'Order', kind: 'number' },
     ],
   },
 };

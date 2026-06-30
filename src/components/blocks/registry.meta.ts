@@ -330,6 +330,25 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
       content: [],
     },
   },
+  faculties: {
+    type: 'faculties', label: 'Faculties & programs', category: 'Entity-bound',
+    defaultConfig: { background: 'paper', spacing: 'normal', display: 'explorer', showCourses: true, accent: 'magenta' },
+    defaultContent: { heading: {}, intro: {} },
+    editor: {
+      config: [
+        { key: 'display', label: 'Display', type: 'select', options: [
+          { value: 'explorer', label: 'Explorer (expandable list)' },
+          { value: 'grid', label: 'Grid of faculty cards' },
+        ] },
+        { key: 'showCourses', label: 'Show courses (explorer)', type: 'boolean' },
+        ...UNIVERSAL,
+      ],
+      content: [
+        { key: 'heading', label: 'Heading', type: 'text', localized: true },
+        { key: 'intro', label: 'Intro', type: 'textarea', localized: true },
+      ],
+    },
+  },
   inquiry_form: {
     type: 'inquiry_form', label: 'Inquiry form', category: 'Conversion', defaultConfig: { background: 'navy', spacing: 'spacious', preset: 'student' },
     defaultContent: { heading: {}, intro: {} },

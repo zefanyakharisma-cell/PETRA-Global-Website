@@ -23,6 +23,7 @@ export const BLOCK_TYPES = [
   'testimonials',
   'news_feed',
   'staff',
+  'faculties',
   // Conversion
   'inquiry_form',
 ] as const;

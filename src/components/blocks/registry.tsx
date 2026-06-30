@@ -19,6 +19,7 @@ import { PartnerMapBlock } from './PartnerMapBlock';
 import { TestimonialsBlock } from './TestimonialsBlock';
 import { NewsFeedBlock } from './NewsFeedBlock';
 import { StaffBlock } from './StaffBlock';
+import { FacultiesBlock } from './FacultiesBlock';
 import { InquiryFormBlock } from './InquiryFormBlock';
 
 /**
@@ -45,6 +46,7 @@ const COMPONENTS: Record<BlockMeta['type'], ComponentType<BlockComponentProps>> 
   testimonials: TestimonialsBlock,
   news_feed: NewsFeedBlock,
   staff: StaffBlock,
+  faculties: FacultiesBlock,
   inquiry_form: InquiryFormBlock,
 };
 
