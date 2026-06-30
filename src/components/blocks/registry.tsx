@@ -5,12 +5,16 @@ import { BLOCK_META } from './registry.meta';
 import { HeroBlock } from './HeroBlock';
 import { SectionHeaderBlock } from './SectionHeaderBlock';
 import { AudienceDoorsBlock } from './AudienceDoorsBlock';
+import { DividerBlock } from './DividerBlock';
 import { RichTextBlock } from './RichTextBlock';
 import { ImageTextSplitBlock } from './ImageTextSplitBlock';
 import { StatStripBlock } from './StatStripBlock';
 import { CardGridBlock } from './CardGridBlock';
+import { FeatureListBlock } from './FeatureListBlock';
 import { AccordionBlock } from './AccordionBlock';
+import { TabsBlock } from './TabsBlock';
 import { StepsBlock } from './StepsBlock';
+import { TimelineBlock } from './TimelineBlock';
 import { GalleryBlock } from './GalleryBlock';
 import { PullQuoteBlock } from './PullQuoteBlock';
 import { LogoWallBlock } from './LogoWallBlock';
@@ -20,6 +24,7 @@ import { TestimonialsBlock } from './TestimonialsBlock';
 import { NewsFeedBlock } from './NewsFeedBlock';
 import { StaffBlock } from './StaffBlock';
 import { FacultiesBlock } from './FacultiesBlock';
+import { CtaBannerBlock } from './CtaBannerBlock';
 import { InquiryFormBlock } from './InquiryFormBlock';
 
 /**
@@ -32,12 +37,16 @@ const COMPONENTS: Record<BlockMeta['type'], ComponentType<BlockComponentProps>> 
   hero: HeroBlock,
   section_header: SectionHeaderBlock,
   audience_doors: AudienceDoorsBlock,
+  divider: DividerBlock,
   rich_text: RichTextBlock,
   image_text_split: ImageTextSplitBlock,
   stat_strip: StatStripBlock,
   card_grid: CardGridBlock,
+  feature_list: FeatureListBlock,
   accordion: AccordionBlock,
+  tabs: TabsBlock,
   steps: StepsBlock,
+  timeline: TimelineBlock,
   gallery: GalleryBlock,
   pull_quote: PullQuoteBlock,
   logo_wall: LogoWallBlock,
@@ -47,6 +56,7 @@ const COMPONENTS: Record<BlockMeta['type'], ComponentType<BlockComponentProps>> 
   news_feed: NewsFeedBlock,
   staff: StaffBlock,
   faculties: FacultiesBlock,
+  cta_banner: CtaBannerBlock,
   inquiry_form: InquiryFormBlock,
 };
 

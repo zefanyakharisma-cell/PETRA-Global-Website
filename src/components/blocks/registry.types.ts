@@ -1,19 +1,23 @@
 import type { ComponentType } from 'react';
 import type { Block, BlockBaseConfig, Locale } from '@/lib/types';
 
-/** Canonical ordered list of the 18 block types (source of truth for BlockType). */
+/** Canonical ordered list of the 23 block types (source of truth for BlockType). */
 export const BLOCK_TYPES = [
   // Layout & hero
   'hero',
   'section_header',
   'audience_doors',
+  'divider',
   // Content composition
   'rich_text',
   'image_text_split',
   'stat_strip',
   'card_grid',
+  'feature_list',
   'accordion',
+  'tabs',
   'steps',
+  'timeline',
   'gallery',
   'pull_quote',
   'logo_wall',
@@ -25,6 +29,7 @@ export const BLOCK_TYPES = [
   'staff',
   'faculties',
   // Conversion
+  'cta_banner',
   'inquiry_form',
 ] as const;
 

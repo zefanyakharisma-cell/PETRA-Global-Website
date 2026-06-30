@@ -91,6 +91,21 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
       ],
     },
   },
+  divider: {
+    type: 'divider', label: 'Divider / spacer', category: 'Layout & hero', defaultConfig: { background: 'paper', spacing: 'normal', style: 'line', accent: 'magenta' },
+    defaultContent: {},
+    editor: {
+      config: [
+        { key: 'style', label: 'Style', type: 'select', options: [
+          { value: 'line', label: 'Hairline' },
+          { value: 'dots', label: 'Dots' },
+          { value: 'space', label: 'Empty space' },
+        ] },
+        ...UNIVERSAL,
+      ],
+      content: [],
+    },
+  },
   rich_text: {
     type: 'rich_text', label: 'Rich text', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', width: 'narrow' },
     defaultContent: { html: {} },
@@ -168,6 +183,40 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
       ],
     },
   },
+  feature_list: {
+    type: 'feature_list', label: 'Feature list', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', columns: 3, accent: 'magenta' },
+    defaultContent: { heading: {}, intro: {}, items: [] },
+    editor: {
+      config: [{ key: 'columns', label: 'Columns', type: 'number' }, ...UNIVERSAL],
+      content: [
+        { key: 'heading', label: 'Heading', type: 'text', localized: true },
+        { key: 'intro', label: 'Intro', type: 'textarea', localized: true },
+        { key: 'items', label: 'Features', type: 'list', itemFields: [
+          { key: 'icon', label: 'Icon', type: 'select', options: [
+            { value: 'globe', label: 'Globe' },
+            { value: 'graduation', label: 'Graduation cap' },
+            { value: 'users', label: 'People' },
+            { value: 'handshake', label: 'Handshake' },
+            { value: 'book', label: 'Book' },
+            { value: 'award', label: 'Award' },
+            { value: 'pin', label: 'Map pin' },
+            { value: 'plane', label: 'Plane' },
+            { value: 'building', label: 'Building' },
+            { value: 'heart', label: 'Heart' },
+            { value: 'idea', label: 'Lightbulb' },
+            { value: 'sparkles', label: 'Sparkles' },
+            { value: 'calendar', label: 'Calendar' },
+            { value: 'mail', label: 'Mail' },
+            { value: 'compass', label: 'Compass' },
+            { value: 'star', label: 'Star' },
+          ] },
+          { key: 'title', label: 'Title', type: 'text', localized: true },
+          { key: 'body', label: 'Body', type: 'textarea', localized: true },
+          { key: 'href', label: 'Link (optional)', type: 'url' },
+        ] },
+      ],
+    },
+  },
   accordion: {
     type: 'accordion', label: 'Accordion / FAQ', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', openMode: 'multi' },
     defaultContent: { heading: {}, items: [] },
@@ -187,6 +236,20 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
       ],
     },
   },
+  tabs: {
+    type: 'tabs', label: 'Tabs', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', accent: 'magenta' },
+    defaultContent: { heading: {}, tabs: [] },
+    editor: {
+      config: UNIVERSAL,
+      content: [
+        { key: 'heading', label: 'Heading', type: 'text', localized: true },
+        { key: 'tabs', label: 'Tabs', type: 'list', itemFields: [
+          { key: 'label', label: 'Tab label', type: 'text', localized: true },
+          { key: 'body', label: 'Panel content', type: 'richtext', localized: true },
+        ] },
+      ],
+    },
+  },
   steps: {
     type: 'steps', label: 'Steps', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', orientation: 'vertical' },
     defaultContent: { heading: {}, steps: [] },
@@ -200,6 +263,22 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
       content: [
         { key: 'heading', label: 'Heading', type: 'text', localized: true },
         { key: 'steps', label: 'Steps', type: 'list', itemFields: [
+          { key: 'title', label: 'Title', type: 'text', localized: true },
+          { key: 'body', label: 'Detail', type: 'textarea', localized: true },
+        ] },
+      ],
+    },
+  },
+  timeline: {
+    type: 'timeline', label: 'Timeline', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', accent: 'magenta' },
+    defaultContent: { heading: {}, intro: {}, items: [] },
+    editor: {
+      config: UNIVERSAL,
+      content: [
+        { key: 'heading', label: 'Heading', type: 'text', localized: true },
+        { key: 'intro', label: 'Intro', type: 'textarea', localized: true },
+        { key: 'items', label: 'Milestones', type: 'list', itemFields: [
+          { key: 'date', label: 'Date / year', type: 'text' },
           { key: 'title', label: 'Title', type: 'text', localized: true },
           { key: 'body', label: 'Detail', type: 'textarea', localized: true },
         ] },
@@ -346,6 +425,28 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
       content: [
         { key: 'heading', label: 'Heading', type: 'text', localized: true },
         { key: 'intro', label: 'Intro', type: 'textarea', localized: true },
+      ],
+    },
+  },
+  cta_banner: {
+    type: 'cta_banner', label: 'CTA banner', category: 'Conversion', defaultConfig: { background: 'navy', spacing: 'normal', alignment: 'center', accent: 'cyan' },
+    defaultContent: { eyebrow: {}, heading: {}, subcopy: {}, ctas: [] },
+    editor: {
+      config: [
+        { key: 'alignment', label: 'Alignment', type: 'select', options: [
+          { value: 'center', label: 'Center' },
+          { value: 'split', label: 'Split (text left, buttons right)' },
+        ] },
+        ...UNIVERSAL,
+      ],
+      content: [
+        { key: 'eyebrow', label: 'Eyebrow', type: 'text', localized: true },
+        { key: 'heading', label: 'Heading', type: 'text', localized: true },
+        { key: 'subcopy', label: 'Subcopy', type: 'textarea', localized: true },
+        { key: 'ctas', label: 'Buttons (max 2)', type: 'list', itemFields: [
+          { key: 'label', label: 'Label', type: 'text', localized: true },
+          { key: 'href', label: 'Link', type: 'url' },
+        ] },
       ],
     },
   },
