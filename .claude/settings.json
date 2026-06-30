@@ -75,7 +75,9 @@
       "PowerShell(npm run typecheck 2>&1)",
       "PowerShell(npm run lint 2>&1)",
       "Bash(grep -niA4 \"migrat\\\\|supabase db\\\\|deploy\" README.md)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "PowerShell(npx tsc --noEmit 2>&1)",
+      "PowerShell(npx eslint src/components/blocks/CardGridBlock.tsx src/components/blocks/CardGridCard.tsx src/components/blocks/registry.meta.ts 2>&1)"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",

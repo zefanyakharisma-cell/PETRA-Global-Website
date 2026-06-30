@@ -1,0 +1,220 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { Link } from '@/i18n/routing';
+import { clsx } from '@/lib/clsx';
+
+export interface CardGridCardData {
+  title: string;
+  body: string;
+  image_url?: string;
+  href?: string;
+}
+
+export interface CardGridOptions {
+  /** Whole card (or button) links to its page. */
+  linkToPage: boolean;
+  /** Clicking opens a compact popup with the card's details. */
+  enablePopup: boolean;
+  /** Render an explicit button instead of making the whole card clickable. */
+  showButton: boolean;
+}
+
+/**
+ * Interactive card for the card grid. The admin can enable any combination of
+ * three behaviours (link, popup, button); this resolves them into a single
+ * sensible interaction:
+ *  - popup takes priority as the click action; the page link, if also enabled,
+ *    appears as a "Visit page" link inside the popup;
+ *  - otherwise the card links to its page;
+ *  - "show button" moves the trigger onto an explicit button so the card body
+ *    itself is not clickable (avoids nested interactive elements).
+ */
+export function CardGridCard({
+  card,
+  onNavy,
+  options,
+  buttonLabel,
+  viewLabel,
+}: {
+  card: CardGridCardData;
+  onNavy: boolean;
+  options: CardGridOptions;
+  buttonLabel: string;
+  viewLabel: string;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const isExternal = !!card.href && card.href.startsWith('http');
+  const canLink = options.linkToPage && !!card.href;
+  // The primary action when the card/button is activated.
+  const action: 'popup' | 'link' | 'none' = options.enablePopup ? 'popup' : canLink ? 'link' : 'none';
+
+  // An explicit button rendered inside the card footer.
+  const button = options.showButton ? (
+    action === 'link' && card.href ? (
+      <CardLink href={card.href} external={isExternal} className={buttonClass(onNavy)}>
+        {buttonLabel}
+      </CardLink>
+    ) : (
+      <button
+        type="button"
+        onClick={() => action === 'popup' && setOpen(true)}
+        disabled={action === 'none'}
+        className={clsx(buttonClass(onNavy), action === 'none' && 'cursor-default opacity-60')}
+      >
+        {buttonLabel}
+      </button>
+    )
+  ) : null;
+
+  const shell = (
+    <div
+      className={clsx(
+        'group flex h-full flex-col overflow-hidden rounded-2xl border transition hover:-translate-y-1 hover:shadow-lg',
+        onNavy ? 'border-white/15 bg-white/5' : 'border-ink/10 bg-white',
+      )}
+    >
+      <div className="relative aspect-[16/10] bg-ink/5">
+        {card.image_url && <Image src={card.image_url} alt={card.title} fill className="object-cover" />}
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className={clsx('text-2xl', onNavy && 'text-white')}>{card.title}</h3>
+        {card.body && <p className={clsx('mt-2 line-clamp-3 text-sm', onNavy ? 'text-white/70' : 'text-ink/65')}>{card.body}</p>}
+        {button && <div className="mt-4">{button}</div>}
+      </div>
+    </div>
+  );
+
+  // With an explicit button, the card body itself is never the trigger.
+  let cardNode: React.ReactNode = shell;
+  if (!options.showButton) {
+    if (action === 'popup') {
+      cardNode = (
+        <button type="button" onClick={() => setOpen(true)} className="block w-full text-left">
+          {shell}
+        </button>
+      );
+    } else if (action === 'link' && card.href) {
+      cardNode = (
+        <CardLink href={card.href} external={isExternal} className="block">
+          {shell}
+        </CardLink>
+      );
+    }
+  }
+
+  return (
+    <>
+      {cardNode}
+      {open && (
+        <CardPopup
+          card={card}
+          showVisit={canLink}
+          viewLabel={viewLabel}
+          external={isExternal}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
+function CardLink({
+  href,
+  external,
+  className,
+  children,
+}: {
+  href: string;
+  external: boolean;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  );
+}
+
+function buttonClass(onNavy: boolean) {
+  return clsx(
+    'inline-flex items-center justify-center gap-2 rounded-md px-4 py-2',
+    'font-condensed text-sm uppercase tracking-wide transition',
+    onNavy ? 'bg-white text-navy hover:brightness-95' : 'bg-navy text-white hover:bg-navy-2',
+  );
+}
+
+/** Compact details popup for a single card. */
+function CardPopup({
+  card,
+  showVisit,
+  viewLabel,
+  external,
+  onClose,
+}: {
+  card: CardGridCardData;
+  showVisit: boolean;
+  viewLabel: string;
+  external: boolean;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={card.title}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-navy/80 p-6"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          aria-label="Close"
+          onClick={onClose}
+          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-xl text-ink/70 hover:bg-white"
+        >
+          ×
+        </button>
+        {card.image_url && (
+          <div className="relative aspect-[16/9] bg-ink/5">
+            <Image src={card.image_url} alt={card.title} fill className="object-cover" />
+          </div>
+        )}
+        <div className="p-5">
+          <h3 className="text-2xl">{card.title}</h3>
+          {card.body && <p className="mt-2 text-sm text-ink/70">{card.body}</p>}
+          {showVisit && card.href && (
+            <div className="mt-5">
+              <CardLink
+                href={card.href}
+                external={external}
+                className="inline-flex items-center gap-1 font-condensed text-sm uppercase tracking-wide text-magenta hover:underline"
+              >
+                {viewLabel} →
+              </CardLink>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

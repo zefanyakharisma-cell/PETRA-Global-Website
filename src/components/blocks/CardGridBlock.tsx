@@ -1,12 +1,11 @@
-import Image from 'next/image';
 import { Section, Container } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
-import { Link } from '@/i18n/routing';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { createClient } from '@/lib/supabase/server';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap, type Locale } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
+import { CardGridCard } from './CardGridCard';
 
 interface ManualCard {
   title?: LocaleMap;
@@ -17,6 +16,7 @@ interface ManualCard {
 
 interface CardGridContent {
   cards?: ManualCard[];
+  buttonLabel?: LocaleMap;
 }
 
 type ResolvedCard = { title: string; body: string; image_url?: string; href?: string };
@@ -83,8 +83,19 @@ async function resolveCards(
 export async function CardGridBlock({ block, locale }: BlockComponentProps) {
   const source = (block.config.source as string) ?? 'manual';
   const columns = Number(block.config.columns ?? 3);
-  const cards = await resolveCards(source, block.content as CardGridContent, locale, columns * 3);
+  const content = block.content as CardGridContent;
+  const cards = await resolveCards(source, content, locale, columns * 3);
   const onNavy = block.config.background === 'navy';
+
+  // Card behaviour — any combination may be enabled. linkToPage defaults on so
+  // existing card grids keep their whole-card link behaviour.
+  const options = {
+    linkToPage: block.config.linkToPage !== false,
+    enablePopup: block.config.enablePopup === true,
+    showButton: block.config.showButton === true,
+  };
+  const buttonLabel = t(content.buttonLabel, locale) || (locale === 'id' ? 'Selengkapnya' : 'Learn more');
+  const viewLabel = locale === 'id' ? 'Lihat halaman' : 'Visit page';
 
   return (
     <Section config={block.config}>
@@ -114,7 +125,13 @@ export async function CardGridBlock({ block, locale }: BlockComponentProps) {
           >
             {cards.map((card, i) => (
               <Reveal key={i} delay={i * 0.05}>
-                <Card card={card} onNavy={onNavy} />
+                <CardGridCard
+                  card={card}
+                  onNavy={onNavy}
+                  options={options}
+                  buttonLabel={buttonLabel}
+                  viewLabel={viewLabel}
+                />
               </Reveal>
             ))}
           </div>
@@ -122,29 +139,4 @@ export async function CardGridBlock({ block, locale }: BlockComponentProps) {
       </Container>
     </Section>
   );
-}
-
-function Card({ card, onNavy }: { card: ResolvedCard; onNavy: boolean }) {
-  const inner = (
-    <div
-      className={clsx(
-        'group flex h-full flex-col overflow-hidden rounded-2xl border transition hover:-translate-y-1 hover:shadow-lg',
-        onNavy ? 'border-white/15 bg-white/5' : 'border-ink/10 bg-white',
-      )}
-    >
-      <div className="relative aspect-[16/10] bg-ink/5">
-        {card.image_url && <Image src={card.image_url} alt={card.title} fill className="object-cover" />}
-      </div>
-      <div className="flex flex-1 flex-col p-5">
-        <h3 className={clsx('text-2xl', onNavy && 'text-white')}>{card.title}</h3>
-        {card.body && <p className={clsx('mt-2 text-sm', onNavy ? 'text-white/70' : 'text-ink/65')}>{card.body}</p>}
-      </div>
-    </div>
-  );
-
-  if (!card.href) return inner;
-  if (card.href.startsWith('http')) {
-    return <a href={card.href} target="_blank" rel="noopener noreferrer">{inner}</a>;
-  }
-  return <Link href={card.href}>{inner}</Link>;
 }

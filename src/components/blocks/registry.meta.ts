@@ -178,7 +178,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     },
   },
   card_grid: {
-    type: 'card_grid', label: 'Card grid', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', source: 'manual', columns: 3 },
+    type: 'card_grid', label: 'Card grid', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', source: 'manual', columns: 3, linkToPage: true },
     defaultContent: { cards: [] },
     editor: {
       config: [
@@ -189,9 +189,14 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           { value: 'partners', label: 'Partners' },
         ] },
         { key: 'columns', label: 'Columns', type: 'number' },
+        // Card behaviour — any combination may be enabled.
+        { key: 'linkToPage', label: 'Card links to its page', type: 'boolean' },
+        { key: 'enablePopup', label: 'Card opens a popup (compact details)', type: 'boolean' },
+        { key: 'showButton', label: 'Show a clickable button on the card', type: 'boolean' },
         ...UNIVERSAL,
       ],
       content: [
+        { key: 'buttonLabel', label: 'Button label', type: 'text', localized: true, help: 'Shown when “Show a clickable button” is on. Defaults to “Learn more”.' },
         { key: 'cards', label: 'Manual cards', type: 'list', itemFields: [
           { key: 'title', label: 'Title', type: 'text', localized: true },
           { key: 'body', label: 'Body', type: 'textarea', localized: true },
