@@ -21,12 +21,20 @@ const ACCENT_BG: Record<string, string> = {
   amber: 'bg-amber',
   cyan: 'bg-cyan',
   blue: 'bg-blue',
+  red: 'bg-red',
+  orange: 'bg-orange',
+  green: 'bg-green',
+  yellow: 'bg-yellow',
 };
 const ACCENT_TEXT: Record<string, string> = {
   magenta: 'text-magenta',
   amber: 'text-amber',
   cyan: 'text-cyan',
   blue: 'text-blue',
+  red: 'text-red',
+  orange: 'text-orange',
+  green: 'text-green',
+  yellow: 'text-yellow',
 };
 
 /** Vertical timeline — milestones, history, or an application schedule. */

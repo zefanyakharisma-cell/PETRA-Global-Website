@@ -14,10 +14,14 @@ const UNIVERSAL: EditorField[] = [
     { value: 'spacious', label: 'Spacious' },
   ] },
   { key: 'accent', label: 'Accent', type: 'select', options: [
-    { value: 'magenta', label: 'Magenta (Study)' },
+    { value: 'magenta', label: 'Magenta (Study / FHIK)' },
     { value: 'blue', label: 'Blue (Partner)' },
     { value: 'amber', label: 'Amber (Go Abroad)' },
     { value: 'cyan', label: 'Cyan' },
+    { value: 'red', label: 'Red (Sipil & Ars)' },
+    { value: 'orange', label: 'Orange (FTI)' },
+    { value: 'green', label: 'Green (SBM)' },
+    { value: 'yellow', label: 'Yellow (PGSD)' },
   ] },
 ];
 
@@ -92,6 +96,11 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
             { value: 'magenta', label: 'Magenta (Study)' },
             { value: 'blue', label: 'Blue (Partner)' },
             { value: 'amber', label: 'Amber (Go Abroad)' },
+            { value: 'cyan', label: 'Cyan' },
+            { value: 'red', label: 'Red (Sipil & Ars)' },
+            { value: 'orange', label: 'Orange (FTI)' },
+            { value: 'green', label: 'Green (SBM)' },
+            { value: 'yellow', label: 'Yellow (PGSD)' },
           ] },
           { key: 'title', label: 'Title', type: 'text', localized: true },
           { key: 'blurb', label: 'Blurb', type: 'text', localized: true },

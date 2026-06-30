@@ -7,6 +7,10 @@ const ACCENT_TEXT: Record<string, string> = {
   amber: 'text-amber',
   cyan: 'text-cyan',
   blue: 'text-blue',
+  red: 'text-red',
+  orange: 'text-orange',
+  green: 'text-green',
+  yellow: 'text-yellow',
 };
 
 /** Structural breather between blocks — blank space, a hairline, or dots. */

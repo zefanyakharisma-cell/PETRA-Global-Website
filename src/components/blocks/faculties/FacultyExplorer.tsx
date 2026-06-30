@@ -43,6 +43,10 @@ const ACCENT: Record<string, Accent> = {
   blue: { bar: 'bg-blue', ring: 'hover:border-blue/60', chip: 'bg-blue text-white', dot: 'text-blue' },
   amber: { bar: 'bg-amber', ring: 'hover:border-amber/60', chip: 'bg-amber text-ink', dot: 'text-amber' },
   cyan: { bar: 'bg-cyan', ring: 'hover:border-cyan/60', chip: 'bg-cyan text-ink', dot: 'text-ink' },
+  red: { bar: 'bg-red', ring: 'hover:border-red/60', chip: 'bg-red text-white', dot: 'text-red' },
+  orange: { bar: 'bg-orange', ring: 'hover:border-orange/60', chip: 'bg-orange text-white', dot: 'text-orange' },
+  green: { bar: 'bg-green', ring: 'hover:border-green/60', chip: 'bg-green text-ink', dot: 'text-green' },
+  yellow: { bar: 'bg-yellow', ring: 'hover:border-yellow/60', chip: 'bg-yellow text-ink', dot: 'text-ink' },
 };
 
 const LABELS = {

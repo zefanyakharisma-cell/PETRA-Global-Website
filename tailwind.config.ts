@@ -16,10 +16,18 @@ const config: Config = {
           DEFAULT: '#133256',
           2: '#245484',
         },
-        magenta: '#ec008c', // STUDY door accent
+        magenta: '#ec008c', // STUDY door accent / FHIK faculty
         amber: '#ffbc00', // GO ABROAD door accent (dark text on it)
         cyan: '#54feeb', // accent (dark text on it)
         blue: '#3880d0', // PARTNER door accent (pairs with navy)
+
+        // Faculty (FAKULTAS) accents. Red/orange take white text; green/yellow
+        // take dark (ink) text. Kept alongside the brand accents above.
+        red: '#ed1c24', // SIPIL & ARS faculty
+        orange: '#f58220', // FTI faculty
+        green: '#6cb33f', // SBM faculty (dark text on it)
+        yellow: '#fff200', // PGSD faculty (dark text on it)
+
         paper: '#f0f0f0', // light neutral surface
         ink: '#111111', // near-black text/neutral
 

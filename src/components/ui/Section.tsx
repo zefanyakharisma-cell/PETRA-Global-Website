@@ -13,6 +13,10 @@ const ACCENT_TINT: Record<string, string> = {
   amber: 'bg-amber/10',
   cyan: 'bg-cyan/10',
   blue: 'bg-blue/5',
+  red: 'bg-red/5',
+  orange: 'bg-orange/10',
+  green: 'bg-green/10',
+  yellow: 'bg-yellow/10',
 };
 
 const SPACING: Record<string, string> = {

@@ -21,6 +21,10 @@ const ACCENT_BORDER: Record<string, string> = {
   amber: 'border-amber text-amber',
   cyan: 'border-cyan text-cyan',
   blue: 'border-blue text-blue',
+  red: 'border-red text-red',
+  orange: 'border-orange text-orange',
+  green: 'border-green text-green',
+  yellow: 'border-yellow text-yellow',
 };
 
 /** Tabbed content panels — group related copy without a long scroll. */

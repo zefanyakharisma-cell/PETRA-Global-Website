@@ -6,7 +6,7 @@ import { t, type LocaleMap } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
 
 interface Door {
-  accent: 'magenta' | 'blue' | 'amber';
+  accent: string;
   title: LocaleMap;
   blurb?: LocaleMap;
   href: string;
@@ -25,6 +25,11 @@ const ACCENT: Record<string, { ring: string; bar: string; hover: string }> = {
   magenta: { ring: 'hover:border-magenta', bar: 'bg-magenta', hover: 'group-hover:text-magenta' },
   blue: { ring: 'hover:border-blue', bar: 'bg-blue', hover: 'group-hover:text-blue' },
   amber: { ring: 'hover:border-amber', bar: 'bg-amber', hover: 'group-hover:text-amber' },
+  cyan: { ring: 'hover:border-cyan', bar: 'bg-cyan', hover: 'group-hover:text-cyan' },
+  red: { ring: 'hover:border-red', bar: 'bg-red', hover: 'group-hover:text-red' },
+  orange: { ring: 'hover:border-orange', bar: 'bg-orange', hover: 'group-hover:text-orange' },
+  green: { ring: 'hover:border-green', bar: 'bg-green', hover: 'group-hover:text-green' },
+  yellow: { ring: 'hover:border-yellow', bar: 'bg-yellow', hover: 'group-hover:text-yellow' },
 };
 
 export function AudienceDoorsBlock({ block, locale }: BlockComponentProps) {

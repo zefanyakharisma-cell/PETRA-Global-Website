@@ -131,7 +131,7 @@ export const ENTITY_CONFIG: Record<EntityTable, EntityConfig> = {
       { key: 'url', label: 'Faculty website', kind: 'url' },
       { key: 'logo_url', label: 'Logo URL', kind: 'url' },
       { key: 'cover_url', label: 'Cover image URL', kind: 'url' },
-      { key: 'accent', label: 'Accent', kind: 'select', options: ['magenta', 'blue', 'amber', 'cyan'] },
+      { key: 'accent', label: 'Accent', kind: 'select', options: ['magenta', 'blue', 'amber', 'cyan', 'red', 'orange', 'green', 'yellow'] },
       { key: 'position', label: 'Order', kind: 'number' },
       { key: 'is_active', label: 'Active', kind: 'bool' },
     ],

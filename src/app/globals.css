@@ -58,6 +58,11 @@
   --amber: #ffbc00;
   --cyan: #54feeb;
   --blue: #3880d0;
+  /* Faculty (FAKULTAS) accents — mirrored in tailwind.config.ts. */
+  --red: #ed1c24;
+  --orange: #f58220;
+  --green: #6cb33f;
+  --yellow: #fff200;
   --paper: #f0f0f0;
   --ink: #111111;
 

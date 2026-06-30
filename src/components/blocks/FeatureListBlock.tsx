@@ -36,6 +36,10 @@ const ACCENT_TEXT: Record<string, string> = {
   amber: 'text-amber',
   cyan: 'text-cyan',
   blue: 'text-blue',
+  red: 'text-red',
+  orange: 'text-orange',
+  green: 'text-green',
+  yellow: 'text-yellow',
 };
 
 /** Grid of icon + title + blurb features (benefits, services, highlights). */
