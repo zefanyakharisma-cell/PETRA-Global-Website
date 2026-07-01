@@ -24,28 +24,33 @@ import {
   deleteBlock,
   duplicateBlock,
   reorderBlocks,
-  setPageStatus,
+  setOwnerPublished,
+  type BlockOwner,
 } from '@/app/admin/actions/cms';
-import type { Block, BlockType, PageStatus } from '@/lib/types';
+import type { Block, BlockType } from '@/lib/types';
 
 type Dict = Record<string, unknown>;
 type SaveState = 'idle' | 'dirty' | 'saving' | 'saved';
 
 export function Editor({
-  pageId,
+  owner,
   slug,
   initialBlocks,
-  initialStatus,
+  initialPublished,
   entities,
 }: {
-  pageId: string;
+  owner: BlockOwner;
   slug: string;
   initialBlocks: Block[];
-  initialStatus: PageStatus;
+  initialPublished: boolean;
   entities: EntityOptions;
 }) {
+  // Public path differs by owner: pages live at /<slug>, news at /news/<slug>.
+  const publicPath = owner.kind === 'news' ? `news/${slug}` : slug;
+  const previewPath = owner.kind === 'news' ? `news/${slug}` : slug;
+
   const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
-  const [status, setStatus] = useState<PageStatus>(initialStatus);
+  const [published, setPublished] = useState<boolean>(initialPublished);
   const [selectedId, setSelectedId] = useState<string | null>(initialBlocks[0]?.id ?? null);
   const [locale, setLocale] = useState<'en' | 'id'>('en');
   const [previewKey, setPreviewKey] = useState(0);
@@ -71,7 +76,7 @@ export function Editor({
     pendingRef.current = null;
     setSaveState('saving');
     startTransition(async () => {
-      await updateBlock(p.id, slug, { config: p.config, content: p.content });
+      await updateBlock(p.id, owner, slug, { config: p.config, content: p.content });
       setSaveState('saved');
       if (refresh) reloadPreview();
     });
@@ -99,7 +104,7 @@ export function Editor({
     const next = arrayMove(blocks, oldIndex, newIndex);
     setBlocks(next);
     startTransition(async () => {
-      await reorderBlocks(next.map((b) => b.id), slug);
+      await reorderBlocks(next.map((b) => b.id), owner, slug);
       reloadPreview();
     });
   };
@@ -108,10 +113,11 @@ export function Editor({
     setPicking(false);
     flushSave(false);
     startTransition(async () => {
-      const res = await addBlock(pageId, type, slug);
+      const res = await addBlock(owner, type, slug);
       if (res?.ok && res.id) {
         const def = BLOCK_META[type];
-        const nb: Block = { id: res.id, page_id: pageId, type, position: blocks.length, config: def.defaultConfig, content: def.defaultContent };
+        const ownerRef = owner.kind === 'news' ? { news_id: owner.id } : { page_id: owner.id };
+        const nb: Block = { id: res.id, ...ownerRef, type, position: blocks.length, config: def.defaultConfig, content: def.defaultContent };
         setBlocks((prev) => [...prev, nb]);
         setSelectedId(res.id);
         reloadPreview();
@@ -125,11 +131,11 @@ export function Editor({
     scheduleSave(selected.id, next.config, next.content);
   };
 
-  const onDuplicate = (id: string) => { flushSave(false); startTransition(async () => { await duplicateBlock(id, slug); location.reload(); }); };
+  const onDuplicate = (id: string) => { flushSave(false); startTransition(async () => { await duplicateBlock(id, owner, slug); location.reload(); }); };
   const onDelete = (id: string) => {
     if (pendingRef.current?.id === id) pendingRef.current = null;
     startTransition(async () => {
-      await deleteBlock(id, slug);
+      await deleteBlock(id, owner, slug);
       setBlocks((prev) => prev.filter((b) => b.id !== id));
       if (selectedId === id) setSelectedId(null);
       reloadPreview();
@@ -137,9 +143,9 @@ export function Editor({
   };
 
   const togglePublish = () => {
-    const next: PageStatus = status === 'published' ? 'draft' : 'published';
-    setStatus(next);
-    startTransition(async () => { await setPageStatus(pageId, next, slug); });
+    const next = !published;
+    setPublished(next);
+    startTransition(async () => { await setOwnerPublished(owner, next, slug); });
   };
 
   const saveLabel =
@@ -153,7 +159,7 @@ export function Editor({
       <div className="flex items-center justify-between gap-3 border-b border-ink/10 bg-white px-4 py-2">
         <div className="flex items-center gap-2">
           <span className="font-condensed uppercase tracking-wide text-ink/60">Editing</span>
-          <span className="font-medium">/{slug}</span>
+          <span className="font-medium">/{publicPath}</span>
           {saveLabel && <span className="text-xs text-ink/40">{saveLabel}</span>}
         </div>
         <div className="flex items-center gap-2">
@@ -164,10 +170,10 @@ export function Editor({
               </button>
             ))}
           </div>
-          <button onClick={togglePublish} className={'rounded-md px-4 py-1.5 text-sm font-medium ' + (status === 'published' ? 'bg-green-600 text-white' : 'bg-amber text-ink')}>
-            {status === 'published' ? 'Published' : 'Publish'}
+          <button onClick={togglePublish} className={'rounded-md px-4 py-1.5 text-sm font-medium ' + (published ? 'bg-green-600 text-white' : 'bg-amber text-ink')}>
+            {published ? 'Published' : 'Publish'}
           </button>
-          <a href={`/${locale}/${slug}`} target="_blank" rel="noreferrer" className="rounded-md border border-ink/20 px-3 py-1.5 text-sm">View live ↗</a>
+          <a href={`/${locale}/${publicPath}`} target="_blank" rel="noreferrer" className="rounded-md border border-ink/20 px-3 py-1.5 text-sm">View live ↗</a>
         </div>
       </div>
 
@@ -197,7 +203,7 @@ export function Editor({
 
         {/* Live preview (real components, draft state) */}
         <div className="overflow-hidden bg-ink/5">
-          <iframe key={previewKey} src={`/editor-preview/${slug}?locale=${locale}`} className="h-full w-full border-0" title="Live preview" />
+          <iframe key={previewKey} src={`/editor-preview/${previewPath}?locale=${locale}`} className="h-full w-full border-0" title="Live preview" />
         </div>
 
         {/* Side panel */}

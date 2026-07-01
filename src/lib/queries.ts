@@ -1,10 +1,37 @@
 import { createClient } from '@/lib/supabase/server';
-import type { Block, NavSection, PageRecord } from '@/lib/types';
+import type { Block, NavSection, NewsRecord, PageRecord } from '@/lib/types';
 
 /** A published page plus its ordered blocks. */
 export interface PageWithBlocks {
   page: PageRecord;
   blocks: Block[];
+}
+
+/** A published news article plus its ordered blocks. */
+export interface NewsWithBlocks {
+  article: NewsRecord;
+  blocks: Block[];
+}
+
+export async function getNewsBySlug(slug: string): Promise<NewsWithBlocks | null> {
+  const supabase = await createClient();
+  const { data: article } = await supabase
+    .from('news')
+    .select('*')
+    .eq('slug', slug)
+    .not('published_at', 'is', null)
+    .lte('published_at', new Date().toISOString())
+    .maybeSingle();
+
+  if (!article) return null;
+
+  const { data: blocks } = await supabase
+    .from('blocks')
+    .select('*')
+    .eq('news_id', article.id)
+    .order('position');
+
+  return { article: article as NewsRecord, blocks: (blocks ?? []) as Block[] };
 }
 
 export async function getPageBySlug(slug: string): Promise<PageWithBlocks | null> {

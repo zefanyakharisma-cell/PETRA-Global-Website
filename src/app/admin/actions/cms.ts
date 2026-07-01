@@ -14,6 +14,27 @@ function revalidatePublic(slug?: string) {
   }
 }
 
+/** Refresh public ISR for a news article (both locales) plus the home/feeds. */
+function revalidateNews(slug?: string) {
+  revalidatePath('/', 'layout');
+  if (slug) {
+    revalidatePath(`/en/news/${slug}`);
+    revalidatePath(`/id/news/${slug}`);
+  }
+}
+
+/** A block belongs to exactly one owner — a page or a news article. */
+export type BlockOwner = { kind: 'page' | 'news'; id: string };
+
+function ownerColumn(owner: BlockOwner) {
+  return owner.kind === 'news' ? 'news_id' : 'page_id';
+}
+
+function revalidateOwner(owner: BlockOwner, slug: string) {
+  if (owner.kind === 'news') revalidateNews(slug);
+  else revalidatePublic(slug);
+}
+
 // ---- Pages -----------------------------------------------------------------
 export async function createPage(formData: FormData) {
   const supabase = await createClient();
@@ -115,15 +136,89 @@ export async function reorderPages(items: { id: string; nav_order: number }[]) {
   revalidatePublic(); // refresh the auto-built navigation
 }
 
+// ---- News ------------------------------------------------------------------
+export async function createNews(formData: FormData) {
+  const supabase = await createClient();
+  const slug = String(formData.get('slug') ?? '').trim();
+  const titleEn = String(formData.get('title_en') ?? '');
+  const titleId = String(formData.get('title_id') ?? '');
+
+  const { error } = await supabase.from('news').insert({
+    slug,
+    title: { en: titleEn, id: titleId },
+    published_at: null, // starts as a draft until published from the editor/list
+  } as never);
+  if (error) {
+    if (error.code === '23505') return { error: 'That slug is already in use.' };
+    return { error: error.message };
+  }
+  revalidatePath('/admin/news');
+  revalidateNews(slug);
+  return { ok: true };
+}
+
+/**
+ * Flexible news edit used by the News admin: slug, title, tags, cover and
+ * publish date in one call. `oldSlug` lets us revalidate the public route when
+ * the slug changes. Returns `{ error }` so the UI can surface conflicts inline.
+ */
+export async function updateNews(
+  id: string,
+  oldSlug: string,
+  patch: {
+    slug?: string;
+    title?: LocaleMap;
+    tags?: string[];
+    cover_url?: string | null;
+    published_at?: string | null;
+  },
+) {
+  const supabase = await createClient();
+
+  const update: Record<string, unknown> = {};
+  if (patch.title !== undefined) update.title = patch.title;
+  if (patch.tags !== undefined) update.tags = patch.tags;
+  if (patch.cover_url !== undefined) update.cover_url = patch.cover_url || null;
+  if (patch.published_at !== undefined) update.published_at = patch.published_at;
+
+  let newSlug: string | undefined;
+  if (patch.slug !== undefined) {
+    newSlug = patch.slug.trim();
+    if (!newSlug) return { error: 'Slug cannot be empty.' };
+    update.slug = newSlug;
+  }
+
+  if (Object.keys(update).length === 0) return { ok: true };
+
+  const { error } = await supabase.from('news').update(update as never).eq('id', id);
+  if (error) {
+    if (error.code === '23505') return { error: 'That slug is already in use.' };
+    return { error: error.message };
+  }
+
+  revalidatePath('/admin/news');
+  revalidateNews(oldSlug);
+  if (newSlug && newSlug !== oldSlug) revalidateNews(newSlug);
+  return { ok: true };
+}
+
+export async function deleteNews(id: string, slug: string) {
+  const supabase = await createClient();
+  await supabase.from('news').delete().eq('id', id); // blocks cascade
+  revalidatePath('/admin/news');
+  revalidateNews(slug);
+}
+
 // ---- Blocks (live editor) --------------------------------------------------
-export async function addBlock(pageId: string, type: BlockType, slug: string) {
+export async function addBlock(owner: BlockOwner, type: BlockType, slug: string) {
   const supabase = await createClient();
   const def = BLOCK_META[type];
+  const col = ownerColumn(owner);
 
   const { data: last } = await supabase
     .from('blocks')
     .select('position')
-    .eq('page_id', pageId)
+    .eq(col, owner.id)
     .order('position', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -131,49 +226,72 @@ export async function addBlock(pageId: string, type: BlockType, slug: string) {
 
   const { data, error } = await supabase
     .from('blocks')
-    .insert({ page_id: pageId, type, position, config: def.defaultConfig, content: def.defaultContent } as never)
+    .insert({ [col]: owner.id, type, position, config: def.defaultConfig, content: def.defaultContent } as never)
     .select('id')
     .single();
   if (error) return { error: error.message };
-  revalidatePublic(slug);
+  revalidateOwner(owner, slug);
   return { ok: true, id: data?.id };
 }
 
 export async function updateBlock(
   id: string,
+  owner: BlockOwner,
   slug: string,
   patch: { config?: Record<string, unknown>; content?: Record<string, unknown> },
 ) {
   const supabase = await createClient();
   await supabase.from('blocks').update(patch as never).eq('id', id);
-  revalidatePublic(slug);
+  revalidateOwner(owner, slug);
 }
 
-export async function deleteBlock(id: string, slug: string) {
+export async function deleteBlock(id: string, owner: BlockOwner, slug: string) {
   const supabase = await createClient();
   await supabase.from('blocks').delete().eq('id', id);
-  revalidatePublic(slug);
+  revalidateOwner(owner, slug);
 }
 
-export async function duplicateBlock(id: string, slug: string) {
+export async function duplicateBlock(id: string, owner: BlockOwner, slug: string) {
   const supabase = await createClient();
   const { data: src } = await supabase.from('blocks').select('*').eq('id', id).single();
   if (!src) return;
   await supabase.from('blocks').insert({
     page_id: src.page_id,
+    news_id: src.news_id,
     type: src.type as BlockType,
     position: src.position + 1,
     config: src.config,
     content: src.content,
   } as never);
-  revalidatePublic(slug);
+  revalidateOwner(owner, slug);
 }
 
 /** Persist a new ordering (array of block ids in display order). */
-export async function reorderBlocks(ids: string[], slug: string) {
+export async function reorderBlocks(ids: string[], owner: BlockOwner, slug: string) {
   const supabase = await createClient();
   await Promise.all(
     ids.map((id, index) => supabase.from('blocks').update({ position: index }).eq('id', id)),
   );
-  revalidatePublic(slug);
+  revalidateOwner(owner, slug);
+}
+
+/**
+ * Toggle an owner's published state from the editor. Pages carry a `status`
+ * enum; news uses `published_at` (set → published, null → draft).
+ */
+export async function setOwnerPublished(owner: BlockOwner, published: boolean, slug: string) {
+  const supabase = await createClient();
+  if (owner.kind === 'news') {
+    await supabase
+      .from('news')
+      .update({ published_at: published ? new Date().toISOString() : null } as never)
+      .eq('id', owner.id);
+    revalidateNews(slug);
+  } else {
+    await supabase
+      .from('pages')
+      .update({ status: published ? 'published' : 'draft' })
+      .eq('id', owner.id);
+    revalidatePublic(slug);
+  }
 }

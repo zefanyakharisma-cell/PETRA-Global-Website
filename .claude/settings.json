@@ -78,7 +78,10 @@
       "Bash(npx eslint *)",
       "PowerShell(npx tsc --noEmit 2>&1)",
       "PowerShell(npx eslint src/components/blocks/CardGridBlock.tsx src/components/blocks/CardGridCard.tsx src/components/blocks/registry.meta.ts 2>&1)",
-      "Bash(node -e \"const l=require\\('e:/PETRA-Global-Website/node_modules/lucide-react'\\); console.log\\('GripVertical' in l, 'version exports count', Object.keys\\(l\\).length\\)\")"
+      "Bash(node -e \"const l=require\\('e:/PETRA-Global-Website/node_modules/lucide-react'\\); console.log\\('GripVertical' in l, 'version exports count', Object.keys\\(l\\).length\\)\")",
+      "Bash(grep -iA40 \"news\\\\|blocks\\\\|pages\")",
+      "Bash(grep -n -iA10 \"admin write blocks\\\\|authenticated.*blocks\\\\|for all to authenticated\" supabase/migrations/0001_petra_io_schema.sql)",
+      "Bash(C-c)"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",

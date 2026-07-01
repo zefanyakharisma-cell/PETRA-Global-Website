@@ -48,11 +48,25 @@ export interface BlockBaseConfig {
 
 export interface Block {
   id: string;
-  page_id: string;
+  /** A block belongs to exactly one owner: a page or a news article. */
+  page_id?: string | null;
+  news_id?: string | null;
   type: BlockType;
   position: number;
   config: BlockBaseConfig;
   content: Record<string, unknown>;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface NewsRecord {
+  id: string;
+  slug: string;
+  title: LocaleMap;
+  body: LocaleMap;
+  tags: string[];
+  published_at: string | null;
+  cover_url: string | null;
   created_at?: string;
   updated_at?: string;
 }

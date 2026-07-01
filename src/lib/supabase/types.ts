@@ -149,7 +149,8 @@ export type PageRow = Timestamps & {
 
 export type BlockRow = Timestamps & {
   id: string;
-  page_id: string;
+  page_id: string | null;
+  news_id: string | null;
   type: string;
   position: number;
   config: Json;
@@ -180,7 +181,7 @@ export interface Database {
       courses: TableShape<CourseRow>;
       inquiries: TableShape<InquiryRow, 'kind' | 'payload'>;
       pages: TableShape<PageRow, 'slug'>;
-      blocks: TableShape<BlockRow, 'page_id' | 'type' | 'position'>;
+      blocks: TableShape<BlockRow, 'type' | 'position'>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
