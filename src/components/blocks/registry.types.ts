@@ -46,8 +46,16 @@ export interface BlockComponentProps {
   pageOwnerStaffId?: string | null;
 }
 
+/**
+ * Optional conditional visibility. When present, the field only renders in the
+ * side panel while `config[field]` equals one of `equals` — this is what lets a
+ * single block (e.g. Hero) present a *different* set of options per layout.
+ * Kept declarative (data, not a function) so the schema stays serialisable.
+ */
+export type FieldVisibility = { showFor?: { field: string; equals: string[] } };
+
 /** A single editable field in the live-editor side panel. */
-export type EditorField =
+export type EditorField = FieldVisibility & (
   | { key: string; label: string; type: 'text' | 'textarea'; localized?: boolean; help?: string }
   | { key: string; label: string; type: 'richtext'; localized?: boolean }
   | { key: string; label: string; type: 'image' }
@@ -59,7 +67,8 @@ export type EditorField =
   | { key: string; label: string; type: 'boolean' }
   | { key: string; label: string; type: 'select'; options: { value: string; label: string }[]; default?: string; help?: string }
   | { key: string; label: string; type: 'entity'; entity: 'staff' | 'programs'; help?: string }
-  | { key: string; label: string; type: 'list'; itemFields: EditorField[] };
+  | { key: string; label: string; type: 'list'; itemFields: EditorField[] }
+);
 
 export interface EditorSchema {
   /** Fields bound to block.config (layout/source options). */

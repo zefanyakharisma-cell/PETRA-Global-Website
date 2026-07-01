@@ -34,18 +34,29 @@ export function BlockForm({
   const setConfig = (key: string, value: unknown) => onChange({ config: { ...config, [key]: value }, content });
   const setContent = (key: string, value: unknown) => onChange({ config, content: { ...content, [key]: value } });
 
+  // A field may declare `showFor` to appear only for certain sibling values
+  // (e.g. the Hero's scroll-expand fields show only when layout = scroll-expand).
+  // The controlling value always lives in `config`, so evaluate against it.
+  const visible = (f: EditorField) => {
+    if (!f.showFor) return true;
+    return f.showFor.equals.includes(String(config[f.showFor.field] ?? ''));
+  };
+
+  const configFields = schema.config.filter(visible);
+  const contentFields = schema.content.filter(visible);
+
   return (
     <div className="space-y-5">
-      {schema.config.length > 0 && (
+      {configFields.length > 0 && (
         <Group title="Options">
-          {schema.config.map((f) => (
+          {configFields.map((f) => (
             <FieldEditor key={f.key} field={f} value={config[f.key]} entities={entities} onChange={(v) => setConfig(f.key, v)} />
           ))}
         </Group>
       )}
-      {schema.content.length > 0 && (
+      {contentFields.length > 0 && (
         <Group title="Content">
-          {schema.content.map((f) => (
+          {contentFields.map((f) => (
             <FieldEditor key={f.key} field={f} value={content[f.key]} entities={entities} onChange={(v) => setContent(f.key, v)} />
           ))}
         </Group>

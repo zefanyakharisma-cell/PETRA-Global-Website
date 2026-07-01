@@ -8,6 +8,7 @@ import { t, type LocaleMap, type Locale } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
 import { HeroCarousel, type HeroSlide } from './HeroCarousel';
 import ScrollExpandHero from './ScrollExpandHero';
+import { normalizeImageUrl } from '@/lib/media';
 
 interface HeroContent {
   eyebrow?: LocaleMap;
@@ -17,6 +18,7 @@ interface HeroContent {
   ctas?: { label: LocaleMap; href: string; variant?: 'magenta' | 'amber' | 'blue' | 'navy' | 'outline'; newTab?: boolean }[];
   // Scroll-to-expand layout fields.
   scrollVideoUrl?: string;
+  scrollBgImage?: string;
   scrollMediaImage?: string;
   scrollCaption?: LocaleMap;
 }
@@ -63,7 +65,9 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
         mediaType={(block.config.scrollMediaType as 'video' | 'image') ?? 'video'}
         videoUrl={c.scrollVideoUrl}
         posterUrl={c.scrollMediaImage}
-        bgImageUrl={c.image_url}
+        // Accept a Google Drive share link for the backdrop; normalizeImageUrl
+        // routes it through our /api/media proxy (idempotent for other URLs).
+        bgImageUrl={c.scrollBgImage ? normalizeImageUrl(c.scrollBgImage) : undefined}
         title={t(c.heading, locale) || 'Headline'}
         date={t(c.eyebrow, locale)}
         scrollToExpand={t(c.scrollCaption, locale) || (locale === 'id' ? 'Gulir untuk memperbesar' : 'Scroll to expand')}
