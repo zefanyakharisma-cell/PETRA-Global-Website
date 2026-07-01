@@ -51,7 +51,7 @@ export type EditorField =
   | { key: string; label: string; type: 'text' | 'textarea'; localized?: boolean; help?: string }
   | { key: string; label: string; type: 'richtext'; localized?: boolean }
   | { key: string; label: string; type: 'image' }
-  | { key: string; label: string; type: 'url' }
+  | { key: string; label: string; type: 'url'; help?: string }
   | { key: string; label: string; type: 'link'; help?: string }
   | { key: string; label: string; type: 'file'; help?: string }
   | { key: string; label: string; type: 'date'; help?: string }

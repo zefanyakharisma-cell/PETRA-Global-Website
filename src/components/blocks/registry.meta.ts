@@ -63,6 +63,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           { value: 'centered', label: 'Centered' },
           { value: 'left', label: 'Left' },
           { value: 'split-with-image', label: 'Split with image' },
+          { value: 'scroll-expand', label: 'Scroll-to-expand media (immersive)' },
         ] },
         { key: 'bgType', label: 'Background (centered/left)', type: 'select', options: [
           { value: 'none', label: 'Solid colour' },
@@ -73,14 +74,27 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           { value: 'programs', label: 'Programs (featured first)' },
           { value: 'news', label: 'News & announcements' },
         ] },
+        // Scroll-to-expand layout options (ignored by the other layouts).
+        { key: 'scrollMediaType', label: 'Scroll-expand: media type', type: 'select', default: 'video',
+          help: 'Only used by the “Scroll-to-expand media” layout.',
+          options: [
+            { value: 'video', label: 'Video (YouTube / Google Drive / .mp4)' },
+            { value: 'image', label: 'Image' },
+          ] },
+        { key: 'scrollTextBlend', label: 'Scroll-expand: blend title with background', type: 'boolean' },
         ...UNIVERSAL,
       ],
       content: [
         { key: 'eyebrow', label: 'Eyebrow', type: 'text', localized: true },
         { key: 'heading', label: 'Headline', type: 'text', localized: true },
         { key: 'subcopy', label: 'Subcopy', type: 'textarea', localized: true },
-        { key: 'image_url', label: 'Background image (“Uploaded image”) / split image', type: 'image' },
+        { key: 'image_url', label: 'Background image (“Uploaded image” / split / scroll-expand backdrop)', type: 'image' },
         { key: 'ctas', label: 'Buttons (max 2)', type: 'list', itemFields: BUTTON_FIELDS },
+        // Scroll-to-expand layout fields.
+        { key: 'scrollVideoUrl', label: 'Scroll-expand: video URL', type: 'url',
+          help: 'YouTube, Google Drive share link, or a direct .mp4 URL. Used when media type is “Video”.' },
+        { key: 'scrollMediaImage', label: 'Scroll-expand: media image / video poster', type: 'image' },
+        { key: 'scrollCaption', label: 'Scroll-expand: caption (e.g. “Scroll to explore”)', type: 'text', localized: true },
       ],
     },
   },

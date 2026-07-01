@@ -7,6 +7,7 @@ import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap, type Locale } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
 import { HeroCarousel, type HeroSlide } from './HeroCarousel';
+import ScrollExpandHero from './ScrollExpandHero';
 
 interface HeroContent {
   eyebrow?: LocaleMap;
@@ -14,6 +15,10 @@ interface HeroContent {
   subcopy?: LocaleMap;
   image_url?: string;
   ctas?: { label: LocaleMap; href: string; variant?: 'magenta' | 'amber' | 'blue' | 'navy' | 'outline'; newTab?: boolean }[];
+  // Scroll-to-expand layout fields.
+  scrollVideoUrl?: string;
+  scrollMediaImage?: string;
+  scrollCaption?: LocaleMap;
 }
 
 /** Resolve cover images for the carousel background from a chosen entity source. */
@@ -48,6 +53,25 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as HeroContent;
   const layout = (block.config.layout as string) ?? 'centered';
   const split = layout === 'split-with-image';
+
+  // Immersive scroll-to-expand hero. Renders its own full-height, full-bleed
+  // layout (a client component managing the scroll interaction), so we resolve
+  // the localized copy here and return before the standard hero markup.
+  if (layout === 'scroll-expand') {
+    return (
+      <ScrollExpandHero
+        mediaType={(block.config.scrollMediaType as 'video' | 'image') ?? 'video'}
+        videoUrl={c.scrollVideoUrl}
+        posterUrl={c.scrollMediaImage}
+        bgImageUrl={c.image_url}
+        title={t(c.heading, locale) || 'Headline'}
+        date={t(c.eyebrow, locale)}
+        scrollToExpand={t(c.scrollCaption, locale) || (locale === 'id' ? 'Gulir untuk memperbesar' : 'Scroll to expand')}
+        textBlend={!!block.config.scrollTextBlend}
+        overview={t(c.subcopy, locale)}
+      />
+    );
+  }
 
   // Background mode. Back-compat: when `bgType` is unset, fall back to the
   // single uploaded image if one exists (the pre-carousel behaviour).
