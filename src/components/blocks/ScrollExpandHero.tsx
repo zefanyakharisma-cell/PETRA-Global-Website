@@ -46,16 +46,19 @@ export default function ScrollExpandHero({
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showContent, setShowContent] = useState(false);
   const [mediaFullyExpanded, setMediaFullyExpanded] = useState(false);
-  const [touchStartY, setTouchStartY] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [viewport, setViewport] = useState<{ w: number; h: number }>(() =>
-    typeof window !== 'undefined'
-      ? { w: window.innerWidth, h: window.innerHeight }
-      : { w: 1920, h: 1080 },
-  );
+  // SSR-safe default so server and first client render agree (no hydration
+  // mismatch on the iframe's inline size); the resize effect sets real values.
+  const [viewport, setViewport] = useState({ w: 1920, h: 1080 });
 
-  const sectionRef = useRef<HTMLDivElement | null>(null);
   const video = resolveAutoplayVideo(videoUrl);
+
+  // Refs mirror the interactive state so the window listeners can read the
+  // latest values while being bound only once (binding them per-frame thrashes
+  // add/removeEventListener and causes scroll jank).
+  const progressRef = useRef(0);
+  const expandedRef = useRef(false);
+  const touchStartRef = useRef(0);
 
   // Reduced motion: skip the scroll takeover entirely — show it expanded.
   useEffect(() => {
@@ -69,56 +72,61 @@ export default function ScrollExpandHero({
   useEffect(() => {
     if (reduce) return;
 
+    const applyProgress = (next: number) => {
+      const clamped = Math.min(Math.max(next, 0), 1);
+      progressRef.current = clamped;
+      setScrollProgress(clamped);
+      if (clamped >= 1) {
+        expandedRef.current = true;
+        setMediaFullyExpanded(true);
+        setShowContent(true);
+      } else if (clamped < 0.75) {
+        setShowContent(false);
+      }
+    };
+
+    const collapse = () => {
+      expandedRef.current = false;
+      setMediaFullyExpanded(false);
+    };
+
     const handleWheel = (e: WheelEvent) => {
-      if (mediaFullyExpanded && e.deltaY < 0 && window.scrollY <= 5) {
-        setMediaFullyExpanded(false);
+      if (expandedRef.current && e.deltaY < 0 && window.scrollY <= 5) {
+        collapse();
         e.preventDefault();
-      } else if (!mediaFullyExpanded) {
+      } else if (!expandedRef.current) {
         e.preventDefault();
-        const scrollDelta = e.deltaY * 0.0009;
-        const newProgress = Math.min(Math.max(scrollProgress + scrollDelta, 0), 1);
-        setScrollProgress(newProgress);
-        if (newProgress >= 1) {
-          setMediaFullyExpanded(true);
-          setShowContent(true);
-        } else if (newProgress < 0.75) {
-          setShowContent(false);
-        }
+        applyProgress(progressRef.current + e.deltaY * 0.0009);
       }
     };
 
     const handleTouchStart = (e: TouchEvent) => {
-      setTouchStartY(e.touches[0].clientY);
+      touchStartRef.current = e.touches[0].clientY;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!touchStartY) return;
+      if (!touchStartRef.current) return;
       const touchY = e.touches[0].clientY;
-      const deltaY = touchStartY - touchY;
+      const deltaY = touchStartRef.current - touchY;
 
-      if (mediaFullyExpanded && deltaY < -20 && window.scrollY <= 5) {
-        setMediaFullyExpanded(false);
+      if (expandedRef.current && deltaY < -20 && window.scrollY <= 5) {
+        collapse();
         e.preventDefault();
-      } else if (!mediaFullyExpanded) {
+      } else if (!expandedRef.current) {
         e.preventDefault();
-        const scrollFactor = deltaY < 0 ? 0.008 : 0.005;
-        const scrollDelta = deltaY * scrollFactor;
-        const newProgress = Math.min(Math.max(scrollProgress + scrollDelta, 0), 1);
-        setScrollProgress(newProgress);
-        if (newProgress >= 1) {
-          setMediaFullyExpanded(true);
-          setShowContent(true);
-        } else if (newProgress < 0.75) {
-          setShowContent(false);
-        }
-        setTouchStartY(touchY);
+        const factor = deltaY < 0 ? 0.008 : 0.005;
+        applyProgress(progressRef.current + deltaY * factor);
+        touchStartRef.current = touchY;
       }
     };
 
-    const handleTouchEnd = () => setTouchStartY(0);
+    const handleTouchEnd = () => {
+      touchStartRef.current = 0;
+    };
 
+    // While collapsed the hero owns the viewport — keep the page pinned to top.
     const handleScroll = () => {
-      if (!mediaFullyExpanded) window.scrollTo(0, 0);
+      if (!expandedRef.current) window.scrollTo(0, 0);
     };
 
     window.addEventListener('wheel', handleWheel, { passive: false });
@@ -134,7 +142,7 @@ export default function ScrollExpandHero({
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [scrollProgress, mediaFullyExpanded, touchStartY, reduce]);
+  }, [reduce]);
 
   useEffect(() => {
     const check = () => {
@@ -148,7 +156,9 @@ export default function ScrollExpandHero({
 
   const mediaWidth = 300 + scrollProgress * (isMobile ? 650 : 1250);
   const mediaHeight = 400 + scrollProgress * (isMobile ? 200 : 400);
-  const textTranslateX = scrollProgress * (isMobile ? 180 : 150);
+  // Reduced motion renders the expanded state statically, so keep the title
+  // centred (a non-zero translate here would fling it off-screen).
+  const textTranslateX = reduce ? 0 : scrollProgress * (isMobile ? 180 : 150);
 
   // Cover sizing for the YouTube/Drive iframe. An iframe can't use object-fit,
   // so we size it to the smallest 16:9 rectangle that fully covers the viewport
@@ -160,20 +170,22 @@ export default function ScrollExpandHero({
   const coverW = viewportIsWide ? viewport.w : viewport.h * VIDEO_RATIO;
   const coverH = viewportIsWide ? viewport.w / VIDEO_RATIO : viewport.h;
 
-  const firstWord = title ? title.split(' ')[0] : '';
-  const restOfTitle = title ? title.split(' ').slice(1).join(' ') : '';
+  const words = title?.trim() ? title.trim().split(' ') : [];
+  const firstWord = words[0] ?? '';
+  const restOfTitle = words.slice(1).join(' ');
 
   const isIframeVideo =
-    mediaType === 'video' && video && (video.kind === 'youtube' || video.kind === 'drive');
-  const isFileVideo = mediaType === 'video' && video && video.kind === 'file';
+    mediaType === 'video' && video?.kind !== undefined && video.kind !== 'file';
+  const isFileVideo = mediaType === 'video' && video?.kind === 'file';
+  const isImage = !isIframeVideo && !isFileVideo && !!posterUrl;
 
   return (
-    <div ref={sectionRef} className="overflow-x-hidden bg-navy text-white">
+    <div className="overflow-x-hidden bg-navy text-white">
       <section className="relative flex min-h-[100dvh] flex-col items-center justify-start">
         <div className="relative flex min-h-[100dvh] w-full flex-col items-center">
           {bgImageUrl && (
             <motion.div
-              className="absolute inset-0 z-0 h-full"
+              className="absolute inset-0 z-0"
               initial={{ opacity: reduce ? 0 : 1 }}
               animate={{ opacity: 1 - scrollProgress }}
               transition={{ duration: 0.1 }}
@@ -183,7 +195,7 @@ export default function ScrollExpandHero({
               <img
                 src={bgImageUrl}
                 alt=""
-                className="h-screen w-screen object-cover object-center"
+                className="h-full w-full object-cover object-center"
               />
               <div className="absolute inset-0 bg-black/10" />
             </motion.div>
@@ -192,7 +204,7 @@ export default function ScrollExpandHero({
           <div className="container relative z-10 mx-auto flex flex-col items-center justify-start">
             <div className="relative flex h-[100dvh] w-full flex-col items-center justify-center">
               <div
-                className="absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2 rounded-2xl"
+                className="absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl"
                 style={{
                   width: `${mediaWidth}px`,
                   height: `${mediaHeight}px`,
@@ -242,7 +254,7 @@ export default function ScrollExpandHero({
                       transition={{ duration: 0.2 }}
                     />
                   </div>
-                ) : (
+                ) : isImage ? (
                   <div className="relative h-full w-full">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -251,15 +263,18 @@ export default function ScrollExpandHero({
                       className="h-full w-full rounded-xl object-cover"
                     />
                     <motion.div
-                      className="absolute inset-0 rounded-xl bg-black/50"
+                      className="pointer-events-none absolute inset-0 rounded-xl bg-black/50"
                       initial={{ opacity: 0.7 }}
                       animate={{ opacity: 0.7 - scrollProgress * 0.3 }}
                       transition={{ duration: 0.2 }}
                     />
                   </div>
+                ) : (
+                  // No media configured yet — a neutral panel beats a broken <img>.
+                  <div className="h-full w-full rounded-xl bg-gradient-to-br from-navy to-ink" />
                 )}
 
-                <div className="relative z-10 mt-4 flex flex-col items-center text-center">
+                <div className="pointer-events-none relative z-10 mt-4 flex flex-col items-center text-center">
                   {date && (
                     <p
                       className="text-2xl text-cyan"
@@ -279,25 +294,23 @@ export default function ScrollExpandHero({
                 </div>
               </div>
 
-              <div
-                className={clsx(
-                  'relative z-10 flex w-full flex-col items-center justify-center gap-4 text-center',
-                  textBlend ? 'mix-blend-difference' : 'mix-blend-normal',
-                )}
-              >
-                <motion.h1
-                  className="text-4xl font-bold text-white md:text-5xl lg:text-6xl"
-                  style={{ transform: `translateX(-${textTranslateX}vw)` }}
+              {firstWord && (
+                <h1
+                  className={clsx(
+                    'pointer-events-none relative z-10 flex w-full flex-col items-center justify-center gap-2 text-center text-4xl font-bold text-white md:text-5xl lg:text-6xl',
+                    textBlend ? 'mix-blend-difference' : 'mix-blend-normal',
+                  )}
                 >
-                  {firstWord}
-                </motion.h1>
-                <motion.h1
-                  className="text-center text-4xl font-bold text-white md:text-5xl lg:text-6xl"
-                  style={{ transform: `translateX(${textTranslateX}vw)` }}
-                >
-                  {restOfTitle}
-                </motion.h1>
-              </div>
+                  <motion.span style={{ transform: `translateX(-${textTranslateX}vw)` }}>
+                    {firstWord}
+                  </motion.span>
+                  {restOfTitle && (
+                    <motion.span style={{ transform: `translateX(${textTranslateX}vw)` }}>
+                      {restOfTitle}
+                    </motion.span>
+                  )}
+                </h1>
+              )}
             </div>
 
             {overview && (
@@ -306,6 +319,7 @@ export default function ScrollExpandHero({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: showContent ? 1 : 0 }}
                 transition={{ duration: 0.7 }}
+                aria-hidden={!showContent}
               >
                 <div className="mx-auto max-w-4xl">
                   <p className="text-lg text-white/85">{overview}</p>
