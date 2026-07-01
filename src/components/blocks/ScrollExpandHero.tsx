@@ -44,7 +44,6 @@ export default function ScrollExpandHero({
 }: ScrollExpandHeroProps) {
   const reduce = useReducedMotion();
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [showContent, setShowContent] = useState(false);
   const [mediaFullyExpanded, setMediaFullyExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   // SSR-safe default so server and first client render agree (no hydration
@@ -65,7 +64,6 @@ export default function ScrollExpandHero({
     if (reduce) {
       setScrollProgress(1);
       setMediaFullyExpanded(true);
-      setShowContent(true);
     }
   }, [reduce]);
 
@@ -79,9 +77,6 @@ export default function ScrollExpandHero({
       if (clamped >= 1) {
         expandedRef.current = true;
         setMediaFullyExpanded(true);
-        setShowContent(true);
-      } else if (clamped < 0.75) {
-        setShowContent(false);
       }
     };
 
@@ -273,59 +268,57 @@ export default function ScrollExpandHero({
                   // No media configured yet — a neutral panel beats a broken <img>.
                   <div className="h-full w-full rounded-xl bg-gradient-to-br from-navy to-ink" />
                 )}
-
-                <div className="pointer-events-none relative z-10 mt-4 flex flex-col items-center text-center">
-                  {date && (
-                    <p
-                      className="text-2xl text-cyan"
-                      style={{ transform: `translateX(-${textTranslateX}vw)` }}
-                    >
-                      {date}
-                    </p>
-                  )}
-                  {scrollToExpand && (
-                    <p
-                      className="text-center font-medium text-cyan"
-                      style={{ transform: `translateX(${textTranslateX}vw)` }}
-                    >
-                      {scrollToExpand}
-                    </p>
-                  )}
-                </div>
               </div>
 
-              {firstWord && (
-                <h1
-                  className={clsx(
-                    'pointer-events-none relative z-10 flex w-full flex-col items-center justify-center gap-2 text-center text-4xl font-bold text-white md:text-5xl lg:text-6xl',
-                    textBlend ? 'mix-blend-difference' : 'mix-blend-normal',
-                  )}
-                >
-                  <motion.span style={{ transform: `translateX(-${textTranslateX}vw)` }}>
-                    {firstWord}
-                  </motion.span>
-                  {restOfTitle && (
-                    <motion.span style={{ transform: `translateX(${textTranslateX}vw)` }}>
-                      {restOfTitle}
-                    </motion.span>
-                  )}
-                </h1>
-              )}
-            </div>
+              {/* Eyebrow → Header → Sub-header as one centred stack over the media.
+                  The header keeps its split fling-apart animation; the eyebrow and
+                  sub-header stay centred so they remain readable. Every element
+                  carries a text-shadow so the copy stays legible over any video —
+                  bright, busy, or light-coloured footage included. */}
+              <div className="pointer-events-none relative z-10 flex w-full max-w-4xl flex-col items-center gap-4 px-4 text-center">
+                {date && (
+                  <p className="font-condensed text-sm uppercase tracking-[0.25em] text-cyan drop-shadow-[0_2px_10px_rgba(0,0,0,0.75)] md:text-base">
+                    {date}
+                  </p>
+                )}
 
-            {overview && (
-              <motion.section
-                className="flex w-full flex-col px-8 py-10 md:px-16 lg:py-20"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: showContent ? 1 : 0 }}
-                transition={{ duration: 0.7 }}
-                aria-hidden={!showContent}
-              >
-                <div className="mx-auto max-w-4xl">
-                  <p className="text-lg text-white/85">{overview}</p>
-                </div>
-              </motion.section>
-            )}
+                {firstWord && (
+                  <h1
+                    className={clsx(
+                      'flex w-full flex-col items-center justify-center gap-2 text-4xl font-bold text-white md:text-5xl lg:text-6xl',
+                      textBlend
+                        ? 'mix-blend-difference'
+                        : 'mix-blend-normal drop-shadow-[0_4px_24px_rgba(0,0,0,0.7)]',
+                    )}
+                  >
+                    <motion.span style={{ transform: `translateX(-${textTranslateX}vw)` }}>
+                      {firstWord}
+                    </motion.span>
+                    {restOfTitle && (
+                      <motion.span style={{ transform: `translateX(${textTranslateX}vw)` }}>
+                        {restOfTitle}
+                      </motion.span>
+                    )}
+                  </h1>
+                )}
+
+                {overview && (
+                  <p className="max-w-2xl font-body text-base text-white/90 drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] md:text-lg">
+                    {overview}
+                  </p>
+                )}
+
+                {scrollToExpand && (
+                  <motion.p
+                    className="mt-2 text-sm font-medium text-cyan drop-shadow-[0_2px_10px_rgba(0,0,0,0.75)]"
+                    animate={{ opacity: mediaFullyExpanded ? 0 : 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {scrollToExpand}
+                  </motion.p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </section>
