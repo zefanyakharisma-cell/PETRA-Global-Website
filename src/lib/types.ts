@@ -43,6 +43,8 @@ export interface BlockBaseConfig {
   spacing?: BlockSpacing;
   /** Which accent tints/punctuates this section (one-per-section discipline). */
   accent?: 'magenta' | 'amber' | 'cyan' | 'blue';
+  /** Bento grid size `WxH` — columns spanned (1–4) × height units (1–4). Default `4x1`. */
+  size?: string;
   [key: string]: unknown;
 }
 

@@ -144,7 +144,7 @@ function FieldEditor({
     case 'select':
       return (
         <label className="block">{label}
-          <select className={input} value={(value as string) ?? ''} onChange={(e) => onChange(e.target.value)}>
+          <select className={input} value={(value as string) ?? field.default ?? ''} onChange={(e) => onChange(e.target.value)}>
             {field.options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
           {help}
