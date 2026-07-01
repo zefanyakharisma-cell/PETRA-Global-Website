@@ -33,7 +33,7 @@ export function SearchTrigger() {
         type="button"
         aria-label={t('label')}
         onClick={() => setOpen(true)}
-        className="rounded-md border border-white/20 px-2.5 py-1 text-white/80 hover:text-white"
+        className="rounded-md border border-white/20 px-2.5 py-1 text-white/80 transition-colors duration-200 hover:border-white/40 hover:bg-white/10 hover:text-white"
       >
         <span aria-hidden>⌕</span>
       </button>
@@ -82,32 +82,49 @@ function SearchModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-navy/70 p-4 pt-24" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center bg-navy/60 p-4 pt-24 backdrop-blur-sm animate-fade-up"
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-lg rounded-2xl bg-white p-4 shadow-2xl"
+        className="w-full max-w-lg overflow-hidden rounded-2xl bg-white p-4 shadow-2xl ring-1 ring-ink/5"
         onClick={(e) => e.stopPropagation()}
       >
-        <input
-          autoFocus
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder={t('placeholder')}
-          className="w-full rounded-md border border-ink/20 px-4 py-3 text-ink focus:border-magenta"
-        />
+        <div className="relative">
+          <span aria-hidden className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-ink/40">
+            ⌕
+          </span>
+          <input
+            autoFocus
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={t('placeholder')}
+            className="w-full rounded-md border border-ink/20 bg-paper/40 py-3 pl-10 pr-4 text-ink transition-colors focus:border-magenta focus:bg-white"
+          />
+        </div>
         <div className="mt-3">
           {results.length > 0 ? (
             <ul className="divide-y divide-ink/10">
               {results.map((r, i) => (
                 <li key={i}>
-                  <button type="button" onClick={() => go(r)} className="flex w-full items-center justify-between gap-3 px-2 py-3 text-left hover:bg-paper">
-                    <span className="text-ink">{r.title}</span>
-                    <span className="font-condensed text-xs uppercase tracking-wide text-ink/40">{r.type}</span>
+                  <button
+                    type="button"
+                    onClick={() => go(r)}
+                    className="group flex w-full items-center justify-between gap-3 rounded-md px-3 py-3 text-left transition-colors hover:bg-paper"
+                  >
+                    <span className="flex items-center gap-2 text-ink">
+                      <span aria-hidden className="text-ink/25 transition-colors group-hover:text-magenta">›</span>
+                      {r.title}
+                    </span>
+                    <span className="rounded-full bg-ink/5 px-2 py-0.5 font-condensed text-xs uppercase tracking-wide text-ink/50 transition-colors group-hover:bg-magenta/10 group-hover:text-magenta">
+                      {r.type}
+                    </span>
                   </button>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="px-2 py-3 text-sm text-ink/50">{searched ? t('noResults') : t('hint')}</p>
+            <p className="px-3 py-3 text-sm text-ink/50">{searched ? t('noResults') : t('hint')}</p>
           )}
         </div>
       </div>

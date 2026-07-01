@@ -74,11 +74,11 @@ export function DownloadsBlock({ block, locale }: BlockComponentProps) {
                 rel="noopener noreferrer"
                 download={it.file!.name || true}
                 className={clsx(
-                  'group flex items-center gap-4 rounded-xl border p-4 transition hover:-translate-y-0.5',
+                  'group flex items-center gap-4 rounded-xl border p-4 transition duration-300 ease-out hover:-translate-y-0.5 hover:shadow-lift',
                   onNavy ? 'border-white/15 bg-white/5 hover:bg-white/10' : 'border-ink/10 bg-white hover:border-ink/20',
                 )}
               >
-                <span className={clsx('inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold tracking-wide text-white', ACCENT_BG[accent] ?? 'bg-magenta')}>
+                <span className={clsx('inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold tracking-wide text-white transition-transform duration-300 ease-out group-hover:scale-105', ACCENT_BG[accent] ?? 'bg-magenta')}>
                   {fileExt(it.file)}
                 </span>
                 <span className="min-w-0 flex-1">

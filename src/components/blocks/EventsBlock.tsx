@@ -97,9 +97,9 @@ export function EventsBlock({ block, locale }: BlockComponentProps) {
                   <div className="min-w-0 flex-1">
                     {it.href ? (
                       isExternalHref(it.href) ? (
-                        <a href={it.href} target="_blank" rel="noopener noreferrer" className="transition hover:underline">{titleEl}</a>
+                        <a href={it.href} target="_blank" rel="noopener noreferrer" className={clsx('link-underline inline-block transition-colors', onNavy ? 'hover:text-cyan' : 'hover:text-magenta')}>{titleEl}</a>
                       ) : (
-                        <Link href={it.href} className="transition hover:underline">{titleEl}</Link>
+                        <Link href={it.href} className={clsx('link-underline inline-block transition-colors', onNavy ? 'hover:text-cyan' : 'hover:text-magenta')}>{titleEl}</Link>
                       )
                     ) : (
                       titleEl

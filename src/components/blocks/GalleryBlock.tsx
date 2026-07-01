@@ -38,9 +38,17 @@ export function GalleryBlock({ block }: BlockComponentProps) {
               key={i}
               type="button"
               onClick={() => setActive(i)}
-              className="relative aspect-square overflow-hidden rounded-lg bg-ink/5"
+              className="group relative aspect-square overflow-hidden rounded-lg bg-ink/5"
             >
-              <Image src={img.url} alt={img.alt ?? ''} fill className="object-cover transition hover:scale-105" />
+              <Image
+                src={img.url}
+                alt={img.alt ?? ''}
+                fill
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+              />
+              <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-navy/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                <span className="text-3xl text-white/90">⤢</span>
+              </span>
             </button>
           ))}
         </div>
@@ -50,13 +58,13 @@ export function GalleryBlock({ block }: BlockComponentProps) {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-navy/90 p-6"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-navy/90 p-6 backdrop-blur-sm animate-fade-up"
           onClick={() => setActive(null)}
         >
           <button
             type="button"
             aria-label="Close"
-            className="absolute right-5 top-5 text-3xl text-white"
+            className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-3xl text-white transition-colors hover:bg-white/20"
             onClick={() => setActive(null)}
           >
             ×

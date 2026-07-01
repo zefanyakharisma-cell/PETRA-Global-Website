@@ -47,18 +47,23 @@ export function AudienceDoorsBlock({ block, locale }: BlockComponentProps) {
                 <Link
                   href={d.href || '#'}
                   className={clsx(
-                    'group flex h-full flex-col rounded-2xl border-2 border-ink/10 bg-white p-7 transition',
-                    'hover:-translate-y-1 hover:shadow-lg',
+                    'group relative flex h-full flex-col overflow-hidden rounded-2xl border-2 border-ink/10 bg-white p-7',
+                    'transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift',
                     a.ring,
                   )}
                 >
-                  <span className={clsx('h-1.5 w-12 rounded-full', a.bar)} />
+                  <span
+                    className={clsx('h-1.5 w-12 rounded-full transition-all duration-300 ease-out group-hover:w-20', a.bar)}
+                  />
                   <h3 className={clsx('mt-5 text-3xl transition-colors', a.hover)}>
                     {t(d.title, locale) || 'Door'}
                   </h3>
                   {d.blurb && <p className="mt-2 text-ink/70">{t(d.blurb, locale)}</p>}
-                  <span className="mt-auto pt-6 font-condensed uppercase tracking-wide text-ink/50">
-                    {locale === 'id' ? 'Pelajari →' : 'Explore →'}
+                  <span className="mt-auto flex items-center gap-2 pt-6 font-condensed uppercase tracking-wide text-ink/50 transition-colors group-hover:text-ink/80">
+                    {locale === 'id' ? 'Pelajari' : 'Explore'}
+                    <span aria-hidden className="transition-transform duration-300 ease-out group-hover:translate-x-1.5">
+                      →
+                    </span>
                   </span>
                 </Link>
               </Reveal>

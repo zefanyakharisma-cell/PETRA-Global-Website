@@ -69,11 +69,22 @@ const config: Config = {
           from: { transform: 'translateX(-50%)' },
           to: { transform: 'translateX(0)' },
         },
+        // Gentle vertical nudge for the hero scroll cue.
+        'scroll-cue': {
+          '0%, 100%': { transform: 'translateY(0)', opacity: '0.7' },
+          '50%': { transform: 'translateY(6px)', opacity: '1' },
+        },
       },
       animation: {
         'fade-up': 'fade-up 0.5s ease-out both',
         'marquee-left': 'marquee-left var(--marquee-duration, 40s) linear infinite',
         'marquee-right': 'marquee-right var(--marquee-duration, 40s) linear infinite',
+        'scroll-cue': 'scroll-cue 1.8s ease-in-out infinite',
+      },
+      boxShadow: {
+        // Soft, diffuse elevation used by cards/doors on hover — warmer and
+        // less harsh than Tailwind's default xl for the navy palette.
+        lift: '0 18px 40px -12px rgba(19, 50, 86, 0.28)',
       },
     },
   },

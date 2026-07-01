@@ -89,12 +89,18 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* Anchor targets clear the sticky navbar (h-16 = 4rem) instead of hiding under it. */
+    scroll-padding-top: 5rem;
   }
   body {
     @apply bg-paper text-ink font-body antialiased;
   }
   h1, h2, h3, .display {
     @apply font-display tracking-wide;
+  }
+  /* Brand text selection. */
+  ::selection {
+    @apply bg-magenta/20 text-navy;
   }
   /* Visible focus for keyboard nav (WCAG 2.1 AA). */
   :focus-visible {
@@ -118,6 +124,41 @@
   .prose-on-navy h2, .prose-on-navy h3 { @apply text-white; }
   .prose-on-navy a { @apply text-cyan; }
   .prose-on-navy blockquote { @apply border-cyan text-white; }
+
+  /* ------------------------------------------------------------------------
+     Shared micro-interactions. Kept as component utilities so blocks and
+     layout share one hover language: elegant, quiet, and honouring
+     prefers-reduced-motion (the media query at the bottom neutralises them).
+  ------------------------------------------------------------------------ */
+
+  /* Animated underline that wipes in from the left on hover/focus. Set the
+     text colour on the element; `currentColor` drives the rule. Add
+     `.link-underline--cyan` etc. only if a different underline hue is wanted. */
+  .link-underline {
+    @apply relative;
+  }
+  .link-underline::after {
+    content: '';
+    @apply pointer-events-none absolute -bottom-0.5 left-0 h-px w-full origin-right scale-x-0 bg-current transition-transform duration-300 ease-out;
+  }
+  .link-underline:hover::after,
+  .link-underline:focus-visible::after {
+    @apply origin-left scale-x-100;
+  }
+
+  /* Soft, brand-tinted lift used by cards and doors. */
+  .hover-lift {
+    @apply transition duration-300 ease-out hover:-translate-y-1 hover:shadow-xl;
+  }
+
+  /* Media wrapper whose <img>/next-image child eases in a gentle zoom when the
+     enclosing `.group` is hovered. Pair with `overflow-hidden`. */
+  .media-zoom img {
+    @apply transition-transform duration-[600ms] ease-out;
+  }
+  .group:hover .media-zoom img {
+    @apply scale-[1.06];
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

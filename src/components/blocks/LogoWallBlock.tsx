@@ -65,14 +65,25 @@ export function LogoWallBlock({ block, locale }: BlockComponentProps) {
                   src={logo.url}
                   alt={logo.name ?? ''}
                   fill
-                  className={clsx('object-contain transition', grayscale && 'opacity-70 grayscale hover:opacity-100 hover:grayscale-0')}
+                  className={clsx(
+                    'object-contain transition duration-300 ease-out',
+                    grayscale && 'opacity-70 grayscale group-hover:opacity-100 group-hover:grayscale-0',
+                  )}
                 />
               </div>
             );
             return logo.href ? (
-              <a key={i} href={logo.href} target="_blank" rel="noopener noreferrer">{img}</a>
+              <a
+                key={i}
+                href={logo.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block transition-transform duration-300 ease-out hover:-translate-y-1"
+              >
+                {img}
+              </a>
             ) : (
-              <div key={i}>{img}</div>
+              <div key={i} className="group">{img}</div>
             );
           })}
         </div>

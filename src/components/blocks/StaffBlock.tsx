@@ -39,9 +39,12 @@ export async function StaffBlock({ block, locale, pageOwnerStaffId }: BlockCompo
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {team.map((s, i) => (
                 <Reveal key={s.id} delay={i * 0.05}>
-                  <div className={clsx('flex gap-4 rounded-2xl p-5', onNavy ? 'bg-white/5' : 'bg-white ring-1 ring-ink/10')}>
+                  <div className={clsx(
+                    'group flex gap-4 rounded-2xl p-5 transition duration-300 ease-out hover:-translate-y-1 hover:shadow-lift',
+                    onNavy ? 'bg-white/5 hover:bg-white/10' : 'bg-white ring-1 ring-ink/10 hover:ring-magenta/30',
+                  )}>
                     <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-ink/10">
-                      {s.photo_url && <Image src={s.photo_url} alt={s.name} fill className="object-cover" />}
+                      {s.photo_url && <Image src={s.photo_url} alt={s.name} fill className="object-cover transition-transform duration-500 ease-out group-hover:scale-110" />}
                     </span>
                     <div>
                       <h3 className={clsx('text-xl', onNavy && 'text-white')}>{s.name}</h3>

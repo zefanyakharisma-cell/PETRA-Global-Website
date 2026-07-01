@@ -65,10 +65,13 @@ export function TabsBlock({ block, locale }: BlockComponentProps) {
                 aria-selected={isActive}
                 onClick={() => setActive(i)}
                 className={clsx(
-                  '-mb-px border-b-2 px-4 py-2.5 font-condensed text-lg uppercase tracking-wide transition',
+                  '-mb-px border-b-2 px-4 py-2.5 font-condensed text-lg uppercase tracking-wide transition-colors duration-200',
                   isActive
                     ? ACCENT_BORDER[accent]
-                    : clsx('border-transparent', onNavy ? 'text-white/55 hover:text-white' : 'text-ink/50 hover:text-ink'),
+                    : clsx(
+                        'border-transparent',
+                        onNavy ? 'text-white/55 hover:border-white/30 hover:text-white' : 'text-ink/50 hover:border-ink/20 hover:text-ink',
+                      ),
                 )}
               >
                 {t(tab.label, locale) || `Tab ${i + 1}`}

@@ -44,16 +44,37 @@ export function AccordionBlock({ block, locale }: BlockComponentProps) {
                   type="button"
                   onClick={() => toggle(i)}
                   aria-expanded={isOpen}
-                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+                  className={clsx(
+                    'group flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors',
+                    onNavy ? 'hover:bg-white/5' : 'hover:bg-paper/60',
+                  )}
                 >
-                  <span className="font-condensed text-xl uppercase tracking-wide">{t(item.q, locale)}</span>
-                  <span className={clsx('text-2xl transition-transform', isOpen && 'rotate-45')}>+</span>
+                  <span className={clsx('font-condensed text-xl uppercase tracking-wide transition-colors', !onNavy && 'group-hover:text-navy')}>
+                    {t(item.q, locale)}
+                  </span>
+                  <span
+                    className={clsx(
+                      'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xl leading-none transition-all duration-300 ease-out',
+                      onNavy ? 'bg-white/10 group-hover:bg-white/20' : 'bg-ink/5 group-hover:bg-magenta/10',
+                      isOpen ? 'rotate-45 text-magenta' : 'text-ink/60',
+                      onNavy && 'text-white/80',
+                    )}
+                  >
+                    +
+                  </span>
                 </button>
-                {isOpen && (
-                  <div className={clsx('px-5 pb-5', onNavy ? 'text-white/80' : 'text-ink/70')}>
-                    {t(item.a, locale)}
+                <div
+                  className={clsx(
+                    'grid transition-all duration-300 ease-out',
+                    isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
+                  )}
+                >
+                  <div className="overflow-hidden">
+                    <div className={clsx('px-5 pb-5', onNavy ? 'text-white/80' : 'text-ink/70')}>
+                      {t(item.a, locale)}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             );
           })}

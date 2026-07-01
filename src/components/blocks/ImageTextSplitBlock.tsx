@@ -27,7 +27,7 @@ export function ImageTextSplitBlock({ block, locale }: BlockComponentProps) {
       <Container>
         <div className="grid items-center gap-10 md:grid-cols-2">
           <Reveal className={clsx(imageRight && 'md:order-2')}>
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-ink/5">
+            <div className="group media-zoom relative aspect-[4/3] overflow-hidden rounded-2xl bg-ink/5 shadow-lg ring-1 ring-ink/5">
               {c.image_url ? (
                 <Image src={c.image_url} alt={t(c.heading, locale)} fill className="object-cover" />
               ) : (

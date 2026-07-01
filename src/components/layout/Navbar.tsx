@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { getNavigation } from '@/lib/queries';
+import { clsx } from '@/lib/clsx';
 import { t as localize, type Locale } from '@/lib/types';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { SearchTrigger } from './Search';
@@ -27,7 +28,11 @@ export async function Navbar({ locale }: { locale: string }) {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-navy text-white">
       <nav className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-5 md:px-8" aria-label="Primary">
-        <Link href="/" className="flex items-center" aria-label="Petra Christian University — home">
+        <Link
+          href="/"
+          className="flex items-center transition-opacity duration-200 hover:opacity-80"
+          aria-label="Petra Christian University — home"
+        >
           <Image
             src="/brand/petra-logo-white.png"
             alt="Petra Christian University"
@@ -43,15 +48,21 @@ export async function Navbar({ locale }: { locale: string }) {
             <li key={s.key} className="group relative">
               <Link
                 href={s.items[0] ? `/${s.items[0].slug}` : '/'}
-                className="rounded-md px-3 py-2 font-condensed text-lg uppercase tracking-wide text-white/85 hover:text-white"
+                className={clsx(
+                  'relative rounded-md px-3 py-2 font-condensed text-lg uppercase tracking-wide text-white/85 transition-colors hover:text-white',
+                  'after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-cyan after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100 group-hover:after:scale-x-100',
+                )}
               >
                 {s.label}
               </Link>
               {s.items.length > 1 && (
-                <ul className="invisible absolute left-0 top-full min-w-56 rounded-xl border border-ink/10 bg-white p-2 text-ink opacity-0 shadow-xl transition group-hover:visible group-hover:opacity-100">
+                <ul className="invisible absolute left-0 top-full mt-1 min-w-56 translate-y-1 rounded-xl border border-ink/10 bg-white p-2 text-ink opacity-0 shadow-xl transition duration-200 ease-out group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                   {s.items.map((item) => (
                     <li key={item.slug}>
-                      <Link href={`/${item.slug}`} className="block rounded-md px-3 py-2 hover:bg-paper">
+                      <Link
+                        href={`/${item.slug}`}
+                        className="block rounded-md px-3 py-2 text-ink/80 transition-colors hover:bg-paper hover:text-navy"
+                      >
                         {item.label}
                       </Link>
                     </li>

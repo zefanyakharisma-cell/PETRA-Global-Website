@@ -72,15 +72,17 @@ export function CardGridCard({
   const shell = (
     <div
       className={clsx(
-        'group flex h-full flex-col overflow-hidden rounded-2xl border transition hover:-translate-y-1 hover:shadow-lg',
-        onNavy ? 'border-white/15 bg-white/5' : 'border-ink/10 bg-white',
+        'group flex h-full flex-col overflow-hidden rounded-2xl border transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift',
+        onNavy ? 'border-white/15 bg-white/5 hover:border-white/30' : 'border-ink/10 bg-white hover:border-ink/20',
       )}
     >
-      <div className="relative aspect-[16/10] bg-ink/5">
+      <div className="media-zoom relative aspect-[16/10] overflow-hidden bg-ink/5">
         {card.image_url && <Image src={card.image_url} alt={card.title} fill className="object-cover" />}
+        {/* Quiet gradient that lifts on hover for depth over the image. */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy/25 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <h3 className={clsx('text-2xl', onNavy && 'text-white')}>{card.title}</h3>
+        <h3 className={clsx('text-2xl transition-colors', onNavy ? 'text-white' : 'text-ink group-hover:text-navy')}>{card.title}</h3>
         {card.body && <p className={clsx('mt-2 line-clamp-3 text-sm', onNavy ? 'text-white/70' : 'text-ink/65')}>{card.body}</p>}
         {button && <div className="mt-4">{button}</div>}
       </div>

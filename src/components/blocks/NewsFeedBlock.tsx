@@ -50,13 +50,16 @@ export async function NewsFeedBlock({ block, locale }: BlockComponentProps) {
             {items.map((n, i) => (
               <Reveal key={i} delay={i * 0.05}>
                 <Link href={`/news/${n.slug}`} className="group block">
-                  <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-ink/5">
-                    {n.cover_url && <Image src={n.cover_url} alt="" fill className="object-cover transition group-hover:scale-105" />}
+                  <div className="media-zoom relative aspect-[16/10] overflow-hidden rounded-xl bg-ink/5 ring-1 ring-ink/5 transition-shadow duration-300 group-hover:shadow-lift">
+                    {n.cover_url && <Image src={n.cover_url} alt="" fill className="object-cover" />}
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   </div>
-                  <p className="mt-2 text-xs uppercase tracking-wide text-magenta">
+                  <p className="mt-3 text-xs uppercase tracking-wide text-magenta">
                     {n.published_at ? new Date(n.published_at).toLocaleDateString(locale) : ''}
                   </p>
-                  <h3 className={clsx('mt-1 text-xl', onNavy && 'text-white')}>{t(n.title as LocaleMap, locale)}</h3>
+                  <h3 className={clsx('mt-1 text-xl transition-colors', onNavy ? 'text-white group-hover:text-cyan' : 'text-ink group-hover:text-magenta')}>
+                    {t(n.title as LocaleMap, locale)}
+                  </h3>
                 </Link>
               </Reveal>
             ))}

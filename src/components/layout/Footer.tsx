@@ -38,7 +38,10 @@ export async function Footer() {
               <ul className="mt-3 space-y-2">
                 {g.items.map((item) => (
                   <li key={item.slug}>
-                    <Link href={`/${item.slug}`} className="text-white/80 hover:text-white">
+                    <Link
+                      href={`/${item.slug}`}
+                      className="link-underline inline-block text-white/80 transition-colors hover:text-white"
+                    >
                       {localize(item.title, locale as Locale)}
                     </Link>
                   </li>
@@ -53,7 +56,7 @@ export async function Footer() {
         <div className="mx-auto flex max-w-6xl flex-col gap-1 px-5 py-6 text-sm text-white/60 md:flex-row md:items-center md:justify-between md:px-8">
           <span>{t('office')} · {t('university')}</span>
           <div className="flex items-center gap-4">
-            <a href="/admin/login" className="text-white/60 hover:text-white">
+            <a href="/admin/login" className="link-underline inline-block text-white/60 transition-colors hover:text-white">
               Admin
             </a>
             <span>© {new Date().getFullYear()} {t('university')}. {t('rights')}</span>

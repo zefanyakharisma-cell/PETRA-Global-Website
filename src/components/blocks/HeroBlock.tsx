@@ -72,7 +72,8 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
           {showImageBg && (
             <>
               <Image src={c.image_url!} alt="" fill priority sizes="100vw" className="object-cover" />
-              <div className="absolute inset-0 bg-navy/70" />
+              {/* Directional gradient: readable copy up top, image breathes below. */}
+              <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/75 to-navy/45" />
             </>
           )}
           {showCarouselBg && <HeroCarousel slides={slides} />}
@@ -126,13 +127,26 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
           </div>
           {split && c.image_url && (
             <Reveal delay={0.12}>
-              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
-                <Image src={c.image_url} alt="" fill className="object-cover" />
+              <div className="group relative aspect-[4/3] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10">
+                <Image
+                  src={c.image_url}
+                  alt=""
+                  fill
+                  className="object-cover transition-transform duration-[800ms] ease-out group-hover:scale-105"
+                />
               </div>
             </Reveal>
           )}
         </div>
       </Container>
+      {hasBg && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-5 z-10 flex justify-center text-white/60"
+        >
+          <span className="animate-scroll-cue text-2xl leading-none">⌄</span>
+        </div>
+      )}
     </Section>
   );
 }

@@ -6,11 +6,12 @@ type Variant = 'magenta' | 'amber' | 'blue' | 'navy' | 'outline';
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANTS: Record<Variant, string> = {
-  // Amber needs dark text for contrast.
-  amber: 'bg-amber text-ink hover:brightness-95',
-  magenta: 'bg-magenta text-white hover:brightness-110',
-  blue: 'bg-blue text-white hover:brightness-110',
-  navy: 'bg-navy text-white hover:bg-navy-2',
+  // Amber needs dark text for contrast. Solid variants gain a soft resting
+  // shadow that deepens on hover; outline stays flat and fills subtly.
+  amber: 'bg-amber text-ink shadow-sm hover:brightness-95 hover:shadow-lift',
+  magenta: 'bg-magenta text-white shadow-sm hover:brightness-110 hover:shadow-lift',
+  blue: 'bg-blue text-white shadow-sm hover:brightness-110 hover:shadow-lift',
+  navy: 'bg-navy text-white shadow-sm hover:bg-navy-2 hover:shadow-lift',
   outline: 'border border-current text-current hover:bg-white/10',
 };
 
@@ -49,7 +50,8 @@ export function Cta({
 }) {
   const cls = clsx(
     'inline-flex items-center justify-center gap-2 rounded-md',
-    'font-condensed uppercase tracking-wide transition',
+    'font-condensed uppercase tracking-wide',
+    'transition duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:brightness-95',
     SIZES[size],
     VARIANTS[variant],
     className,

@@ -42,6 +42,19 @@ const ACCENT_TEXT: Record<string, string> = {
   yellow: 'text-yellow',
 };
 
+// Literal group-hover variants — kept as complete strings so Tailwind's JIT
+// scanner emits them (dynamic `group-hover:${...}` concatenation is not seen).
+const ACCENT_GROUP_HOVER: Record<string, string> = {
+  magenta: 'group-hover:text-magenta',
+  amber: 'group-hover:text-amber',
+  cyan: 'group-hover:text-cyan',
+  blue: 'group-hover:text-blue',
+  red: 'group-hover:text-red',
+  orange: 'group-hover:text-orange',
+  green: 'group-hover:text-green',
+  yellow: 'group-hover:text-yellow',
+};
+
 /** Grid of icon + title + blurb features (benefits, services, highlights). */
 export function FeatureListBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as FeatureListContent;
@@ -82,14 +95,17 @@ export function FeatureListBlock({ block, locale }: BlockComponentProps) {
               <div className="flex flex-col gap-3">
                 <span
                   className={clsx(
-                    'inline-flex h-12 w-12 items-center justify-center rounded-xl',
-                    onNavy ? 'bg-white/10' : 'bg-ink/5',
+                    'inline-flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 ease-out',
+                    onNavy ? 'bg-white/10 group-hover:bg-white/20' : 'bg-ink/5 group-hover:bg-ink/[0.08]',
+                    'group-hover:-rotate-6 group-hover:scale-110',
                     ACCENT_TEXT[accent],
                   )}
                 >
                   <Icon className="h-6 w-6" strokeWidth={1.75} />
                 </span>
-                <h3 className="text-xl">{t(f.title, locale) || 'Feature'}</h3>
+                <h3 className={clsx('text-xl transition-colors', f.href && ACCENT_GROUP_HOVER[accent])}>
+                  {t(f.title, locale) || 'Feature'}
+                </h3>
                 {f.body && (
                   <p className={clsx(onNavy ? 'text-white/75' : 'text-ink/65')}>{t(f.body, locale)}</p>
                 )}
@@ -98,7 +114,7 @@ export function FeatureListBlock({ block, locale }: BlockComponentProps) {
             return (
               <Reveal key={i} delay={i * 0.05}>
                 {f.href ? (
-                  <Link href={f.href} className="block transition hover:-translate-y-0.5">
+                  <Link href={f.href} className="group block transition duration-300 ease-out hover:-translate-y-1">
                     {inner}
                   </Link>
                 ) : (
