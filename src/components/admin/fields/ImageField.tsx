@@ -2,33 +2,10 @@
 
 import { useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { normalizeImageUrl } from '@/lib/media';
 import { ImageCropModal } from './ImageCropModal';
 
 const BUCKET = 'petra-io-media';
-
-/**
- * Extract the file id from any Google Drive / Docs share link form, e.g.
- *   https://drive.google.com/file/d/FILE_ID/view?usp=sharing
- *   https://drive.google.com/open?id=FILE_ID
- *   https://drive.google.com/uc?id=FILE_ID&export=download
- *   https://docs.google.com/document/d/FILE_ID/edit
- * Returns null when the input isn't a Drive link.
- */
-function driveFileId(input: string): string | null {
-  if (!/drive\.google\.com|docs\.google\.com/.test(input)) return null;
-  const m = input.match(/\/d\/([a-zA-Z0-9_-]+)/) ?? input.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  return m ? m[1] : null;
-}
-
-/**
- * Turn a pasted URL into something that actually renders. A Drive share link is
- * rewritten to our same-origin proxy (which fetches the real bytes server-side);
- * everything else is passed through unchanged.
- */
-function normalizeUrl(input: string): string {
-  const id = driveFileId(input.trim());
-  return id ? `/api/media?gdrive=${id}` : input;
-}
 
 /**
  * Visual image control: drag-and-drop or click to upload a file to Supabase
@@ -184,14 +161,14 @@ export function ImageField({
         onChange={(e) => onChange(e.target.value)}
         onPaste={(e) => {
           const pasted = e.clipboardData.getData('text');
-          const normalized = normalizeUrl(pasted);
+          const normalized = normalizeImageUrl(pasted);
           if (normalized !== pasted) {
             e.preventDefault();
             onChange(normalized);
           }
         }}
         onBlur={(e) => {
-          const normalized = normalizeUrl(e.target.value);
+          const normalized = normalizeImageUrl(e.target.value);
           if (normalized !== e.target.value) onChange(normalized);
         }}
       />

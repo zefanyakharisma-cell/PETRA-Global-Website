@@ -1,6 +1,7 @@
 import { Section, Container } from '@/components/ui/Section';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap } from '@/lib/types';
+import { resolveEmbed } from '@/lib/media';
 import type { BlockComponentProps } from './registry.types';
 
 interface EmbedContent {
@@ -14,18 +15,23 @@ const ASPECT: Record<string, string> = {
   '1/1': 'aspect-square',
 };
 
-/** Video / map / iframe embed. Aspect ratio configurable. */
+/**
+ * Video / map / iframe embed. Accepts an ordinary YouTube link (watch, youtu.be,
+ * shorts) or a Google Drive share link — both are rewritten to their embeddable
+ * form — as well as any already-embeddable URL. Aspect ratio configurable.
+ */
 export function EmbedBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as EmbedContent;
   const aspect = ASPECT[(block.config.aspect as string) ?? '16/9'] ?? 'aspect-video';
+  const embed = resolveEmbed(c.url);
 
   return (
     <Section config={block.config}>
       <Container>
         <div className={clsx('w-full overflow-hidden rounded-2xl bg-ink/10', aspect)}>
-          {c.url ? (
+          {embed ? (
             <iframe
-              src={c.url}
+              src={embed.src}
               title={t(c.caption, locale) || 'Embedded content'}
               className="h-full w-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

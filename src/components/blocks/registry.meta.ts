@@ -396,7 +396,8 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         ...UNIVERSAL,
       ],
       content: [
-        { key: 'url', label: 'Embed URL', type: 'url' },
+        { key: 'url', label: 'Embed URL', type: 'url',
+          help: 'Paste a YouTube link (watch, youtu.be, or shorts), a Google Drive video share link, or any embeddable URL (Google Maps, Spotify…). Ordinary share links are converted automatically.' },
         { key: 'caption', label: 'Caption', type: 'text', localized: true },
       ],
     },

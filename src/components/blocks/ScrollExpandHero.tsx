@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { clsx } from '@/lib/clsx';
+import { resolveAutoplayVideo } from '@/lib/media';
 
 export interface ScrollExpandHeroProps {
   mediaType?: 'video' | 'image';
@@ -21,52 +22,6 @@ export interface ScrollExpandHeroProps {
   textBlend?: boolean;
   /** Body copy revealed once the media is fully expanded. */
   overview?: string;
-}
-
-type ResolvedVideo =
-  | { kind: 'youtube' | 'drive'; src: string }
-  | { kind: 'file'; src: string }
-  | null;
-
-/** Pull a YouTube video id out of watch / short / embed URLs. */
-function youtubeId(url: string): string | null {
-  const patterns = [
-    /(?:youtube\.com\/watch\?(?:.*&)?v=)([\w-]{11})/,
-    /(?:youtu\.be\/)([\w-]{11})/,
-    /(?:youtube\.com\/embed\/)([\w-]{11})/,
-    /(?:youtube\.com\/shorts\/)([\w-]{11})/,
-  ];
-  for (const p of patterns) {
-    const m = url.match(p);
-    if (m) return m[1];
-  }
-  return null;
-}
-
-/** Pull a Google Drive file id out of /file/d/<id>/ or ?id=<id> links. */
-function driveId(url: string): string | null {
-  const m = url.match(/\/file\/d\/([\w-]+)/) || url.match(/[?&]id=([\w-]+)/);
-  return m ? m[1] : null;
-}
-
-/**
- * Turn a pasted video URL into something embeddable. YouTube + Google Drive
- * render inside an <iframe> (autoplay/mute/loop where the platform allows it);
- * everything else is treated as a direct file for a native <video>.
- */
-function resolveVideo(url: string | undefined): ResolvedVideo {
-  if (!url) return null;
-  const yt = youtubeId(url);
-  if (yt) {
-    const params =
-      'autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1&playsinline=1';
-    return { kind: 'youtube', src: `https://www.youtube.com/embed/${yt}?${params}&playlist=${yt}` };
-  }
-  const gd = driveId(url);
-  if (gd) {
-    return { kind: 'drive', src: `https://drive.google.com/file/d/${gd}/preview` };
-  }
-  return { kind: 'file', src: url };
 }
 
 /**
@@ -95,7 +50,7 @@ export default function ScrollExpandHero({
   const [isMobile, setIsMobile] = useState(false);
 
   const sectionRef = useRef<HTMLDivElement | null>(null);
-  const video = resolveVideo(videoUrl);
+  const video = resolveAutoplayVideo(videoUrl);
 
   // Reduced motion: skip the scroll takeover entirely — show it expanded.
   useEffect(() => {
