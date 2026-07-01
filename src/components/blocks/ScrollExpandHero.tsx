@@ -48,6 +48,11 @@ export default function ScrollExpandHero({
   const [mediaFullyExpanded, setMediaFullyExpanded] = useState(false);
   const [touchStartY, setTouchStartY] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [viewport, setViewport] = useState<{ w: number; h: number }>(() =>
+    typeof window !== 'undefined'
+      ? { w: window.innerWidth, h: window.innerHeight }
+      : { w: 1920, h: 1080 },
+  );
 
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const video = resolveAutoplayVideo(videoUrl);
@@ -132,7 +137,10 @@ export default function ScrollExpandHero({
   }, [scrollProgress, mediaFullyExpanded, touchStartY, reduce]);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
+    const check = () => {
+      setIsMobile(window.innerWidth < 768);
+      setViewport({ w: window.innerWidth, h: window.innerHeight });
+    };
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
@@ -141,6 +149,16 @@ export default function ScrollExpandHero({
   const mediaWidth = 300 + scrollProgress * (isMobile ? 650 : 1250);
   const mediaHeight = 400 + scrollProgress * (isMobile ? 200 : 400);
   const textTranslateX = scrollProgress * (isMobile ? 180 : 150);
+
+  // Cover sizing for the YouTube/Drive iframe. An iframe can't use object-fit,
+  // so we size it to the smallest 16:9 rectangle that fully covers the viewport
+  // and clip it to the (smaller) media box below. The box is always ≤ viewport,
+  // so it's always fully covered — no black bars — reading as a cropped "peek"
+  // while small and a full-screen video once expanded.
+  const VIDEO_RATIO = 16 / 9;
+  const viewportIsWide = viewport.w / viewport.h > VIDEO_RATIO;
+  const coverW = viewportIsWide ? viewport.w : viewport.h * VIDEO_RATIO;
+  const coverH = viewportIsWide ? viewport.w / VIDEO_RATIO : viewport.h;
 
   const firstWord = title ? title.split(' ')[0] : '';
   const restOfTitle = title ? title.split(' ').slice(1).join(' ') : '';
@@ -184,10 +202,13 @@ export default function ScrollExpandHero({
                 }}
               >
                 {isIframeVideo ? (
-                  <div className="relative h-full w-full">
+                  <div className="relative h-full w-full overflow-hidden rounded-xl">
+                    {/* Sized to cover the viewport and centred, then clipped by the
+                        parent's overflow-hidden — the iframe equivalent of object-cover. */}
                     <iframe
                       src={video!.src}
-                      className="h-full w-full rounded-xl"
+                      className="absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
+                      style={{ width: `${coverW}px`, height: `${coverH}px` }}
                       frameBorder={0}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
@@ -198,7 +219,7 @@ export default function ScrollExpandHero({
                       style={{ pointerEvents: mediaFullyExpanded ? 'auto' : 'none' }}
                     />
                     <motion.div
-                      className="pointer-events-none absolute inset-0 rounded-xl bg-black/30"
+                      className="pointer-events-none absolute inset-0 bg-black/30"
                       initial={{ opacity: 0.7 }}
                       animate={{ opacity: 0.5 - scrollProgress * 0.3 }}
                       transition={{ duration: 0.2 }}
