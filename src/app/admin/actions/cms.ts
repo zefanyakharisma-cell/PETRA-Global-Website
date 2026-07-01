@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { BLOCK_META } from '@/components/blocks/registry.meta';
+import { defaultHomeBlocks } from '@/lib/defaultHome';
 import type { BlockType, LocaleMap, NavSection, PageStatus } from '@/lib/types';
 
 /** Refresh public ISR for a page (both locales) plus the home. */
@@ -55,6 +56,61 @@ export async function createPage(formData: FormData) {
   revalidatePath('/admin/pages');
   revalidatePublic(slug);
   return { ok: true };
+}
+
+/**
+ * The home page lives in the CMS under the reserved slug `home`, but unlike
+ * other pages it renders at the site root (`/`). Until it exists, the root
+ * falls back to the built-in `defaultHomeBlocks()` composition. This seeds a
+ * `home` page pre-filled with that exact composition so an admin edits the real
+ * design in the block editor instead of rebuilding it from scratch. It starts as
+ * a draft — publishing it is what makes the CMS version take over the homepage.
+ */
+export async function createHomePage() {
+  const supabase = await createClient();
+
+  // Idempotent: never create a second `home` page.
+  const { data: existing } = await supabase
+    .from('pages')
+    .select('id')
+    .eq('slug', 'home')
+    .maybeSingle();
+  if (existing) return { ok: true, id: existing.id as string, existed: true };
+
+  const { data: page, error } = await supabase
+    .from('pages')
+    .insert({
+      slug: 'home',
+      title: { en: 'Home', id: 'Beranda' },
+      nav_section: 'none', // the home page is not part of the auto-built nav
+      nav_order: 0,
+      status: 'draft',
+    })
+    .select('id')
+    .single();
+  if (error) {
+    if (error.code === '23505') return { error: 'A home page already exists.' };
+    return { error: error.message };
+  }
+
+  const pageId = page.id as string;
+  const seed = defaultHomeBlocks().map((b) => ({
+    page_id: pageId,
+    type: b.type,
+    position: b.position,
+    config: b.config,
+    content: b.content,
+  }));
+  const { error: blockError } = await supabase.from('blocks').insert(seed as never);
+  if (blockError) {
+    // Roll back the page so the admin can retry cleanly.
+    await supabase.from('pages').delete().eq('id', pageId);
+    return { error: blockError.message };
+  }
+
+  revalidatePath('/admin/pages');
+  revalidatePublic('home');
+  return { ok: true, id: pageId };
 }
 
 export async function setPageStatus(id: string, status: PageStatus, slug: string) {

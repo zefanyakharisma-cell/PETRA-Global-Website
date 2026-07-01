@@ -19,7 +19,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
-import { createPage, updatePage, deletePage, reorderPages } from '@/app/admin/actions/cms';
+import { createPage, createHomePage, updatePage, deletePage, reorderPages } from '@/app/admin/actions/cms';
 import type { LocaleMap, NavSection, PageRecord, PageStatus } from '@/lib/types';
 
 const SECTIONS: NavSection[] = ['none', 'about', 'mobility', 'partnership', 'life', 'news'];
@@ -60,22 +60,41 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
+  // The home page renders at the site root and is managed via its own card, so
+  // keep it out of the sortable/editable table below.
+  const homePage = useMemo(() => initialPages.find((p) => p.slug === 'home') ?? null, [initialPages]);
+  const otherPages = useMemo(() => initialPages.filter((p) => p.slug !== 'home'), [initialPages]);
+
   const originals = useMemo(() => {
     const map: Record<string, Draft> = {};
-    for (const p of initialPages) map[p.id] = toDraft(p);
+    for (const p of otherPages) map[p.id] = toDraft(p);
     return map;
-  }, [initialPages]);
+  }, [otherPages]);
 
   const [drafts, setDrafts] = useState<Record<string, Draft>>(originals);
-  const [rows, setRows] = useState<PageRecord[]>(initialPages);
+  const [rows, setRows] = useState<PageRecord[]>(otherPages);
 
   // Re-sync working copies whenever the server data changes (after a refresh).
   const [snapshot, setSnapshot] = useState(initialPages);
   if (snapshot !== initialPages) {
     setSnapshot(initialPages);
     setDrafts(originals);
-    setRows(initialPages);
+    setRows(otherPages);
   }
+
+  const createHome = () => {
+    setError(null);
+    setBusyId('__home__');
+    startTransition(async () => {
+      const res = await createHomePage();
+      setBusyId(null);
+      if (res && 'error' in res && res.error) {
+        setError(res.error);
+        return;
+      }
+      router.push('/admin/edit/home');
+    });
+  };
 
   const setField = <K extends keyof Draft>(id: string, key: K, value: Draft[K]) =>
     setDrafts((d) => ({ ...d, [id]: { ...d[id], [key]: value } }));
@@ -119,7 +138,7 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
   };
 
   const create = (formData: FormData) => {
-    formData.set('nav_order', String(initialPages.length));
+    formData.set('nav_order', String(otherPages.length));
     setError(null);
     setBusyId('__create__');
     startTransition(async () => {
@@ -174,6 +193,41 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
           {error}
         </div>
       )}
+
+      {/* Home page — special: renders at the site root, edited via its own blocks. */}
+      <div className="mt-6 flex flex-col gap-3 rounded-2xl bg-navy/5 p-5 ring-1 ring-navy/10 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="font-condensed text-lg uppercase tracking-wide text-navy">Home page</h2>
+          {homePage ? (
+            <p className="mt-0.5 text-sm text-ink/60">
+              Shown at the site root when published. Status:{' '}
+              <span className={STATUS_STYLES[homePage.status]}>{homePage.status}</span>
+              {homePage.status !== 'published' && ' — the built-in default is live until you publish.'}
+            </p>
+          ) : (
+            <p className="mt-0.5 text-sm text-ink/60">
+              The homepage currently uses the built-in default design. Create a CMS copy to edit it
+              block by block — you start from the exact current design, nothing is lost.
+            </p>
+          )}
+        </div>
+        {homePage ? (
+          <Link
+            href="/admin/edit/home"
+            className="shrink-0 rounded-md bg-navy px-4 py-2 text-center font-condensed uppercase tracking-wide text-white"
+          >
+            Edit home blocks
+          </Link>
+        ) : (
+          <button
+            onClick={createHome}
+            disabled={isPending && busyId === '__home__'}
+            className="shrink-0 rounded-md bg-navy px-4 py-2 font-condensed uppercase tracking-wide text-white disabled:opacity-50"
+          >
+            {isPending && busyId === '__home__' ? 'Creating…' : 'Create home page'}
+          </button>
+        )}
+      </div>
 
       {/* Create */}
       <form action={create} className="mt-6 grid gap-3 rounded-2xl bg-white p-5 ring-1 ring-ink/10 md:grid-cols-5">
