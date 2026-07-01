@@ -207,16 +207,11 @@ export default function ScrollExpandHero({
                         parent's overflow-hidden — the iframe equivalent of object-cover. */}
                     <iframe
                       src={video!.src}
-                      className="absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
+                      className="pointer-events-none absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
                       style={{ width: `${coverW}px`, height: `${coverH}px` }}
                       frameBorder={0}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
-                    />
-                    {/* Blocks pointer events so the page scroll drives expansion. */}
-                    <div
-                      className="absolute inset-0 z-10"
-                      style={{ pointerEvents: mediaFullyExpanded ? 'auto' : 'none' }}
                     />
                     <motion.div
                       className="pointer-events-none absolute inset-0 bg-black/30"

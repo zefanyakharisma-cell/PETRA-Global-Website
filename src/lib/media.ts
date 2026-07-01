@@ -89,8 +89,12 @@ export function resolveAutoplayVideo(url: string | undefined): ResolvedVideo {
   if (!u) return null;
   const yt = youtubeId(u);
   if (yt) {
+    // Hide every player chrome: no control bar (controls=0), no keyboard,
+    // no fullscreen button (fs=0), no annotations (iv_load_policy=3), no logo
+    // (modestbranding=1). loop + playlist keep it replaying so the "next/prev"
+    // end screen never shows. Interaction is blocked in the UI too (pointer-events).
     const params =
-      'autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1&playsinline=1';
+      'autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1&playsinline=1&fs=0&iv_load_policy=3';
     return { kind: 'youtube', src: `https://www.youtube.com/embed/${yt}?${params}&playlist=${yt}` };
   }
   const gd = driveFileId(u);
