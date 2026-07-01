@@ -49,9 +49,31 @@ export async function createEntity(table: EntityTable, formData: FormData) {
   return { ok: true };
 }
 
-export async function deleteEntity(table: EntityTable, id: string) {
+export async function updateEntity(table: EntityTable, id: string, formData: FormData) {
   const supabase = await createClient();
-  await supabase.from(table).delete().eq('id', id);
+  const record = buildRecord(table, formData);
+  const { error } = await supabase.from(table).update(record as never).eq('id', id);
+  if (error) return { error: error.message };
   revalidatePath(`/admin/${table}`);
   revalidatePath('/', 'layout');
+  return { ok: true };
+}
+
+/** Archive (is_active=false) or restore (is_active=true) a row without deleting it. */
+export async function setEntityActive(table: EntityTable, id: string, active: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase.from(table).update({ is_active: active } as never).eq('id', id);
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/${table}`);
+  revalidatePath('/', 'layout');
+  return { ok: true };
+}
+
+export async function deleteEntity(table: EntityTable, id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from(table).delete().eq('id', id);
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/${table}`);
+  revalidatePath('/', 'layout');
+  return { ok: true };
 }

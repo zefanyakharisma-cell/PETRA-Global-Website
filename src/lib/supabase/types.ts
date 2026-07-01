@@ -123,6 +123,7 @@ export type CourseRow = Timestamps & {
   semester: string | null;
   description: Json;
   position: number;
+  is_active: boolean;
 };
 
 export type InquiryRow = {

@@ -154,7 +154,7 @@ export const ENTITY_CONFIG: Record<EntityTable, EntityConfig> = {
   courses: {
     table: 'courses',
     title: 'Courses',
-    list: ['code', 'name', 'credits', 'semester'],
+    list: ['code', 'name', 'credits', 'semester', 'is_active'],
     fields: [
       { key: 'study_program_id', label: 'Study program', kind: 'relation', relTable: 'study_programs', required: true },
       { key: 'code', label: 'Course code', kind: 'text' },
@@ -163,6 +163,7 @@ export const ENTITY_CONFIG: Record<EntityTable, EntityConfig> = {
       { key: 'semester', label: 'Semester', kind: 'text' },
       { key: 'description', label: 'Description', kind: 'localized' },
       { key: 'position', label: 'Order', kind: 'number' },
+      { key: 'is_active', label: 'Active', kind: 'bool' },
     ],
   },
 };

@@ -48,6 +48,7 @@ export async function FacultiesBlock({ block, locale }: BlockComponentProps) {
     ? await supabase
         .from('courses')
         .select('id,study_program_id,code,name,credits,semester,description')
+        .eq('is_active', true)
         .in('study_program_id', programIds)
         .order('position', { ascending: true })
     : { data: [] };
