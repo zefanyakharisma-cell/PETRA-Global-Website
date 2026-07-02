@@ -17,10 +17,11 @@ export default async function EditorPreview({
   params,
   searchParams,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string[] }>;
   searchParams: Promise<{ locale?: string }>;
 }) {
   const { slug } = await params;
+  const path = slug.join('/');
   const { locale: rawLocale = 'en' } = await searchParams;
   const locale = routing.locales.includes(rawLocale as never)
     ? rawLocale
@@ -33,7 +34,7 @@ export default async function EditorPreview({
   const messages = await getMessages({ locale });
 
   const supabase = await createClient();
-  const { data: page } = await supabase.from('pages').select('*').eq('slug', slug).maybeSingle();
+  const { data: page } = await supabase.from('pages').select('*').eq('slug', path).maybeSingle();
   if (!page) notFound();
 
   const { data: blocks } = await supabase

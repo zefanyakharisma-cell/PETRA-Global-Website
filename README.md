@@ -107,11 +107,17 @@ untouched.
 
 ### Pages & navigation
 
-- Public pages render at `/[locale]/[slug]`; news at `/[locale]/news/[slug]`;
-  programs at `/[locale]/programs/[slug]`.
+- Public pages render at `/[locale]/[...slug]` (a catch-all, so slugs are full
+  nested paths like `mobility/inbound/semester-exchange`); news at
+  `/[locale]/news/[slug]`; programs at `/[locale]/programs/[slug]`.
 - **Navigation auto-builds** from *published* pages grouped by `nav_section`
   (`about`, `mobility`, `partnership`, `life`, `news`), ordered by `nav_order`
-  (`src/lib/queries.ts`). Publish a page into a section and it appears in the nav.
+  (`src/lib/queries.ts`). Within a section, pages **nest into a layered tree via
+  `parent_id`** (section → subsection → item), rendered as dropdown → flyout
+  menus. A section with a single root page treats it as the landing page (the
+  top-level link) and shows its children beneath. Publish a page into a section,
+  set its parent, and it appears in the nav. Use the full path as the slug so the
+  URL mirrors the hierarchy.
 - The **home page** falls back to a built-in default composition
   (`src/lib/defaultHome.ts`) until a page with slug `home` is published.
 - Public pages use **ISR** (`export const revalidate = 60`).

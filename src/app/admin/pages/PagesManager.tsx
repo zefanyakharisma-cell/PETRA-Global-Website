@@ -30,6 +30,7 @@ type Draft = {
   slug: string;
   nav_section: NavSection;
   nav_order: number;
+  parent_id: string;
 };
 
 function toDraft(p: PageRecord): Draft {
@@ -40,6 +41,7 @@ function toDraft(p: PageRecord): Draft {
     slug: p.slug,
     nav_section: p.nav_section,
     nav_order: p.nav_order,
+    parent_id: p.parent_id ?? '',
   };
 }
 
@@ -64,6 +66,16 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
   // keep it out of the sortable/editable table below.
   const homePage = useMemo(() => initialPages.find((p) => p.slug === 'home') ?? null, [initialPages]);
   const otherPages = useMemo(() => initialPages.filter((p) => p.slug !== 'home'), [initialPages]);
+
+  // Parent options for nesting a page under another (builds the layered nav).
+  const parentOptions = useMemo(
+    () =>
+      otherPages.map((p) => ({
+        id: p.id,
+        label: (p.title as LocaleMap)?.en?.trim() || p.slug,
+      })),
+    [otherPages],
+  );
 
   const originals = useMemo(() => {
     const map: Record<string, Draft> = {};
@@ -123,6 +135,7 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
         title: { en: d.title_en, id: d.title_id },
         nav_section: d.nav_section,
         nav_order: Number(d.nav_order),
+        parent_id: d.parent_id || null,
       }),
     );
   };
@@ -230,8 +243,8 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
       </div>
 
       {/* Create */}
-      <form action={create} className="mt-6 grid gap-3 rounded-2xl bg-white p-5 ring-1 ring-ink/10 md:grid-cols-5">
-        <input name="slug" required placeholder="slug (e.g. semester-exchange)" className="rounded-md border border-ink/20 px-3 py-2" />
+      <form action={create} className="mt-6 grid gap-3 rounded-2xl bg-white p-5 ring-1 ring-ink/10 md:grid-cols-6">
+        <input name="slug" required placeholder="slug (e.g. mobility/inbound/semester-exchange)" className="rounded-md border border-ink/20 px-3 py-2 md:col-span-2" />
         <input name="title_en" required placeholder="Title (EN)" className="rounded-md border border-ink/20 px-3 py-2" />
         <input name="title_id" placeholder="Judul (ID)" className="rounded-md border border-ink/20 px-3 py-2" />
         <select name="nav_section" className="rounded-md border border-ink/20 px-3 py-2">
@@ -245,7 +258,17 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
         >
           {isPending && busyId === '__create__' ? 'Creating…' : 'Create page'}
         </button>
+        <select name="parent_id" defaultValue="" className="rounded-md border border-ink/20 px-3 py-2 md:col-span-6">
+          <option value="">No parent (top level of its section)</option>
+          {parentOptions.map((o) => (
+            <option key={o.id} value={o.id}>Parent: {o.label}</option>
+          ))}
+        </select>
       </form>
+      <p className="mt-2 text-xs text-ink/50">
+        Nesting: set a <strong>Parent</strong> to place a page inside another (e.g. <em>Semester Exchange</em> under <em>Inbound Programs</em>).
+        Use the full path as the slug so the URL mirrors the hierarchy — e.g. <code>mobility/inbound/semester-exchange</code>.
+      </p>
 
       {/* Toolbar */}
       <div className="mt-6 flex items-center justify-between">
@@ -270,6 +293,7 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
               <th className="px-3 py-3">Title (ID)</th>
               <th className="px-3 py-3">Slug</th>
               <th className="px-3 py-3">Section</th>
+              <th className="px-3 py-3">Parent</th>
               <th className="w-20 px-3 py-3">Order</th>
               <th className="px-3 py-3">Status</th>
               <th className="px-3 py-3 text-right">Actions</th>
@@ -278,7 +302,7 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
           <tbody className="divide-y divide-ink/10">
             {visible.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-ink/40">
+                <td colSpan={9} className="px-4 py-8 text-center text-ink/40">
                   No pages yet. Create your first above.
                 </td>
               </tr>
@@ -292,6 +316,7 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
                     draft={drafts[p.id] ?? toDraft(p)}
                     dirty={isDirty(p.id)}
                     busy={isPending && busyId === p.id}
+                    parentOptions={parentOptions}
                     onField={setField}
                     onSave={saveRow}
                     onStatus={setStatus}
@@ -312,6 +337,7 @@ function SortableRow({
   draft,
   dirty,
   busy,
+  parentOptions,
   onField,
   onSave,
   onStatus,
@@ -321,6 +347,7 @@ function SortableRow({
   draft: Draft;
   dirty: boolean;
   busy: boolean;
+  parentOptions: { id: string; label: string }[];
   onField: <K extends keyof Draft>(id: string, key: K, value: Draft[K]) => void;
   onSave: (p: PageRecord) => void;
   onStatus: (p: PageRecord, status: PageStatus) => void;
@@ -364,6 +391,20 @@ function SortableRow({
           {SECTIONS.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
+        </select>
+      </td>
+      <td className="px-3 py-2">
+        <select
+          className={CELL}
+          value={draft.parent_id}
+          onChange={(e) => onField(id, 'parent_id', e.target.value)}
+        >
+          <option value="">— none —</option>
+          {parentOptions
+            .filter((o) => o.id !== id)
+            .map((o) => (
+              <option key={o.id} value={o.id}>{o.label}</option>
+            ))}
         </select>
       </td>
       <td className="px-3 py-2">

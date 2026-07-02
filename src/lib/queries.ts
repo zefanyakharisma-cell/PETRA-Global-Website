@@ -54,17 +54,19 @@ export async function getPageBySlug(slug: string): Promise<PageWithBlocks | null
   return { page: page as PageRecord, blocks: (blocks ?? []) as Block[] };
 }
 
-export interface NavItem {
+/** A node in the navigation tree — a page plus its (recursive) child pages. */
+export interface NavNode {
   slug: string;
   title: PageRecord['title'];
-  section: NavSection;
-  order: number;
-  parentId: string | null;
+  children: NavNode[];
 }
 
 export interface NavGroup {
   section: Exclude<NavSection, 'none'>;
-  items: NavItem[];
+  /** The section's landing page — the top-level link target (may be null). */
+  landingSlug: string | null;
+  /** The menu tree shown under the section (the landing page's children). */
+  items: NavNode[];
 }
 
 const SECTION_ORDER: Exclude<NavSection, 'none'>[] = [
@@ -77,30 +79,52 @@ const SECTION_ORDER: Exclude<NavSection, 'none'>[] = [
 
 /**
  * Navigation AUTO-BUILDS from published pages grouped by `nav_section`, ordered
- * by `nav_order`. Adding a published page to a section makes it appear here.
+ * by `nav_order`. Within a section, pages nest into a tree via `parent_id`, so
+ * the menu can be arbitrarily layered (section → subsection → item).
+ *
+ * A section whose pages form a single root (parent_id = null) treats that root
+ * as the landing page: the top-level nav links to it and its children fill the
+ * dropdown. A section with several roots keeps the older flat behaviour (the
+ * top-level links to the first, all roots list beneath it).
  */
 export async function getNavigation(): Promise<NavGroup[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from('pages')
-    .select('slug,title,nav_section,nav_order,parent_id')
+    .select('id,slug,title,nav_section,nav_order,parent_id')
     .eq('status', 'published')
     .neq('nav_section', 'none')
     .order('nav_order');
 
   const rows = data ?? [];
-  return SECTION_ORDER.map((section) => ({
-    section,
-    items: rows
-      .filter((r) => r.nav_section === section)
-      .map((r) => ({
-        slug: r.slug,
-        title: r.title as PageRecord['title'],
-        section: r.nav_section as NavSection,
-        order: r.nav_order,
-        parentId: r.parent_id,
-      })),
-  })).filter((g) => g.items.length > 0);
+
+  const groups = SECTION_ORDER.map((section): NavGroup | null => {
+    const sectionRows = rows.filter((r) => r.nav_section === section);
+    if (sectionRows.length === 0) return null;
+
+    // Build the tree. Rows arrive ordered by nav_order, so pushing children in
+    // iteration order keeps siblings correctly sorted.
+    const nodeById = new Map<string, NavNode>();
+    for (const r of sectionRows) {
+      nodeById.set(r.id, { slug: r.slug, title: r.title as PageRecord['title'], children: [] });
+    }
+
+    const roots: NavNode[] = [];
+    for (const r of sectionRows) {
+      const node = nodeById.get(r.id)!;
+      // A page whose parent lives outside this published section is a root here.
+      const parent = r.parent_id ? nodeById.get(r.parent_id) : null;
+      if (parent) parent.children.push(node);
+      else roots.push(node);
+    }
+
+    if (roots.length === 1) {
+      return { section, landingSlug: roots[0].slug, items: roots[0].children };
+    }
+    return { section, landingSlug: roots[0]?.slug ?? null, items: roots };
+  });
+
+  return groups.filter((g): g is NavGroup => g !== null && (g.landingSlug !== null || g.items.length > 0));
 }
 
 /** Published page slugs for static generation. */

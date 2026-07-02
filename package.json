@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "db:seed": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed.ts"
+    "db:seed": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed.ts",
+    "db:seed:pages": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed-pages.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",

@@ -8,30 +8,32 @@ import type { Locale } from '@/lib/types';
 
 export const revalidate = 60;
 
-// Reserved segments handled by their own routes.
+// Reserved first segments handled by their own routes.
 const RESERVED = new Set(['programs', 'news', 'thank-you', 'api', 'admin']);
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; slug: string }>;
+  params: Promise<{ locale: string; slug: string[] }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const data = await getPageBySlug(slug);
+  const path = slug.join('/');
+  const data = await getPageBySlug(path);
   if (!data) return {};
-  return pageMetadata(data.page, locale as Locale, `/${slug}`);
+  return pageMetadata(data.page, locale as Locale, `/${path}`);
 }
 
 export default async function CmsPage({
   params,
 }: {
-  params: Promise<{ locale: string; slug: string }>;
+  params: Promise<{ locale: string; slug: string[] }>;
 }) {
   const { locale, slug } = await params;
-  if (RESERVED.has(slug)) notFound();
+  if (RESERVED.has(slug[0])) notFound();
   setRequestLocale(locale);
 
-  const data = await getPageBySlug(slug);
+  const path = slug.join('/');
+  const data = await getPageBySlug(path);
   if (!data) notFound();
 
   return (

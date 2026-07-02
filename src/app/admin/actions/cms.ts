@@ -44,15 +44,21 @@ export async function createPage(formData: FormData) {
   const titleId = String(formData.get('title_id') ?? '');
   const nav_section = (String(formData.get('nav_section') ?? 'none') as NavSection);
   const nav_order = Number(formData.get('nav_order') ?? 0);
+  const parentRaw = String(formData.get('parent_id') ?? '').trim();
+  const parent_id = parentRaw || null;
 
   const { error } = await supabase.from('pages').insert({
     slug,
     title: { en: titleEn, id: titleId },
     nav_section,
     nav_order,
+    parent_id,
     status: 'draft',
   });
-  if (error) return { error: error.message };
+  if (error) {
+    if (error.code === '23505') return { error: 'That slug is already in use.' };
+    return { error: error.message };
+  }
   revalidatePath('/admin/pages');
   revalidatePublic(slug);
   return { ok: true };
@@ -141,6 +147,7 @@ export async function updatePage(
     title?: LocaleMap;
     nav_section?: NavSection;
     nav_order?: number;
+    parent_id?: string | null;
     status?: PageStatus;
   },
 ) {
@@ -149,6 +156,7 @@ export async function updatePage(
   const update: Record<string, unknown> = {};
   if (patch.title !== undefined) update.title = patch.title;
   if (patch.nav_section !== undefined) update.nav_section = patch.nav_section;
+  if (patch.parent_id !== undefined) update.parent_id = patch.parent_id || null;
   if (patch.status !== undefined) update.status = patch.status;
   if (patch.nav_order !== undefined && Number.isFinite(patch.nav_order)) {
     update.nav_order = patch.nav_order;

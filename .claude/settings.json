@@ -82,12 +82,22 @@
       "Bash(grep -iA40 \"news\\\\|blocks\\\\|pages\")",
       "Bash(grep -n -iA10 \"admin write blocks\\\\|authenticated.*blocks\\\\|for all to authenticated\" supabase/migrations/0001_petra_io_schema.sql)",
       "Bash(C-c)",
-      "Bash(grep -v -e '\\\\.png$' -e '\\\\.jpg$' -e '\\\\.jpeg$' -e '\\\\.svg$')"
+      "Bash(grep -v -e '\\\\.png$' -e '\\\\.jpg$' -e '\\\\.jpeg$' -e '\\\\.svg$')",
+      "Bash(grep -rn \"from\\('pages'\\)\\\\|\\\\`/\\\\${\" \"e:/PETRA-Global-Website/src/app/api\")",
+      "Bash(rm \"e:/PETRA-Global-Website/src/app/[locale]/[slug]/page.tsx\")",
+      "Bash(rmdir \"e:/PETRA-Global-Website/src/app/[locale]/[slug]\")",
+      "Bash(rm \"e:/PETRA-Global-Website/src/app/admin/edit/[slug]/page.tsx\" \"e:/PETRA-Global-Website/src/app/editor-preview/[slug]/page.tsx\")",
+      "Bash(rmdir \"e:/PETRA-Global-Website/src/app/admin/edit/[slug]\" \"e:/PETRA-Global-Website/src/app/editor-preview/[slug]\")",
+      "Bash(cd \"e:/PETRA-Global-Website\" && rm -rf \".next/types/app/[locale]/[slug]\" \".next/types/app/admin/edit/[slug]\" \".next/types/app/editor-preview/[slug]\" && echo \"cleaned stale types\")",
+      "Bash(ls -la e:/ 2>/dev/null; echo \"===\"; du -sh e:/PETRA-Global-Website 2>/dev/null)",
+      "Read(//e//**)",
+      "PowerShell($pd='e:\\\\PETRA-Global-Website\\\\.git\\\\objects\\\\pack'; foreach\\($p in 'pack-74ba4d3e3f97a64d63e9f62b078d551db107bb31','pack-af38d889d636f71f5026721338142b39f72b9c78','pack-ada94c2360c006015a5460c4c2b436468565bf4b'\\){ $n=\\(git verify-pack -v \"$pd\\\\$p.idx\" 2>$null | Measure-Object -Line\\).Lines; \"$p objects+lines=$n\" })"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",
       "E:\\PETRA-Global-Website\\src\\app\\[locale]\\partnership",
-      "c:\\Users\\KUI\\.claude\\projects\\e--PETRA-Global-Website\\memory"
+      "c:\\Users\\KUI\\.claude\\projects\\e--PETRA-Global-Website\\memory",
+      "E:\\PETRA-Global-Website\\.next\\types\\app\\[locale]\\[slug]"
     ]
   }
 }

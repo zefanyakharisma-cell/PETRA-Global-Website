@@ -7,11 +7,12 @@ import { t, type Block, type LocaleMap, type PageRecord } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-export default async function EditPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function EditPage({ params }: { params: Promise<{ slug: string[] }> }) {
   const { slug } = await params;
+  const path = slug.join('/');
   const supabase = await createClient();
 
-  const { data: page } = await supabase.from('pages').select('*').eq('slug', slug).maybeSingle();
+  const { data: page } = await supabase.from('pages').select('*').eq('slug', path).maybeSingle();
   if (!page) notFound();
 
   const { data: blocks } = await supabase
