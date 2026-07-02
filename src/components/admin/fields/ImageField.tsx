@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { normalizeImageUrl } from '@/lib/media';
 import { ImageCropModal } from './ImageCropModal';
+import { MediaLibraryModal } from './MediaLibraryModal';
 
 const BUCKET = 'petra-io-media';
 
@@ -28,6 +29,7 @@ export function ImageField({
   const [dragOver, setDragOver] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [crop, setCrop] = useState<{ src: string; mime: string } | null>(null);
+  const [libraryOpen, setLibraryOpen] = useState(false);
 
   /** Upload any image blob and return its public URL. */
   const uploadBlob = async (blob: Blob): Promise<string> => {
@@ -107,6 +109,7 @@ export function ImageField({
           <div className="absolute inset-x-0 bottom-0 flex justify-between gap-1 bg-ink/70 p-1.5 opacity-0 transition group-hover:opacity-100">
             <button type="button" onClick={openCrop} className="rounded bg-white/90 px-2 py-0.5 text-xs font-medium text-ink">Crop</button>
             <button type="button" onClick={() => inputRef.current?.click()} className="rounded bg-white/90 px-2 py-0.5 text-xs font-medium text-ink">Replace</button>
+            <button type="button" onClick={() => setLibraryOpen(true)} className="rounded bg-white/90 px-2 py-0.5 text-xs font-medium text-ink">Library</button>
             <button type="button" onClick={() => onChange('')} className="rounded bg-white/90 px-2 py-0.5 text-xs font-medium text-magenta">Remove</button>
           </div>
           {uploading && (
@@ -114,31 +117,40 @@ export function ImageField({
           )}
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragOver(false);
-            const f = e.dataTransfer.files?.[0];
-            if (f) upload(f);
-          }}
-          className={
-            'flex h-24 w-full flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed text-xs transition ' +
-            (dragOver ? 'border-magenta bg-magenta/5 text-magenta' : 'border-ink/20 text-ink/50 hover:border-navy hover:text-navy')
-          }
-        >
-          {uploading ? (
-            <span>Uploading…</span>
-          ) : (
-            <>
-              <span className="text-lg leading-none">⬆</span>
-              <span>Click or drop an image</span>
-            </>
-          )}
-        </button>
+        <div>
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragOver(false);
+              const f = e.dataTransfer.files?.[0];
+              if (f) upload(f);
+            }}
+            className={
+              'flex h-24 w-full flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed text-xs transition ' +
+              (dragOver ? 'border-magenta bg-magenta/5 text-magenta' : 'border-ink/20 text-ink/50 hover:border-navy hover:text-navy')
+            }
+          >
+            {uploading ? (
+              <span>Uploading…</span>
+            ) : (
+              <>
+                <span className="text-lg leading-none">⬆</span>
+                <span>Click or drop an image</span>
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setLibraryOpen(true)}
+            className="mt-1.5 w-full rounded-md border border-ink/15 px-2 py-1 text-xs font-medium text-navy transition hover:bg-navy/5"
+          >
+            Choose from media library
+          </button>
+        </div>
       )}
 
       <input
@@ -176,6 +188,10 @@ export function ImageField({
 
       {crop && (
         <ImageCropModal src={crop.src} mime={crop.mime} onCancel={closeCrop} onCropped={onCropped} />
+      )}
+
+      {libraryOpen && (
+        <MediaLibraryModal onSelect={onChange} onClose={() => setLibraryOpen(false)} />
       )}
     </div>
   );

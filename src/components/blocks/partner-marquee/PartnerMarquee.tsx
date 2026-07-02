@@ -15,7 +15,8 @@ export interface MarqueeFaculty {
 export interface MarqueePartner {
   name: string;
   country?: string | null;
-  logoUrl: string;
+  /** Uploaded logo, if any. When absent the tile falls back to a text card. */
+  logoUrl?: string | null;
   url?: string | null;
   /** Agreement expiry, already formatted for display (e.g. "2027", "No fixed end date"). */
   expiry?: string | null;
@@ -66,9 +67,23 @@ export function PartnerMarquee({
       aria-label={p.name}
       className="group relative mx-2 flex h-20 w-40 shrink-0 items-center justify-center rounded-xl bg-white px-5 py-3 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
     >
-      <span className="relative h-full w-full">
-        <Image src={p.logoUrl} alt={p.name} fill className="object-contain transition group-hover:scale-105" sizes="160px" />
-      </span>
+      {p.logoUrl ? (
+        <span className="relative h-full w-full">
+          <Image src={p.logoUrl} alt={p.name} fill className="object-contain transition group-hover:scale-105" sizes="160px" />
+        </span>
+      ) : (
+        // No logo uploaded — show the name (and place) as a compact text card.
+        <span className="flex h-full w-full flex-col items-center justify-center text-center">
+          <span className="line-clamp-3 text-xs font-medium leading-tight text-navy transition group-hover:text-magenta">
+            {p.name}
+          </span>
+          {p.country && (
+            <span className="mt-1 font-condensed text-[10px] uppercase tracking-wide text-ink/45">
+              {p.country}
+            </span>
+          )}
+        </span>
+      )}
     </button>
   );
 
@@ -134,9 +149,11 @@ export function PartnerMarquee({
             </button>
 
             <div className="flex items-center gap-4">
-              <span className="relative h-16 w-24 shrink-0">
-                <Image src={active.logoUrl} alt={active.name} fill className="object-contain" sizes="96px" />
-              </span>
+              {active.logoUrl && (
+                <span className="relative h-16 w-24 shrink-0">
+                  <Image src={active.logoUrl} alt={active.name} fill className="object-contain" sizes="96px" />
+                </span>
+              )}
               <div>
                 <h3 className="text-2xl leading-tight">{active.name}</h3>
                 {active.country && (
