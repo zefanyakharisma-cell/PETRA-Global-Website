@@ -83,6 +83,9 @@ async function resolveCards(
 export async function CardGridBlock({ block, locale }: BlockComponentProps) {
   const source = (block.config.source as string) ?? 'manual';
   const columns = Number(block.config.columns ?? 3);
+  // grid = columns of cards (default) · list = single-column rows · featured =
+  // first card spans wide, the rest tile in a grid below.
+  const layout = (block.config.layout as string) ?? 'grid';
   const content = block.content as CardGridContent;
   const cards = await resolveCards(source, content, locale, columns * 3);
   const onNavy = block.config.background === 'navy';
@@ -114,6 +117,35 @@ export async function CardGridBlock({ block, locale }: BlockComponentProps) {
             }
             hint={locale === 'id' ? 'Konten akan tampil di sini setelah ditambahkan.' : 'Content appears here once it is added.'}
           />
+        ) : layout === 'list' ? (
+          <div className="mx-auto flex max-w-3xl flex-col gap-4">
+            {cards.map((card, i) => (
+              <Reveal key={i} delay={i * 0.05}>
+                <CardGridCard card={card} onNavy={onNavy} options={options} buttonLabel={buttonLabel} viewLabel={viewLabel} variant="horizontal" />
+              </Reveal>
+            ))}
+          </div>
+        ) : layout === 'featured' && cards.length > 1 ? (
+          <div className="flex flex-col gap-6">
+            {/* First card spans full width as a horizontal hero card. */}
+            <Reveal>
+              <CardGridCard card={cards[0]} onNavy={onNavy} options={options} buttonLabel={buttonLabel} viewLabel={viewLabel} variant="horizontal" />
+            </Reveal>
+            <div
+              className={clsx(
+                'grid gap-6',
+                columns === 2 && 'sm:grid-cols-2',
+                columns === 3 && 'sm:grid-cols-2 lg:grid-cols-3',
+                columns >= 4 && 'sm:grid-cols-2 lg:grid-cols-4',
+              )}
+            >
+              {cards.slice(1).map((card, i) => (
+                <Reveal key={i} delay={i * 0.05}>
+                  <CardGridCard card={card} onNavy={onNavy} options={options} buttonLabel={buttonLabel} viewLabel={viewLabel} />
+                </Reveal>
+              ))}
+            </div>
+          </div>
         ) : (
           <div
             className={clsx(

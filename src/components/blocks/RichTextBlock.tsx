@@ -1,5 +1,5 @@
 import { Section, Container } from '@/components/ui/Section';
-import { clsx } from '@/lib/clsx';
+import { RichText } from '@/components/ui/RichText';
 import { t, type LocaleMap } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
 
@@ -11,7 +11,11 @@ interface RichTextContent {
 /** The flexible escape hatch: Tiptap WYSIWYG output in a styled reading column. */
 export function RichTextBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as RichTextContent;
-  const narrow = (block.config.width as string) !== 'full';
+  // narrow = centred reading column · full = full width · two-column = flows
+  // into two balanced newspaper columns on wide screens.
+  const width = (block.config.width as string) ?? 'narrow';
+  const narrow = width === 'narrow';
+  const twoColumn = width === 'two-column';
   const onNavy = block.config.background === 'navy';
   const html = t(c.html, locale);
 
@@ -19,13 +23,10 @@ export function RichTextBlock({ block, locale }: BlockComponentProps) {
     <Section config={block.config}>
       <Container narrow={narrow}>
         {html ? (
-          <div
-            className={clsx(
-              'prose-block max-w-reading',
-              onNavy && 'prose-on-navy',
-            )}
-            // Tiptap output is sanitized on save in the editor; trusted admin content.
-            dangerouslySetInnerHTML={{ __html: html }}
+          <RichText
+            html={html}
+            onNavy={onNavy}
+            className={twoColumn ? 'md:columns-2 md:gap-10 [&>*]:break-inside-avoid' : 'max-w-reading'}
           />
         ) : (
           <p className="text-ink/40">

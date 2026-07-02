@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
+import { InlineHtml, stripHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
 
 export interface CardGridCardData {
@@ -37,14 +38,18 @@ export function CardGridCard({
   options,
   buttonLabel,
   viewLabel,
+  variant = 'vertical',
 }: {
   card: CardGridCardData;
   onNavy: boolean;
   options: CardGridOptions;
   buttonLabel: string;
   viewLabel: string;
+  /** vertical = image on top (grid) · horizontal = image beside copy (list / featured). */
+  variant?: 'vertical' | 'horizontal';
 }) {
   const [open, setOpen] = useState(false);
+  const horizontal = variant === 'horizontal';
 
   const isExternal = !!card.href && card.href.startsWith('http');
   const canLink = options.linkToPage && !!card.href;
@@ -55,7 +60,7 @@ export function CardGridCard({
   const button = options.showButton ? (
     action === 'link' && card.href ? (
       <CardLink href={card.href} external={isExternal} className={buttonClass(onNavy)}>
-        {buttonLabel}
+        <InlineHtml as="span" html={buttonLabel} />
       </CardLink>
     ) : (
       <button
@@ -64,7 +69,7 @@ export function CardGridCard({
         disabled={action === 'none'}
         className={clsx(buttonClass(onNavy), action === 'none' && 'cursor-default opacity-60')}
       >
-        {buttonLabel}
+        <InlineHtml as="span" html={buttonLabel} />
       </button>
     )
   ) : null;
@@ -72,18 +77,24 @@ export function CardGridCard({
   const shell = (
     <div
       className={clsx(
-        'group flex h-full flex-col overflow-hidden rounded-2xl border transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift',
+        'group flex h-full overflow-hidden rounded-2xl border transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift',
+        horizontal ? 'flex-col sm:flex-row' : 'flex-col',
         onNavy ? 'border-white/15 bg-white/5 hover:border-white/30' : 'border-ink/10 bg-white hover:border-ink/20',
       )}
     >
-      <div className="media-zoom relative aspect-[16/10] overflow-hidden bg-ink/5">
-        {card.image_url && <Image src={card.image_url} alt={card.title} fill className="object-cover" />}
+      <div
+        className={clsx(
+          'media-zoom relative overflow-hidden bg-ink/5',
+          horizontal ? 'aspect-[16/10] sm:aspect-auto sm:w-56 sm:shrink-0 sm:self-stretch' : 'aspect-[16/10]',
+        )}
+      >
+        {card.image_url && <Image src={card.image_url} alt={stripHtml(card.title)} fill className="object-cover" />}
         {/* Quiet gradient that lifts on hover for depth over the image. */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy/25 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       </div>
-      <div className="flex flex-1 flex-col p-5">
-        <h3 className={clsx('text-2xl transition-colors', onNavy ? 'text-white' : 'text-ink group-hover:text-navy')}>{card.title}</h3>
-        {card.body && <p className={clsx('mt-2 line-clamp-3 text-sm', onNavy ? 'text-white/70' : 'text-ink/65')}>{card.body}</p>}
+      <div className={clsx('flex flex-1 flex-col p-5', horizontal && 'justify-center')}>
+        <InlineHtml as="h3" html={card.title} className={clsx('text-2xl transition-colors', onNavy ? 'text-white' : 'text-ink group-hover:text-navy')} />
+        {card.body && <div className={clsx('rich-inline mt-2 text-sm', horizontal ? 'line-clamp-2' : 'line-clamp-3', onNavy ? 'text-white/70' : 'text-ink/65')} dangerouslySetInnerHTML={{ __html: card.body }} />}
         {button && <div className="mt-4">{button}</div>}
       </div>
     </div>
@@ -180,7 +191,7 @@ function CardPopup({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={card.title}
+      aria-label={stripHtml(card.title)}
       className="fixed inset-0 z-50 flex items-center justify-center bg-navy/80 p-6"
       onClick={onClose}
     >
@@ -198,12 +209,12 @@ function CardPopup({
         </button>
         {card.image_url && (
           <div className="relative aspect-[16/9] bg-ink/5">
-            <Image src={card.image_url} alt={card.title} fill className="object-cover" />
+            <Image src={card.image_url} alt={stripHtml(card.title)} fill className="object-cover" />
           </div>
         )}
         <div className="p-5">
-          <h3 className="text-2xl">{card.title}</h3>
-          {card.body && <p className="mt-2 text-sm text-ink/70">{card.body}</p>}
+          <InlineHtml as="h3" html={card.title} className="text-2xl" />
+          {card.body && <div className="rich-inline mt-2 text-sm text-ink/70" dangerouslySetInnerHTML={{ __html: card.body }} />}
           {showVisit && card.href && (
             <div className="mt-5">
               <CardLink

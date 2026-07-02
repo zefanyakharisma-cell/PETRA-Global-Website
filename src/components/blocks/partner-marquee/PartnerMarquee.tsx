@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useReducedMotion } from 'framer-motion';
 import { Section, Container } from '@/components/ui/Section';
+import { InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
 import type { BlockBaseConfig, Locale } from '@/lib/types';
 
@@ -58,7 +59,12 @@ export function PartnerMarquee({
     return () => window.removeEventListener('keydown', onKey);
   }, [active]);
 
-  const rows = intoRows(partners, partners.length > 24 ? 3 : partners.length > 10 ? 2 : 1);
+  // rows = auto-lane scrolling (default) · single = one scrolling lane ·
+  // static = no motion, wrapped grid of every tile.
+  const layout = (config.layout as string) ?? 'rows';
+  const laneCount = layout === 'single' ? 1 : partners.length > 24 ? 3 : partners.length > 10 ? 2 : 1;
+  const rows = intoRows(partners, laneCount);
+  const staticGrid = reduce || layout === 'static';
 
   const Tile = ({ p }: { p: MarqueePartner }) => (
     <button
@@ -91,12 +97,12 @@ export function PartnerMarquee({
     <Section config={{ ...config, background: config.background ?? 'navy' }}>
       {heading && (
         <Container>
-          <h2 className="mb-8 text-center text-3xl text-white md:text-4xl">{heading}</h2>
+          <InlineHtml as="h2" html={heading} className="mb-8 text-center text-3xl text-white md:text-4xl" />
         </Container>
       )}
 
-      {reduce ? (
-        // Reduced motion: show every logo statically, no scrolling.
+      {staticGrid ? (
+        // Static grid: show every logo without scrolling (also honours reduced motion).
         <Container>
           <div className="flex flex-wrap justify-center gap-3">
             {partners.map((p, i) => <Tile key={i} p={p} />)}

@@ -25,6 +25,8 @@ export async function StaffBlock({ block, locale, pageOwnerStaffId }: BlockCompo
       .eq('is_active', true)
       .order('name');
     const team = data ?? [];
+    // grid = cards (default) · list = single-column rows.
+    const dirList = (block.config.layout as string) === 'list';
 
     return (
       <Section config={block.config}>
@@ -36,7 +38,7 @@ export async function StaffBlock({ block, locale, pageOwnerStaffId }: BlockCompo
               hint={locale === 'id' ? 'Profil staf IO akan tampil di sini.' : 'IO staff profiles will appear here.'}
             />
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className={clsx(dirList ? 'mx-auto flex max-w-2xl flex-col gap-3' : 'grid gap-6 sm:grid-cols-2 lg:grid-cols-3')}>
               {team.map((s, i) => (
                 <Reveal key={s.id} delay={i * 0.05}>
                   <div className={clsx(

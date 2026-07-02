@@ -58,14 +58,21 @@ export type FieldVisibility = { showFor?: { field: string; equals: string[] } };
 export type EditorField = FieldVisibility & (
   | { key: string; label: string; type: 'text' | 'textarea'; localized?: boolean; help?: string }
   | { key: string; label: string; type: 'richtext'; localized?: boolean }
+  // Single-line WYSIWYG for short display copy (headings, labels…). Stores
+  // inline HTML (no block wrapper) so it injects into the block's own tag.
+  | { key: string; label: string; type: 'richtext-inline'; localized?: boolean; help?: string }
   | { key: string; label: string; type: 'image' }
   | { key: string; label: string; type: 'url'; help?: string }
   | { key: string; label: string; type: 'link'; help?: string }
   | { key: string; label: string; type: 'file'; help?: string }
   | { key: string; label: string; type: 'date'; help?: string }
-  | { key: string; label: string; type: 'number' }
+  | { key: string; label: string; type: 'number'; help?: string }
   | { key: string; label: string; type: 'boolean' }
   | { key: string; label: string; type: 'select'; options: { value: string; label: string }[]; default?: string; help?: string }
+  // Visual layout picker — like `select`, but rendered as clickable thumbnail
+  // previews. `shape` names a diagram in the LayoutField shape map. The chosen
+  // value is a plain string, so it can also drive `showFor` visibility.
+  | { key: string; label: string; type: 'layout'; options: { value: string; label: string; shape: string }[]; default?: string; help?: string }
   // Pick many fixed options — value is a string[] of the chosen option values.
   | { key: string; label: string; type: 'multiselect'; options: { value: string; label: string }[]; help?: string }
   | { key: string; label: string; type: 'entity'; entity: 'staff' | 'programs'; help?: string }

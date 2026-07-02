@@ -120,10 +120,22 @@
   .prose-block ol { @apply mt-4 list-decimal space-y-1 pl-6; }
   .prose-block a { @apply text-magenta underline underline-offset-2; }
   .prose-block blockquote { @apply my-6 border-l-4 border-magenta pl-4 font-editorial text-2xl text-navy; }
+  /* First child never adds a top margin — the wrapper controls the offset. */
+  .prose-block > :first-child { @apply mt-0; }
+  /* Word-like inline marks (shared by block prose + inline fields). */
+  .prose-block mark, .rich-inline mark { @apply rounded bg-amber/40 px-0.5 text-inherit; }
+  .prose-block u, .rich-inline u { @apply underline underline-offset-2; }
   .prose-on-navy { @apply text-white/85; }
   .prose-on-navy h2, .prose-on-navy h3 { @apply text-white; }
   .prose-on-navy a { @apply text-cyan; }
   .prose-on-navy blockquote { @apply border-cyan text-white; }
+  .prose-on-navy mark { @apply bg-amber/60 text-ink; }
+
+  /* Inline rich-text (headings, labels, buttons). Inherits the host element's
+     size/colour; only links + highlight marks add their own styling. Any single
+     wrapping paragraph the editor emits collapses to inline. */
+  .rich-inline > p { @apply m-0 inline; }
+  .rich-inline a { @apply underline underline-offset-2; }
 
   /* ------------------------------------------------------------------------
      Shared micro-interactions. Kept as component utilities so blocks and

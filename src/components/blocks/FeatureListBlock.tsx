@@ -6,6 +6,7 @@ import {
 import { Link } from '@/i18n/routing';
 import { Section, Container } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
+import { RichText, InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
@@ -62,40 +63,44 @@ export function FeatureListBlock({ block, locale }: BlockComponentProps) {
   const columns = Math.min(Math.max(Number(block.config.columns) || 3, 1), 4);
   const accent = (block.config.accent as string) ?? 'magenta';
   const onNavy = block.config.background === 'navy';
+  // grid = icon over text (default) · cards = bordered tiles · inline = icon
+  // beside text in rows.
+  const layout = (block.config.layout as string) ?? 'grid';
+  const isCards = layout === 'cards';
+  const isInline = layout === 'inline';
 
   return (
     <Section config={block.config}>
       <Container>
         {(c.heading || c.intro) && (
           <div className="mb-10 max-w-2xl">
-            {c.heading && (
+            {t(c.heading, locale) && (
               <Reveal>
-                <h2 className="text-4xl md:text-5xl">{t(c.heading, locale)}</h2>
+                <InlineHtml as="h2" html={t(c.heading, locale)} className="text-4xl md:text-5xl" />
               </Reveal>
             )}
-            {c.intro && (
+            {t(c.intro, locale) && (
               <Reveal delay={0.06}>
-                <p className={clsx('mt-4 text-lg', onNavy ? 'text-white/80' : 'text-ink/70')}>
-                  {t(c.intro, locale)}
-                </p>
+                <RichText html={t(c.intro, locale)} onNavy={onNavy} className={clsx('mt-4 text-lg', !onNavy && 'text-ink/70')} />
               </Reveal>
             )}
           </div>
         )}
         <div
           className={clsx(
-            'grid gap-8 sm:grid-cols-2',
-            columns >= 3 && 'lg:grid-cols-3',
-            columns >= 4 && 'lg:grid-cols-4',
+            'grid gap-8',
+            isInline ? 'sm:grid-cols-2' : 'sm:grid-cols-2',
+            !isInline && columns >= 3 && 'lg:grid-cols-3',
+            !isInline && columns >= 4 && 'lg:grid-cols-4',
           )}
         >
           {items.map((f, i) => {
             const Icon = ICONS[f.icon ?? ''] ?? Sparkles;
             const inner = (
-              <div className="flex flex-col gap-3">
+              <div className={clsx('flex gap-3', isInline ? 'flex-row items-start gap-4' : 'flex-col')}>
                 <span
                   className={clsx(
-                    'inline-flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 ease-out',
+                    'inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-300 ease-out',
                     onNavy ? 'bg-white/10 group-hover:bg-white/20' : 'bg-ink/5 group-hover:bg-ink/[0.08]',
                     'group-hover:-rotate-6 group-hover:scale-110',
                     ACCENT_TEXT[accent],
@@ -103,22 +108,26 @@ export function FeatureListBlock({ block, locale }: BlockComponentProps) {
                 >
                   <Icon className="h-6 w-6" strokeWidth={1.75} />
                 </span>
-                <h3 className={clsx('text-xl transition-colors', f.href && ACCENT_GROUP_HOVER[accent])}>
-                  {t(f.title, locale) || 'Feature'}
-                </h3>
-                {f.body && (
-                  <p className={clsx(onNavy ? 'text-white/75' : 'text-ink/65')}>{t(f.body, locale)}</p>
-                )}
+                <div className={clsx(isInline && 'flex-1')}>
+                  <InlineHtml as="h3" html={t(f.title, locale)} fallback="Feature" className={clsx('text-xl transition-colors', f.href && ACCENT_GROUP_HOVER[accent])} />
+                  {t(f.body, locale) && (
+                    <RichText html={t(f.body, locale)} onNavy={onNavy} className={clsx('mt-2', !onNavy && 'text-ink/65')} />
+                  )}
+                </div>
               </div>
             );
+            // Cards wrap each feature in a bordered tile.
+            const cardClass = isCards
+              ? clsx('rounded-2xl border p-6', onNavy ? 'border-white/15 bg-white/5' : 'border-ink/10 bg-white shadow-sm')
+              : '';
             return (
               <Reveal key={i} delay={i * 0.05}>
                 {f.href ? (
-                  <Link href={f.href} className="group block transition duration-300 ease-out hover:-translate-y-1">
+                  <Link href={f.href} className={clsx('group block transition duration-300 ease-out hover:-translate-y-1', cardClass)}>
                     {inner}
                   </Link>
                 ) : (
-                  inner
+                  <div className={clsx('group', cardClass)}>{inner}</div>
                 )}
               </Reveal>
             );

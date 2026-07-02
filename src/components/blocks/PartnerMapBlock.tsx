@@ -1,5 +1,7 @@
 import { Section, Container } from '@/components/ui/Section';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { InlineHtml } from '@/components/ui/RichText';
+import { clsx } from '@/lib/clsx';
 import { createClient } from '@/lib/supabase/server';
 import { cityToCoords } from '@/lib/cityCoords';
 import { t, type LocaleMap } from '@/lib/types';
@@ -116,11 +118,12 @@ export async function PartnerMapBlock({ block, locale }: BlockComponentProps) {
 
   const dots = buildDots(markers);
   const isDomestic = filterKind === 'domestic';
+  const headingLeft = (block.config.layout as string) === 'left';
 
   return (
     <Section config={{ ...block.config, background: block.config.background ?? 'navy' }}>
       <Container>
-        {c.heading && <h2 className="mb-8 text-center text-3xl md:text-4xl">{t(c.heading, locale)}</h2>}
+        {t(c.heading, locale) && <InlineHtml as="h2" html={t(c.heading, locale)} className={clsx('mb-8 text-3xl md:text-4xl', headingLeft ? 'text-left' : 'text-center')} />}
         {dots.length === 0 ? (
           <EmptyState
             onDark

@@ -1,6 +1,7 @@
 import { Section, Container } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { Link } from '@/i18n/routing';
+import { RichText, InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap, type Locale } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
@@ -56,6 +57,10 @@ export function EventsBlock({ block, locale }: BlockComponentProps) {
   const accent = (block.config.accent as string) ?? 'magenta';
   const hidePast = !!block.config.hidePast;
   const onNavy = block.config.background === 'navy';
+  // list = divided rows (default) · cards = tiles grid · compact = dense rows.
+  const layout = (block.config.layout as string) ?? 'list';
+  const isCards = layout === 'cards';
+  const isCompact = layout === 'compact';
   // "Today" in the university's timezone (en-CA gives YYYY-MM-DD), so events flip
   // to "past" at local midnight regardless of the server's timezone (UTC on Vercel).
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date());
@@ -66,61 +71,94 @@ export function EventsBlock({ block, locale }: BlockComponentProps) {
   const past = hidePast ? [] : dated.filter(isPast).sort((a, b) => (a.date! > b.date! ? -1 : 1));
   const rows = [...upcoming, ...past];
 
+  const titleLink = (it: EventItem) => {
+    const titleEl = (
+      <InlineHtml as="span" html={t(it.title, locale)} fallback="Event" className={clsx('font-condensed uppercase tracking-wide', isCompact ? 'text-lg' : 'text-xl', onNavy ? 'text-white' : 'text-ink')} />
+    );
+    if (!it.href) return titleEl;
+    const cls = clsx('link-underline inline-block transition-colors', onNavy ? 'hover:text-cyan' : 'hover:text-magenta');
+    return isExternalHref(it.href) ? (
+      <a href={it.href} target="_blank" rel="noopener noreferrer" className={cls}>{titleEl}</a>
+    ) : (
+      <Link href={it.href} className={cls}>{titleEl}</Link>
+    );
+  };
+
+  const dateBadge = (it: EventItem) => (
+    <div className="flex items-center gap-2">
+      <span className={clsx('h-2 w-2 shrink-0 rounded-full', ACCENT_BG[accent] ?? 'bg-magenta')} />
+      <span className={clsx('text-sm font-medium', onNavy ? 'text-white/80' : 'text-ink/70')}>{formatDate(it, locale)}</span>
+    </div>
+  );
+
+  const empty = rows.length === 0 && (
+    <p className={clsx('text-sm', onNavy ? 'text-white/50' : 'text-ink/40')}>
+      {locale === 'id' ? 'Belum ada acara.' : 'No events to show yet.'}
+    </p>
+  );
+
+  const header = (c.heading || c.intro) && (
+    <div className="mb-8 max-w-2xl">
+      {t(c.heading, locale) && <Reveal><InlineHtml as="h2" html={t(c.heading, locale)} className="text-3xl md:text-4xl" /></Reveal>}
+      {t(c.intro, locale) && (
+        <Reveal delay={0.06}>
+          <RichText html={t(c.intro, locale)} onNavy={onNavy} className={clsx('mt-3 text-lg', !onNavy && 'text-ink/70')} />
+        </Reveal>
+      )}
+    </div>
+  );
+
+  // Cards: each event becomes a tile with the date, title, location & blurb.
+  if (isCards) {
+    return (
+      <Section config={block.config}>
+        <Container>
+          {header}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {rows.map((it, i) => (
+              <Reveal key={i} delay={Math.min(i, 6) * 0.04}>
+                <div className={clsx('flex h-full flex-col gap-2 rounded-2xl border p-5', isPast(it) && 'opacity-55', onNavy ? 'border-white/15 bg-white/5' : 'border-ink/10 bg-white shadow-sm')}>
+                  {dateBadge(it)}
+                  <div>{titleLink(it)}</div>
+                  {t(it.location, locale) && (
+                    <InlineHtml as="span" html={t(it.location, locale)} className={clsx('block text-sm', onNavy ? 'text-white/60' : 'text-ink/55')} />
+                  )}
+                  {t(it.description, locale) && (
+                    <RichText html={t(it.description, locale)} onNavy={onNavy} className={clsx('text-sm', !onNavy && 'text-ink/65')} />
+                  )}
+                </div>
+              </Reveal>
+            ))}
+          </div>
+          {empty}
+        </Container>
+      </Section>
+    );
+  }
+
   return (
     <Section config={block.config}>
       <Container narrow>
-        {(c.heading || c.intro) && (
-          <div className="mb-8 max-w-2xl">
-            {c.heading && <Reveal><h2 className="text-3xl md:text-4xl">{t(c.heading, locale)}</h2></Reveal>}
-            {c.intro && (
-              <Reveal delay={0.06}>
-                <p className={clsx('mt-3 text-lg', onNavy ? 'text-white/80' : 'text-ink/70')}>{t(c.intro, locale)}</p>
-              </Reveal>
-            )}
-          </div>
-        )}
+        {header}
         <ul className={clsx('divide-y', onNavy ? 'divide-white/10' : 'divide-ink/10')}>
-          {rows.map((it, i) => {
-            const past = isPast(it);
-            const titleEl = (
-              <span className={clsx('font-condensed text-xl uppercase tracking-wide', onNavy ? 'text-white' : 'text-ink')}>
-                {t(it.title, locale) || 'Event'}
-              </span>
-            );
-            return (
-              <Reveal key={i} delay={Math.min(i, 6) * 0.04}>
-                <li className={clsx('flex flex-col gap-1 py-4 sm:flex-row sm:gap-5', past && 'opacity-55')}>
-                  <div className="flex items-center gap-2 sm:w-44 sm:shrink-0">
-                    <span className={clsx('h-2 w-2 shrink-0 rounded-full', ACCENT_BG[accent] ?? 'bg-magenta')} />
-                    <span className={clsx('text-sm font-medium', onNavy ? 'text-white/80' : 'text-ink/70')}>{formatDate(it, locale)}</span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    {it.href ? (
-                      isExternalHref(it.href) ? (
-                        <a href={it.href} target="_blank" rel="noopener noreferrer" className={clsx('link-underline inline-block transition-colors', onNavy ? 'hover:text-cyan' : 'hover:text-magenta')}>{titleEl}</a>
-                      ) : (
-                        <Link href={it.href} className={clsx('link-underline inline-block transition-colors', onNavy ? 'hover:text-cyan' : 'hover:text-magenta')}>{titleEl}</Link>
-                      )
-                    ) : (
-                      titleEl
-                    )}
-                    {it.location && (
-                      <span className={clsx('mt-0.5 block text-sm', onNavy ? 'text-white/60' : 'text-ink/55')}>{t(it.location, locale)}</span>
-                    )}
-                    {it.description && (
-                      <span className={clsx('mt-1 block text-sm', onNavy ? 'text-white/70' : 'text-ink/65')}>{t(it.description, locale)}</span>
-                    )}
-                  </div>
-                </li>
-              </Reveal>
-            );
-          })}
+          {rows.map((it, i) => (
+            <Reveal key={i} delay={Math.min(i, 6) * 0.04}>
+              <li className={clsx('flex flex-col gap-1 sm:flex-row sm:gap-5', isCompact ? 'py-2.5' : 'py-4', isPast(it) && 'opacity-55')}>
+                <div className="sm:w-44 sm:shrink-0">{dateBadge(it)}</div>
+                <div className="min-w-0 flex-1">
+                  {titleLink(it)}
+                  {t(it.location, locale) && (
+                    <InlineHtml as="span" html={t(it.location, locale)} className={clsx('mt-0.5 block text-sm', onNavy ? 'text-white/60' : 'text-ink/55')} />
+                  )}
+                  {!isCompact && t(it.description, locale) && (
+                    <RichText html={t(it.description, locale)} onNavy={onNavy} className={clsx('mt-1 text-sm', !onNavy && 'text-ink/65')} />
+                  )}
+                </div>
+              </li>
+            </Reveal>
+          ))}
         </ul>
-        {rows.length === 0 && (
-          <p className={clsx('text-sm', onNavy ? 'text-white/50' : 'text-ink/40')}>
-            {locale === 'id' ? 'Belum ada acara.' : 'No events to show yet.'}
-          </p>
-        )}
+        {empty}
       </Container>
     </Section>
   );

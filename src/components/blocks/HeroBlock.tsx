@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { Section, Container } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { Cta } from '@/components/ui/Cta';
+import { RichText, InlineHtml, stripHtml } from '@/components/ui/RichText';
 import { createClient } from '@/lib/supabase/server';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap, type Locale } from '@/lib/types';
@@ -68,11 +69,11 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
         // Accept a Google Drive share link for the backdrop; normalizeImageUrl
         // routes it through our /api/media proxy (idempotent for other URLs).
         bgImageUrl={c.scrollBgImage ? normalizeImageUrl(c.scrollBgImage) : undefined}
-        title={t(c.heading, locale) || 'Headline'}
-        date={t(c.eyebrow, locale)}
-        scrollToExpand={t(c.scrollCaption, locale) || (locale === 'id' ? 'Gulir untuk memperbesar' : 'Scroll to expand')}
+        title={stripHtml(t(c.heading, locale)) || 'Headline'}
+        date={stripHtml(t(c.eyebrow, locale))}
+        scrollToExpand={stripHtml(t(c.scrollCaption, locale)) || (locale === 'id' ? 'Gulir untuk memperbesar' : 'Scroll to expand')}
         textBlend={!!block.config.scrollTextBlend}
-        overview={t(c.subcopy, locale)}
+        overview={stripHtml(t(c.subcopy, locale))}
       />
     );
   }
@@ -117,23 +118,17 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
           )}
         >
           <div className={clsx(layout === 'centered' && 'flex flex-col items-center')}>
-            {c.eyebrow && (
+            {t(c.eyebrow, locale) && (
               <Reveal>
-                <p className="font-condensed text-lg uppercase tracking-widest text-cyan">
-                  {t(c.eyebrow, locale)}
-                </p>
+                <InlineHtml as="p" html={t(c.eyebrow, locale)} className="font-condensed text-lg uppercase tracking-widest text-cyan" />
               </Reveal>
             )}
             <Reveal delay={0.08}>
-              <h1 className="mt-3 text-5xl leading-[0.95] md:text-7xl">
-                {t(c.heading, locale) || 'Headline'}
-              </h1>
+              <InlineHtml as="h1" html={t(c.heading, locale)} fallback="Headline" className="mt-3 text-5xl leading-[0.95] md:text-7xl" />
             </Reveal>
-            {c.subcopy && (
+            {t(c.subcopy, locale) && (
               <Reveal delay={0.16}>
-                <p className="mt-5 max-w-xl font-body text-lg text-white/85">
-                  {t(c.subcopy, locale)}
-                </p>
+                <RichText html={t(c.subcopy, locale)} onNavy className="mt-5 max-w-xl font-body text-lg text-white/85" />
               </Reveal>
             )}
             {c.ctas && c.ctas.length > 0 && (
@@ -146,7 +141,7 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
                 >
                   {c.ctas.slice(0, 2).map((cta, i) => (
                     <Cta key={i} href={cta.href || '#'} variant={cta.variant || (i === 0 ? 'magenta' : 'outline')} newTab={cta.newTab}>
-                      {t(cta.label, locale)}
+                      <InlineHtml as="span" html={t(cta.label, locale)} />
                     </Cta>
                   ))}
                 </div>

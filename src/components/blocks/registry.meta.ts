@@ -36,7 +36,7 @@ const UNIVERSAL: EditorField[] = [
 
 // Reusable button definition — label + smart link + style + new-tab toggle.
 const BUTTON_FIELDS: EditorField[] = [
-  { key: 'label', label: 'Label', type: 'text', localized: true },
+  { key: 'label', label: 'Label', type: 'richtext-inline', localized: true },
   { key: 'href', label: 'Link', type: 'link' },
   { key: 'variant', label: 'Style', type: 'select', options: [
     { value: '', label: 'Default (auto)' },
@@ -60,11 +60,11 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     defaultContent: { eyebrow: {}, heading: {}, subcopy: {}, ctas: [] },
     editor: {
       config: [
-        { key: 'layout', label: 'Layout', type: 'select', options: [
-          { value: 'centered', label: 'Centered' },
-          { value: 'left', label: 'Left' },
-          { value: 'split-with-image', label: 'Split with image' },
-          { value: 'scroll-expand', label: 'Scroll-to-expand media (immersive)' },
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'centered', options: [
+          { value: 'centered', label: 'Centered', shape: 'hero-center' },
+          { value: 'left', label: 'Left', shape: 'hero-left' },
+          { value: 'split-with-image', label: 'Split w/ image', shape: 'hero-split' },
+          { value: 'scroll-expand', label: 'Immersive', shape: 'hero-immersive' },
         ] },
         // Standard-hero background options — hidden for the scroll-expand layout,
         // which brings its own media + backdrop fields below.
@@ -91,9 +91,9 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         ...UNIVERSAL,
       ],
       content: [
-        { key: 'eyebrow', label: 'Eyebrow', type: 'text', localized: true },
-        { key: 'heading', label: 'Headline', type: 'text', localized: true },
-        { key: 'subcopy', label: 'Subcopy', type: 'textarea', localized: true },
+        { key: 'eyebrow', label: 'Eyebrow', type: 'richtext-inline', localized: true },
+        { key: 'heading', label: 'Headline', type: 'richtext-inline', localized: true },
+        { key: 'subcopy', label: 'Subcopy', type: 'richtext', localized: true },
         // Standard-hero content (hidden for scroll-expand).
         { key: 'image_url', label: 'Background / split image', type: 'image',
           showFor: { field: 'layout', equals: ['centered', 'left', 'split-with-image'] } },
@@ -107,37 +107,46 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           showFor: { field: 'layout', equals: ['scroll-expand'] } },
         { key: 'scrollMediaImage', label: 'Video poster / image (media-type “Image”)', type: 'image',
           showFor: { field: 'layout', equals: ['scroll-expand'] } },
-        { key: 'scrollCaption', label: 'Scroll hint caption (e.g. “Scroll to explore”)', type: 'text', localized: true,
+        { key: 'scrollCaption', label: 'Scroll hint caption (e.g. “Scroll to explore”)', type: 'richtext-inline', localized: true,
           showFor: { field: 'layout', equals: ['scroll-expand'] } },
       ],
     },
   },
   section_header: {
-    type: 'section_header', label: 'Section header', category: 'Layout & hero', defaultConfig: { background: 'paper', spacing: 'normal', alignment: 'left', accent: 'magenta' },
+    type: 'section_header', label: 'Section header', category: 'Layout & hero', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'left', alignment: 'left', accent: 'magenta' },
     defaultContent: { eyebrow: {}, heading: {}, intro: {} },
     editor: {
       config: [
-        { key: 'alignment', label: 'Alignment', type: 'select', options: [
-          { value: 'left', label: 'Left' }, { value: 'center', label: 'Center' },
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'left', options: [
+          { value: 'left', label: 'Left', shape: 'align-left' },
+          { value: 'center', label: 'Centered', shape: 'align-center' },
+          { value: 'boxed', label: 'Boxed', shape: 'boxed' },
         ] },
         ...UNIVERSAL,
       ],
       content: [
-        { key: 'eyebrow', label: 'Eyebrow', type: 'text', localized: true },
-        { key: 'heading', label: 'Heading', type: 'text', localized: true },
-        { key: 'intro', label: 'Intro', type: 'textarea', localized: true },
+        { key: 'eyebrow', label: 'Eyebrow', type: 'richtext-inline', localized: true },
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
+        { key: 'intro', label: 'Intro', type: 'richtext', localized: true },
       ],
     },
   },
   audience_doors: {
-    type: 'audience_doors', label: 'Audience doors', category: 'Layout & hero', defaultConfig: { background: 'paper', spacing: 'normal' },
+    type: 'audience_doors', label: 'Audience doors', category: 'Layout & hero', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'row' },
     defaultContent: { doors: [
       { accent: 'magenta', title: { en: 'Study at Petra' }, href: '/mobility' },
       { accent: 'blue', title: { en: 'Partner with Petra' }, href: '/partnership' },
       { accent: 'amber', title: { en: 'Go abroad' }, href: '/mobility' },
     ] },
     editor: {
-      config: UNIVERSAL,
+      config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'row', options: [
+          { value: 'row', label: 'Cards row', shape: 'doors-row' },
+          { value: 'stack', label: 'Wide stack', shape: 'doors-stack' },
+          { value: 'list', label: 'Compact list', shape: 'rows-thumb' },
+        ] },
+        ...UNIVERSAL,
+      ],
       content: [
         { key: 'doors', label: 'Doors', type: 'list', itemFields: [
           { key: 'accent', label: 'Accent', type: 'select', options: [
@@ -150,8 +159,8 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
             { value: 'green', label: 'Green (SBM)' },
             { value: 'yellow', label: 'Yellow (PGSD)' },
           ] },
-          { key: 'title', label: 'Title', type: 'text', localized: true },
-          { key: 'blurb', label: 'Blurb', type: 'text', localized: true },
+          { key: 'title', label: 'Title', type: 'richtext-inline', localized: true },
+          { key: 'blurb', label: 'Blurb', type: 'richtext-inline', localized: true },
           { key: 'href', label: 'Destination', type: 'url' },
         ] },
       ],
@@ -162,10 +171,10 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     defaultContent: {},
     editor: {
       config: [
-        { key: 'style', label: 'Style', type: 'select', options: [
-          { value: 'line', label: 'Hairline' },
-          { value: 'dots', label: 'Dots' },
-          { value: 'space', label: 'Empty space' },
+        { key: 'style', label: 'Style', type: 'layout', default: 'line', options: [
+          { value: 'line', label: 'Hairline', shape: 'divider-line' },
+          { value: 'dots', label: 'Dots', shape: 'divider-dots' },
+          { value: 'space', label: 'Empty space', shape: 'divider-space' },
         ] },
         ...UNIVERSAL,
       ],
@@ -177,8 +186,10 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     defaultContent: { html: {} },
     editor: {
       config: [
-        { key: 'width', label: 'Width', type: 'select', options: [
-          { value: 'narrow', label: 'Narrow reading column' }, { value: 'full', label: 'Full' },
+        { key: 'width', label: 'Layout', type: 'layout', default: 'narrow', options: [
+          { value: 'narrow', label: 'Reading column', shape: 'align-left' },
+          { value: 'full', label: 'Full width', shape: 'stack' },
+          { value: 'two-column', label: 'Two columns', shape: 'two-col' },
         ] },
         ...UNIVERSAL,
       ],
@@ -190,28 +201,37 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     defaultContent: { heading: {}, body: {} },
     editor: {
       config: [
-        { key: 'imageSide', label: 'Image side', type: 'select', options: [
-          { value: 'left', label: 'Left' }, { value: 'right', label: 'Right' },
+        { key: 'imageSide', label: 'Layout', type: 'layout', default: 'left', options: [
+          { value: 'left', label: 'Image left', shape: 'split-left' },
+          { value: 'right', label: 'Image right', shape: 'split-right' },
+          { value: 'stacked', label: 'Stacked', shape: 'split-stack' },
         ] },
         ...UNIVERSAL,
       ],
       content: [
-        { key: 'heading', label: 'Heading', type: 'text', localized: true },
-        { key: 'body', label: 'Body', type: 'textarea', localized: true },
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
+        { key: 'body', label: 'Body', type: 'richtext', localized: true },
         { key: 'image_url', label: 'Image', type: 'image' },
         { key: 'cta', label: 'CTA', type: 'list', itemFields: BUTTON_FIELDS },
       ],
     },
   },
   stat_strip: {
-    type: 'stat_strip', label: 'Stat strip', category: 'Content', defaultConfig: { background: 'navy', spacing: 'normal' },
+    type: 'stat_strip', label: 'Stat strip', category: 'Content', defaultConfig: { background: 'navy', spacing: 'normal', layout: 'row' },
     defaultContent: { stats: [] },
     editor: {
-      config: UNIVERSAL,
+      config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'row', options: [
+          { value: 'row', label: 'Inline row', shape: 'stat-row' },
+          { value: 'cards', label: 'Cards', shape: 'stat-cards' },
+          { value: 'stacked', label: 'Stacked', shape: 'stat-stack' },
+        ] },
+        ...UNIVERSAL,
+      ],
       content: [
         { key: 'stats', label: 'Stats (2–5)', type: 'list', itemFields: [
           { key: 'value', label: 'Value', type: 'text' },
-          { key: 'label', label: 'Label', type: 'text', localized: true },
+          { key: 'label', label: 'Label', type: 'richtext-inline', localized: true },
           { key: 'auto', label: 'Auto-count', type: 'select', options: [
             { value: 'none', label: 'Manual value' },
             { value: 'partners', label: 'All partners' },
@@ -223,10 +243,15 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     },
   },
   card_grid: {
-    type: 'card_grid', label: 'Card grid', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', source: 'manual', columns: 3, linkToPage: true },
+    type: 'card_grid', label: 'Card grid', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'grid', source: 'manual', columns: 3, linkToPage: true },
     defaultContent: { cards: [] },
     editor: {
       config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'grid', options: [
+          { value: 'grid', label: 'Grid', shape: 'grid-3' },
+          { value: 'list', label: 'List', shape: 'rows-thumb' },
+          { value: 'featured', label: 'Featured', shape: 'featured' },
+        ] },
         { key: 'source', label: 'Source', type: 'select', options: [
           { value: 'manual', label: 'Manual cards' },
           { value: 'programs', label: 'Programs' },
@@ -241,10 +266,10 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         ...UNIVERSAL,
       ],
       content: [
-        { key: 'buttonLabel', label: 'Button label', type: 'text', localized: true, help: 'Shown when “Show a clickable button” is on. Defaults to “Learn more”.' },
+        { key: 'buttonLabel', label: 'Button label', type: 'richtext-inline', localized: true, help: 'Shown when “Show a clickable button” is on. Defaults to “Learn more”.' },
         { key: 'cards', label: 'Manual cards', type: 'list', itemFields: [
-          { key: 'title', label: 'Title', type: 'text', localized: true },
-          { key: 'body', label: 'Body', type: 'textarea', localized: true },
+          { key: 'title', label: 'Title', type: 'richtext-inline', localized: true },
+          { key: 'body', label: 'Body', type: 'richtext', localized: true },
           { key: 'image_url', label: 'Image', type: 'image' },
           { key: 'href', label: 'Link', type: 'url' },
         ] },
@@ -252,13 +277,21 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     },
   },
   feature_list: {
-    type: 'feature_list', label: 'Feature list', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', columns: 3, accent: 'magenta' },
+    type: 'feature_list', label: 'Feature list', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'grid', columns: 3, accent: 'magenta' },
     defaultContent: { heading: {}, intro: {}, items: [] },
     editor: {
-      config: [{ key: 'columns', label: 'Columns', type: 'number' }, ...UNIVERSAL],
+      config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'grid', options: [
+          { value: 'grid', label: 'Icon grid', shape: 'feature-grid' },
+          { value: 'cards', label: 'Cards', shape: 'cards' },
+          { value: 'inline', label: 'Inline rows', shape: 'rows-thumb' },
+        ] },
+        { key: 'columns', label: 'Columns', type: 'number', help: 'Used by the grid & cards layouts.' },
+        ...UNIVERSAL,
+      ],
       content: [
-        { key: 'heading', label: 'Heading', type: 'text', localized: true },
-        { key: 'intro', label: 'Intro', type: 'textarea', localized: true },
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
+        { key: 'intro', label: 'Intro', type: 'richtext', localized: true },
         { key: 'items', label: 'Features', type: 'list', itemFields: [
           { key: 'icon', label: 'Icon', type: 'select', options: [
             { value: 'globe', label: 'Globe' },
@@ -278,41 +311,53 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
             { value: 'compass', label: 'Compass' },
             { value: 'star', label: 'Star' },
           ] },
-          { key: 'title', label: 'Title', type: 'text', localized: true },
-          { key: 'body', label: 'Body', type: 'textarea', localized: true },
+          { key: 'title', label: 'Title', type: 'richtext-inline', localized: true },
+          { key: 'body', label: 'Body', type: 'richtext', localized: true },
           { key: 'href', label: 'Link (optional)', type: 'url' },
         ] },
       ],
     },
   },
   accordion: {
-    type: 'accordion', label: 'Accordion / FAQ', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', openMode: 'multi' },
+    type: 'accordion', label: 'Accordion / FAQ', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'bordered', openMode: 'multi' },
     defaultContent: { heading: {}, items: [] },
     editor: {
       config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'bordered', options: [
+          { value: 'bordered', label: 'Bordered', shape: 'boxed' },
+          { value: 'plain', label: 'Plain', shape: 'rows' },
+          { value: 'cards', label: 'Separated', shape: 'cards' },
+        ] },
         { key: 'openMode', label: 'Open mode', type: 'select', options: [
           { value: 'multi', label: 'Multi-open' }, { value: 'single', label: 'Single-open' },
         ] },
         ...UNIVERSAL,
       ],
       content: [
-        { key: 'heading', label: 'Heading', type: 'text', localized: true },
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
         { key: 'items', label: 'Q&A', type: 'list', itemFields: [
-          { key: 'q', label: 'Question', type: 'text', localized: true },
-          { key: 'a', label: 'Answer', type: 'textarea', localized: true },
+          { key: 'q', label: 'Question', type: 'richtext-inline', localized: true },
+          { key: 'a', label: 'Answer', type: 'richtext', localized: true },
         ] },
       ],
     },
   },
   tabs: {
-    type: 'tabs', label: 'Tabs', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', accent: 'magenta' },
+    type: 'tabs', label: 'Tabs', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'top', accent: 'magenta' },
     defaultContent: { heading: {}, tabs: [] },
     editor: {
-      config: UNIVERSAL,
+      config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'top', options: [
+          { value: 'top', label: 'Tabs on top', shape: 'tabs-top' },
+          { value: 'side', label: 'Tabs on side', shape: 'tabs-side' },
+          { value: 'pills', label: 'Pills', shape: 'pills' },
+        ] },
+        ...UNIVERSAL,
+      ],
       content: [
-        { key: 'heading', label: 'Heading', type: 'text', localized: true },
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
         { key: 'tabs', label: 'Tabs', type: 'list', itemFields: [
-          { key: 'label', label: 'Tab label', type: 'text', localized: true },
+          { key: 'label', label: 'Tab label', type: 'richtext-inline', localized: true },
           { key: 'body', label: 'Panel content', type: 'richtext', localized: true },
         ] },
       ],
@@ -323,41 +368,58 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     defaultContent: { heading: {}, steps: [] },
     editor: {
       config: [
-        { key: 'orientation', label: 'Orientation', type: 'select', options: [
-          { value: 'vertical', label: 'Vertical' }, { value: 'horizontal', label: 'Horizontal' },
+        { key: 'orientation', label: 'Layout', type: 'layout', default: 'vertical', options: [
+          { value: 'vertical', label: 'Vertical', shape: 'steps-v' },
+          { value: 'horizontal', label: 'Horizontal', shape: 'steps-h' },
+          { value: 'cards', label: 'Cards', shape: 'steps-cards' },
         ] },
         ...UNIVERSAL,
       ],
       content: [
-        { key: 'heading', label: 'Heading', type: 'text', localized: true },
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
         { key: 'steps', label: 'Steps', type: 'list', itemFields: [
-          { key: 'title', label: 'Title', type: 'text', localized: true },
-          { key: 'body', label: 'Detail', type: 'textarea', localized: true },
+          { key: 'title', label: 'Title', type: 'richtext-inline', localized: true },
+          { key: 'body', label: 'Detail', type: 'richtext', localized: true },
         ] },
       ],
     },
   },
   timeline: {
-    type: 'timeline', label: 'Timeline', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', accent: 'magenta' },
+    type: 'timeline', label: 'Timeline', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'vertical', accent: 'magenta' },
     defaultContent: { heading: {}, intro: {}, items: [] },
     editor: {
-      config: UNIVERSAL,
+      config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'vertical', options: [
+          { value: 'vertical', label: 'Vertical', shape: 'timeline-v' },
+          { value: 'alternating', label: 'Alternating', shape: 'timeline-alt' },
+          { value: 'horizontal', label: 'Horizontal', shape: 'timeline-h' },
+        ] },
+        ...UNIVERSAL,
+      ],
       content: [
-        { key: 'heading', label: 'Heading', type: 'text', localized: true },
-        { key: 'intro', label: 'Intro', type: 'textarea', localized: true },
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
+        { key: 'intro', label: 'Intro', type: 'richtext', localized: true },
         { key: 'items', label: 'Milestones', type: 'list', itemFields: [
-          { key: 'date', label: 'Date / year', type: 'text' },
-          { key: 'title', label: 'Title', type: 'text', localized: true },
-          { key: 'body', label: 'Detail', type: 'textarea', localized: true },
+          { key: 'date', label: 'Date / year', type: 'richtext-inline' },
+          { key: 'title', label: 'Title', type: 'richtext-inline', localized: true },
+          { key: 'body', label: 'Detail', type: 'richtext', localized: true },
         ] },
       ],
     },
   },
   gallery: {
-    type: 'gallery', label: 'Gallery', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', columns: 3 },
+    type: 'gallery', label: 'Gallery', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'grid', columns: 3 },
     defaultContent: { images: [] },
     editor: {
-      config: [{ key: 'columns', label: 'Columns', type: 'number' }, ...UNIVERSAL],
+      config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'grid', options: [
+          { value: 'grid', label: 'Grid', shape: 'grid-3' },
+          { value: 'masonry', label: 'Masonry', shape: 'masonry' },
+          { value: 'carousel', label: 'Carousel', shape: 'carousel' },
+        ] },
+        { key: 'columns', label: 'Columns', type: 'number', help: 'Used by the grid & masonry layouts.' },
+        ...UNIVERSAL,
+      ],
       content: [
         { key: 'images', label: 'Images', type: 'list', itemFields: [
           { key: 'url', label: 'Image', type: 'image' },
@@ -367,30 +429,41 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     },
   },
   pull_quote: {
-    type: 'pull_quote', label: 'Pull quote', category: 'Content', defaultConfig: { background: 'navy', spacing: 'spacious' },
+    type: 'pull_quote', label: 'Pull quote', category: 'Content', defaultConfig: { background: 'navy', spacing: 'spacious', layout: 'centered' },
     defaultContent: { quote: {}, attribution: {} },
     editor: {
-      config: UNIVERSAL,
+      config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'centered', options: [
+          { value: 'centered', label: 'Centered', shape: 'quote-center' },
+          { value: 'side', label: 'Portrait beside', shape: 'quote-side' },
+          { value: 'card', label: 'Boxed card', shape: 'quote-card' },
+        ] },
+        ...UNIVERSAL,
+      ],
       content: [
-        { key: 'quote', label: 'Quote', type: 'textarea', localized: true },
-        { key: 'attribution', label: 'Attribution', type: 'text', localized: true },
+        { key: 'quote', label: 'Quote', type: 'richtext', localized: true },
+        { key: 'attribution', label: 'Attribution', type: 'richtext-inline', localized: true },
         { key: 'portrait_url', label: 'Portrait', type: 'image' },
       ],
     },
   },
   logo_wall: {
-    type: 'logo_wall', label: 'Logo wall', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', style: 'grayscale', columns: 4 },
+    type: 'logo_wall', label: 'Logo wall', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'grid', style: 'grayscale', columns: 4 },
     defaultContent: { heading: {}, logos: [] },
     editor: {
       config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'grid', options: [
+          { value: 'grid', label: 'Static grid', shape: 'logo-grid' },
+          { value: 'marquee', label: 'Scrolling', shape: 'marquee' },
+        ] },
         { key: 'style', label: 'Style', type: 'select', options: [
           { value: 'grayscale', label: 'Grayscale' }, { value: 'color', label: 'Color' },
         ] },
-        { key: 'columns', label: 'Columns', type: 'number' },
+        { key: 'columns', label: 'Columns', type: 'number', help: 'Used by the static grid layout.' },
         ...UNIVERSAL,
       ],
       content: [
-        { key: 'heading', label: 'Heading', type: 'text', localized: true },
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
         { key: 'logos', label: 'Logos', type: 'list', itemFields: [
           { key: 'url', label: 'Logo', type: 'image' },
           { key: 'name', label: 'Name', type: 'text' },
@@ -400,10 +473,15 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     },
   },
   embed: {
-    type: 'embed', label: 'Embed', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', aspect: '16/9' },
+    type: 'embed', label: 'Embed', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'contained', aspect: '16/9' },
     defaultContent: { url: '', caption: {} },
     editor: {
       config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'contained', options: [
+          { value: 'contained', label: 'Contained', shape: 'contained' },
+          { value: 'wide', label: 'Full width', shape: 'wide' },
+          { value: 'framed', label: 'Framed', shape: 'framed' },
+        ] },
         { key: 'aspect', label: 'Aspect ratio', type: 'select', options: [
           { value: '16/9', label: '16:9' }, { value: '4/3', label: '4:3' }, { value: '1/1', label: '1:1' },
         ] },
@@ -412,53 +490,70 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
       content: [
         { key: 'url', label: 'Embed URL', type: 'url',
           help: 'Paste a YouTube link (watch, youtu.be, or shorts), a Google Drive video share link, or any embeddable URL (Google Maps, Spotify…). Ordinary share links are converted automatically.' },
-        { key: 'caption', label: 'Caption', type: 'text', localized: true },
+        { key: 'caption', label: 'Caption', type: 'richtext-inline', localized: true },
       ],
     },
   },
   downloads: {
-    type: 'downloads', label: 'Downloads', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', columns: 1, accent: 'magenta' },
+    type: 'downloads', label: 'Downloads', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'list', columns: 1, accent: 'magenta' },
     defaultContent: { heading: {}, intro: {}, items: [] },
     editor: {
-      config: [{ key: 'columns', label: 'Columns', type: 'number' }, ...UNIVERSAL],
+      config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'list', options: [
+          { value: 'list', label: 'List', shape: 'rows-thumb' },
+          { value: 'cards', label: 'Cards', shape: 'cards' },
+          { value: 'compact', label: 'Compact', shape: 'rows' },
+        ] },
+        { key: 'columns', label: 'Columns', type: 'number', help: 'Used by the list & cards layouts.' },
+        ...UNIVERSAL,
+      ],
       content: [
-        { key: 'heading', label: 'Heading', type: 'text', localized: true },
-        { key: 'intro', label: 'Intro', type: 'textarea', localized: true },
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
+        { key: 'intro', label: 'Intro', type: 'richtext', localized: true },
         { key: 'items', label: 'Files', type: 'list', itemFields: [
-          { key: 'title', label: 'Title', type: 'text', localized: true },
-          { key: 'description', label: 'Description', type: 'text', localized: true },
+          { key: 'title', label: 'Title', type: 'richtext-inline', localized: true },
+          { key: 'description', label: 'Description', type: 'richtext-inline', localized: true },
           { key: 'file', label: 'File', type: 'file' },
         ] },
       ],
     },
   },
   events: {
-    type: 'events', label: 'Events / key dates', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', hidePast: false, accent: 'magenta' },
+    type: 'events', label: 'Events / key dates', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'list', hidePast: false, accent: 'magenta' },
     defaultContent: { heading: {}, intro: {}, items: [] },
     editor: {
       config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'list', options: [
+          { value: 'list', label: 'List', shape: 'rows' },
+          { value: 'cards', label: 'Cards', shape: 'cards' },
+          { value: 'compact', label: 'Compact', shape: 'rows-thumb' },
+        ] },
         { key: 'hidePast', label: 'Hide past events', type: 'boolean' },
         ...UNIVERSAL,
       ],
       content: [
-        { key: 'heading', label: 'Heading', type: 'text', localized: true },
-        { key: 'intro', label: 'Intro', type: 'textarea', localized: true },
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
+        { key: 'intro', label: 'Intro', type: 'richtext', localized: true },
         { key: 'items', label: 'Events', type: 'list', itemFields: [
           { key: 'date', label: 'Date', type: 'date' },
           { key: 'endDate', label: 'End date (optional)', type: 'date' },
-          { key: 'title', label: 'Title', type: 'text', localized: true },
-          { key: 'location', label: 'Location', type: 'text', localized: true },
-          { key: 'description', label: 'Description', type: 'textarea', localized: true },
+          { key: 'title', label: 'Title', type: 'richtext-inline', localized: true },
+          { key: 'location', label: 'Location', type: 'richtext-inline', localized: true },
+          { key: 'description', label: 'Description', type: 'richtext', localized: true },
           { key: 'href', label: 'Details / register link', type: 'link' },
         ] },
       ],
     },
   },
   partner_map: {
-    type: 'partner_map', label: 'Partner map', category: 'Entity-bound', defaultConfig: { background: 'navy', spacing: 'normal', filterKind: 'all', defaultZoom: 1 },
+    type: 'partner_map', label: 'Partner map', category: 'Entity-bound', defaultConfig: { background: 'navy', spacing: 'normal', layout: 'center', filterKind: 'all', defaultZoom: 1 },
     defaultContent: { heading: {} },
     editor: {
       config: [
+        { key: 'layout', label: 'Heading layout', type: 'layout', default: 'center', options: [
+          { value: 'center', label: 'Centered', shape: 'map-center' },
+          { value: 'left', label: 'Left', shape: 'map-left' },
+        ] },
         { key: 'filterKind', label: 'Filter', type: 'select', options: [
           { value: 'all', label: 'All partners' },
           { value: 'international', label: 'International' },
@@ -467,14 +562,19 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         { key: 'defaultZoom', label: 'Default zoom', type: 'number' },
         ...UNIVERSAL,
       ],
-      content: [{ key: 'heading', label: 'Heading', type: 'text', localized: true }],
+      content: [{ key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true }],
     },
   },
   partner_marquee: {
-    type: 'partner_marquee', label: 'Partner logo marquee', category: 'Entity-bound', defaultConfig: { background: 'navy', spacing: 'normal', filterKind: 'all' },
+    type: 'partner_marquee', label: 'Partner logo marquee', category: 'Entity-bound', defaultConfig: { background: 'navy', spacing: 'normal', layout: 'rows', filterKind: 'all' },
     defaultContent: { heading: {} },
     editor: {
       config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'rows', options: [
+          { value: 'rows', label: 'Scrolling rows', shape: 'marquee' },
+          { value: 'single', label: 'Single row', shape: 'marquee-1' },
+          { value: 'static', label: 'Static grid', shape: 'logo-grid' },
+        ] },
         { key: 'filterKind', label: 'Logos to show', type: 'select', options: [
           { value: 'all', label: 'All partners' },
           { value: 'international', label: 'International' },
@@ -482,7 +582,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         ] },
         ...UNIVERSAL,
       ],
-      content: [{ key: 'heading', label: 'Heading', type: 'text', localized: true }],
+      content: [{ key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true }],
     },
   },
   testimonials: {
@@ -490,8 +590,10 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     defaultContent: {},
     editor: {
       config: [
-        { key: 'layout', label: 'Layout', type: 'select', options: [
-          { value: 'grid', label: 'Grid' }, { value: 'carousel', label: 'Carousel' },
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'grid', options: [
+          { value: 'grid', label: 'Grid', shape: 'grid-3' },
+          { value: 'carousel', label: 'Carousel', shape: 'carousel' },
+          { value: 'masonry', label: 'Masonry', shape: 'masonry' },
         ] },
         { key: 'programId', label: 'Filter by program', type: 'entity', entity: 'programs', help: 'Leave blank to show all testimonials.' },
         ...UNIVERSAL,
@@ -500,10 +602,15 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     },
   },
   news_feed: {
-    type: 'news_feed', label: 'News feed', category: 'Entity-bound', defaultConfig: { background: 'paper', spacing: 'normal', count: 3 },
+    type: 'news_feed', label: 'News feed', category: 'Entity-bound', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'grid', count: 3 },
     defaultContent: { heading: {} },
     editor: {
       config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'grid', options: [
+          { value: 'grid', label: 'Grid', shape: 'grid-3' },
+          { value: 'list', label: 'List', shape: 'rows-thumb' },
+          { value: 'featured', label: 'Featured', shape: 'featured' },
+        ] },
         { key: 'count', label: 'Count', type: 'number' },
         { key: 'tag', label: 'Tag filter (contextual)', type: 'select', options: [
           { value: '', label: 'Latest (no filter)' },
@@ -513,7 +620,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         ] },
         ...UNIVERSAL,
       ],
-      content: [{ key: 'heading', label: 'Heading', type: 'text', localized: true }],
+      content: [{ key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true }],
     },
   },
   staff: {
@@ -524,6 +631,11 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         { key: 'mode', label: 'Mode', type: 'select', options: [
           { value: 'single', label: 'Single ("Talk to…")' },
           { value: 'directory', label: 'Directory' },
+        ] },
+        { key: 'layout', label: 'Directory layout', type: 'layout', default: 'grid',
+          showFor: { field: 'mode', equals: ['directory'] }, options: [
+          { value: 'grid', label: 'Cards grid', shape: 'directory-grid' },
+          { value: 'list', label: 'List', shape: 'directory-list' },
         ] },
         { key: 'staffId', label: 'Staff member (single)', type: 'entity', entity: 'staff', help: 'Leave blank to use the page owner.' },
         ...UNIVERSAL,
@@ -537,9 +649,9 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     defaultContent: { heading: {}, intro: {} },
     editor: {
       config: [
-        { key: 'display', label: 'Display', type: 'select', options: [
-          { value: 'explorer', label: 'Explorer (expandable list)' },
-          { value: 'grid', label: 'Grid of faculty cards' },
+        { key: 'display', label: 'Layout', type: 'layout', default: 'explorer', options: [
+          { value: 'explorer', label: 'Explorer', shape: 'explorer' },
+          { value: 'grid', label: 'Faculty cards', shape: 'faculty-grid' },
         ] },
         { key: 'facultyIds', label: 'Faculties to show', type: 'entitymulti', entity: 'faculties',
           help: 'Leave all unchecked to show every faculty.' },
@@ -553,8 +665,8 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         ...UNIVERSAL,
       ],
       content: [
-        { key: 'heading', label: 'Heading', type: 'text', localized: true },
-        { key: 'intro', label: 'Intro', type: 'textarea', localized: true },
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
+        { key: 'intro', label: 'Intro', type: 'richtext', localized: true },
       ],
     },
   },
@@ -563,25 +675,31 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
     defaultContent: { eyebrow: {}, heading: {}, subcopy: {}, ctas: [] },
     editor: {
       config: [
-        { key: 'alignment', label: 'Alignment', type: 'select', options: [
-          { value: 'center', label: 'Center' },
-          { value: 'split', label: 'Split (text left, buttons right)' },
+        { key: 'alignment', label: 'Layout', type: 'layout', default: 'center', options: [
+          { value: 'center', label: 'Centered', shape: 'align-center' },
+          { value: 'split', label: 'Split', shape: 'form-split' },
+          { value: 'stacked', label: 'Stacked left', shape: 'stack' },
         ] },
         ...UNIVERSAL,
       ],
       content: [
-        { key: 'eyebrow', label: 'Eyebrow', type: 'text', localized: true },
-        { key: 'heading', label: 'Heading', type: 'text', localized: true },
-        { key: 'subcopy', label: 'Subcopy', type: 'textarea', localized: true },
+        { key: 'eyebrow', label: 'Eyebrow', type: 'richtext-inline', localized: true },
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
+        { key: 'subcopy', label: 'Subcopy', type: 'richtext', localized: true },
         { key: 'ctas', label: 'Buttons (max 2)', type: 'list', itemFields: BUTTON_FIELDS },
       ],
     },
   },
   inquiry_form: {
-    type: 'inquiry_form', label: 'Inquiry form', category: 'Conversion', defaultConfig: { background: 'navy', spacing: 'spacious', preset: 'student' },
+    type: 'inquiry_form', label: 'Inquiry form', category: 'Conversion', defaultConfig: { background: 'navy', spacing: 'spacious', layout: 'centered', preset: 'student' },
     defaultContent: { heading: {}, intro: {} },
     editor: {
       config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'centered', options: [
+          { value: 'centered', label: 'Centered', shape: 'form-center' },
+          { value: 'split', label: 'Intro beside', shape: 'form-split' },
+          { value: 'card', label: 'Boxed card', shape: 'quote-card' },
+        ] },
         { key: 'preset', label: 'Preset', type: 'select', options: [
           { value: 'student', label: 'Student (Admissions link)' },
           { value: 'partner', label: 'Partner (meeting request)' },
@@ -592,8 +710,8 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         ...UNIVERSAL,
       ],
       content: [
-        { key: 'heading', label: 'Heading', type: 'text', localized: true },
-        { key: 'intro', label: 'Intro', type: 'textarea', localized: true },
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
+        { key: 'intro', label: 'Intro', type: 'richtext', localized: true },
       ],
     },
   },

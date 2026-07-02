@@ -1,6 +1,7 @@
 import { Section, Container } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { Cta } from '@/components/ui/Cta';
+import { RichText, InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
@@ -26,41 +27,43 @@ const ACCENT_TEXT: Record<string, string> = {
 /** Focused call-to-action band — a punchy heading + up to two buttons. */
 export function CtaBannerBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as CtaBannerContent;
+  // center (default) · split (text left, buttons right) · stacked (buttons below).
   const align = (block.config.alignment as string) ?? 'center';
   const accent = (block.config.accent as string) ?? 'cyan';
   const onNavy = (block.config.background ?? 'navy') === 'navy';
   const center = align === 'center';
+  const stacked = align === 'stacked';
 
   return (
     <Section config={{ ...block.config, background: block.config.background ?? 'navy' }}>
       <Container>
         <div
           className={clsx(
-            'flex flex-col gap-6 md:flex-row md:items-center',
-            center ? 'text-center md:justify-center md:text-center' : 'md:justify-between',
+            'flex flex-col gap-6',
+            !stacked && 'md:flex-row md:items-center',
+            center && 'text-center md:justify-center',
+            align === 'split' && 'md:justify-between',
           )}
         >
           <div className={clsx('max-w-2xl', center && 'mx-auto')}>
-            {c.eyebrow && (
+            {t(c.eyebrow, locale) && (
               <Reveal>
-                <p
+                <InlineHtml
+                  as="p"
+                  html={t(c.eyebrow, locale)}
                   className={clsx(
                     'font-condensed text-base uppercase tracking-widest',
                     onNavy ? 'text-cyan' : (ACCENT_TEXT[accent] ?? 'text-magenta'),
                   )}
-                >
-                  {t(c.eyebrow, locale)}
-                </p>
+                />
               </Reveal>
             )}
             <Reveal delay={0.06}>
-              <h2 className="mt-2 text-3xl md:text-4xl">{t(c.heading, locale) || 'Ready to begin?'}</h2>
+              <InlineHtml as="h2" html={t(c.heading, locale)} fallback="Ready to begin?" className="mt-2 text-3xl md:text-4xl" />
             </Reveal>
-            {c.subcopy && (
+            {t(c.subcopy, locale) && (
               <Reveal delay={0.12}>
-                <p className={clsx('mt-3 text-lg', onNavy ? 'text-white/80' : 'text-ink/70')}>
-                  {t(c.subcopy, locale)}
-                </p>
+                <RichText html={t(c.subcopy, locale)} onNavy={onNavy} className={clsx('mt-3 text-lg', !onNavy && 'text-ink/70')} />
               </Reveal>
             )}
           </div>
@@ -69,7 +72,7 @@ export function CtaBannerBlock({ block, locale }: BlockComponentProps) {
               <div className={clsx('flex flex-wrap gap-3', center && 'justify-center')}>
                 {c.ctas.slice(0, 2).map((cta, i) => (
                   <Cta key={i} href={cta.href || '#'} variant={cta.variant || (i === 0 ? 'magenta' : 'outline')} newTab={cta.newTab}>
-                    {t(cta.label, locale)}
+                    <InlineHtml as="span" html={t(cta.label, locale)} />
                   </Cta>
                 ))}
               </div>

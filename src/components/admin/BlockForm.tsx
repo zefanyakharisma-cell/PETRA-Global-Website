@@ -5,7 +5,8 @@ import { clsx } from '@/lib/clsx';
 import { ImageField } from './fields/ImageField';
 import { FileField, type FileValue } from './fields/FileField';
 import { LinkField } from './fields/LinkField';
-import { RichTextEditor } from './fields/RichTextField';
+import { LayoutField } from './fields/LayoutField';
+import { RichTextEditor, InlineRichTextEditor } from './fields/RichTextField';
 
 type Dict = Record<string, unknown>;
 
@@ -112,8 +113,10 @@ function FieldEditor({
     );
   }
 
-  // Localized rich text: a WYSIWYG per locale.
-  if (field.type === 'richtext') {
+  // Rich text — `richtext` is a full block WYSIWYG, `richtext-inline` a
+  // single-line one for headings/labels. Both support EN/ID when localized.
+  if (field.type === 'richtext' || field.type === 'richtext-inline') {
+    const Editor = field.type === 'richtext-inline' ? InlineRichTextEditor : RichTextEditor;
     if ('localized' in field && field.localized) {
       const v = (value as { en?: string; id?: string }) ?? {};
       return (
@@ -122,20 +125,22 @@ function FieldEditor({
           <div className="space-y-2">
             <div>
               <span className="mb-1 block text-[11px] uppercase tracking-wide text-ink/40">English</span>
-              <RichTextEditor value={v.en ?? ''} onChange={(html) => onChange({ ...v, en: html })} />
+              <Editor value={v.en ?? ''} onChange={(html) => onChange({ ...v, en: html })} />
             </div>
             <div>
               <span className="mb-1 block text-[11px] uppercase tracking-wide text-ink/40">Indonesian</span>
-              <RichTextEditor value={v.id ?? ''} onChange={(html) => onChange({ ...v, id: html })} />
+              <Editor value={v.id ?? ''} onChange={(html) => onChange({ ...v, id: html })} />
             </div>
           </div>
+          {help}
         </div>
       );
     }
     return (
       <div className="block">
         {label}
-        <RichTextEditor value={(value as string) ?? ''} onChange={onChange} />
+        <Editor value={(value as string) ?? ''} onChange={onChange} />
+        {help}
       </div>
     );
   }
@@ -166,6 +171,16 @@ function FieldEditor({
           </select>
           {help}
         </label>
+      );
+    case 'layout':
+      return (
+        <LayoutField
+          label={field.label}
+          help={'help' in field ? field.help : undefined}
+          value={(value as string) ?? field.default ?? ''}
+          options={field.options}
+          onChange={onChange}
+        />
       );
     case 'entity': {
       const opts = entities[field.entity] ?? [];
@@ -242,21 +257,27 @@ function blankItem(fields: EditorField[]): Dict {
     else if (f.type === 'file') o[f.key] = {};
     else if (f.type === 'boolean') o[f.key] = false;
     else if (f.type === 'select') o[f.key] = f.options[0]?.value ?? '';
+    else if (f.type === 'layout') o[f.key] = f.default ?? f.options[0]?.value ?? '';
     else if ('localized' in f && f.localized) o[f.key] = {};
     else o[f.key] = '';
   }
   return o;
 }
 
+/** Strip HTML tags + entities so a rich value reads as plain text in summaries. */
+function plainText(s: string): string {
+  return s.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').trim();
+}
+
 /** Short human summary of an item for its collapsed-card header. */
 function itemSummary(item: Dict, fields: EditorField[]): string {
   for (const f of fields) {
     const v = item[f.key];
-    if (typeof v === 'string' && v.trim()) return v.trim();
+    if (typeof v === 'string' && plainText(v)) return plainText(v);
     if (v && typeof v === 'object' && !Array.isArray(v)) {
       const loc = v as { en?: string; id?: string };
-      if (loc.en?.trim()) return loc.en.trim();
-      if (loc.id?.trim()) return loc.id.trim();
+      if (loc.en && plainText(loc.en)) return plainText(loc.en);
+      if (loc.id && plainText(loc.id)) return plainText(loc.id);
     }
   }
   return 'New item';

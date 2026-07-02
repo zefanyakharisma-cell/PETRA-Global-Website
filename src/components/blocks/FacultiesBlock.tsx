@@ -1,6 +1,7 @@
 import { Section, Container } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { RichText, InlineHtml } from '@/components/ui/RichText';
 import { createClient } from '@/lib/supabase/server';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap } from '@/lib/types';
@@ -112,11 +113,11 @@ export async function FacultiesBlock({ block, locale }: BlockComponentProps) {
       <Container>
         {(c.heading || c.intro) && (
           <div className="mb-8 max-w-2xl">
-            {c.heading && (
-              <h2 className={clsx('text-3xl md:text-4xl', onNavy && 'text-white')}>{t(c.heading, locale)}</h2>
+            {t(c.heading, locale) && (
+              <InlineHtml as="h2" html={t(c.heading, locale)} className={clsx('text-3xl md:text-4xl', onNavy && 'text-white')} />
             )}
-            {c.intro && (
-              <p className={clsx('mt-3', onNavy ? 'text-white/70' : 'text-ink/70')}>{t(c.intro, locale)}</p>
+            {t(c.intro, locale) && (
+              <RichText html={t(c.intro, locale)} onNavy={onNavy} className={clsx('mt-3', !onNavy && 'text-ink/70')} />
             )}
           </div>
         )}
