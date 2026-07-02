@@ -16,50 +16,66 @@ export async function Footer() {
 
   return (
     <footer className="bg-navy text-white">
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-[1.4fr_2fr] md:px-8">
-        <div>
-          <Image
-            src="/brand/petra-logo-white.png"
-            alt="Petra Christian University"
-            width={842}
-            height={296}
-            className="h-14 w-auto"
-          />
-          <p className="mt-4 max-w-xs text-white/80">{t('tagline')}</p>
-          <p className="mt-6 font-condensed uppercase tracking-widest text-cyan">{t('values')}</p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
-          {groups.map((g) => (
-            <div key={g.section}>
-              <p className="font-condensed text-sm uppercase tracking-widest text-white/50">
-                {navT(g.section)}
+      <div className="mx-auto max-w-6xl px-5 py-16 md:px-8">
+        <div className="grid gap-12 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
+          {/* Brand */}
+          <div className="max-w-sm">
+            <Image
+              src="/brand/petra-logo-white.png"
+              alt="Petra Christian University"
+              width={842}
+              height={296}
+              className="h-14 w-auto"
+            />
+            <p className="mt-5 text-white/70">{t('tagline')}</p>
+            <div className="mt-6">
+              <span className="block h-px w-10 bg-cyan" />
+              <p className="mt-3 font-condensed uppercase tracking-widest text-cyan">
+                {t('values')}
               </p>
-              <ul className="mt-3 space-y-2">
-                {g.items.map((item) => (
-                  <li key={item.slug}>
-                    <Link
-                      href={`/${item.slug}`}
-                      className="link-underline inline-block text-white/80 transition-colors hover:text-white"
-                    >
-                      {localize(item.title, locale as Locale)}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
             </div>
-          ))}
+          </div>
+
+          {/* Navigation */}
+          <nav
+            aria-label={t('exploreLabel')}
+            className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3"
+          >
+            {groups.map((g) => (
+              <div key={g.section}>
+                <p className="font-condensed text-sm uppercase tracking-widest text-white/40">
+                  {navT(g.section)}
+                </p>
+                <ul className="mt-4 space-y-2.5">
+                  {g.items.map((item) => (
+                    <li key={item.slug}>
+                      <Link
+                        href={`/${item.slug}`}
+                        className="link-underline inline-block text-white/75 transition-colors hover:text-white"
+                      >
+                        {localize(item.title, locale as Locale)}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
         </div>
       </div>
 
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-6xl flex-col gap-1 px-5 py-6 text-sm text-white/60 md:flex-row md:items-center md:justify-between md:px-8">
-          <span>{t('office')} · {t('university')}</span>
-          <div className="flex items-center gap-4">
-            <a href="/admin/login" className="link-underline inline-block text-white/60 transition-colors hover:text-white">
+        <div className="mx-auto flex max-w-6xl flex-col-reverse gap-3 px-5 py-6 text-sm text-white/55 md:flex-row md:items-center md:justify-between md:px-8">
+          <span>© {new Date().getFullYear()} {t('university')}. {t('rights')}</span>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span>{t('office')} · {t('university')}</span>
+            <span aria-hidden className="hidden text-white/25 md:inline">|</span>
+            <a
+              href="/admin/login"
+              className="link-underline inline-block text-white/55 transition-colors hover:text-white"
+            >
               Admin
             </a>
-            <span>© {new Date().getFullYear()} {t('university')}. {t('rights')}</span>
           </div>
         </div>
       </div>
