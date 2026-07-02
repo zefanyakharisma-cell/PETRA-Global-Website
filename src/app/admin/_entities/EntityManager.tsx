@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from 'react';
 import { createEntity, updateEntity, deleteEntity, setEntityActive } from '../actions/entities';
-import type { EntityConfig, EntityTable, Field } from './config';
+import { optionLabel, optionValue, type EntityConfig, type EntityTable, type Field } from './config';
 
 export type RelOption = { id: string; label: string };
 export type Relations = Record<string, { options: RelOption[]; labels: Record<string, string> }>;
@@ -33,7 +33,7 @@ function FieldInput({ f, relOptions, row }: { f: Field; relOptions?: RelOption[]
   if (f.kind === 'select') {
     return (
       <select name={f.key} className={inputBase} required={f.required} defaultValue={editing ? String(row?.[f.key] ?? '') : undefined}>
-        {f.options?.map((o) => <option key={o} value={o}>{o}</option>)}
+        {f.options?.map((o) => { const val = optionValue(o); return <option key={val} value={val}>{optionLabel(o)}</option>; })}
       </select>
     );
   }
@@ -146,6 +146,11 @@ export function EntityManager({
   const cell = (row: Row, key: string) => {
     const v = row[key];
     if (relations[key] && v) return relations[key].labels[String(v)] ?? String(v);
+    if (v != null) {
+      const selField = cfg.fields.find((f) => f.key === key && f.kind === 'select');
+      const opt = selField?.options?.find((o) => optionValue(o) === String(v));
+      if (opt) return optionLabel(opt);
+    }
     if (v && typeof v === 'object' && 'en' in (v as object)) return String((v as { en?: string }).en ?? '');
     if (typeof v === 'boolean') return v ? '✓' : '—';
     if (key === 'published_at' && v) return new Date(String(v)).toLocaleDateString();

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { Editor } from '@/components/admin/Editor';
+import { loadEditorEntities } from '@/lib/supabase/editorEntities';
 import { t, type Block, type LocaleMap, type NewsRecord } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -19,18 +20,8 @@ export default async function EditNewsPage({ params }: { params: Promise<{ slug:
     .eq('news_id', article.id)
     .order('position');
 
-  // Entity options powering the editor's dropdowns (staff / program pickers).
-  const [{ data: staffRows }, { data: programRows }] = await Promise.all([
-    supabase.from('staff').select('id, name').order('name'),
-    supabase.from('programs').select('id, slug, title'),
-  ]);
-  const entities = {
-    staff: (staffRows ?? []).map((s) => ({ id: s.id as string, label: (s.name as string) ?? s.id })),
-    programs: (programRows ?? []).map((pr) => ({
-      id: pr.id as string,
-      label: t(pr.title as LocaleMap, 'en') || (pr.slug as string) || (pr.id as string),
-    })),
-  };
+  // Entity options powering the editor's dropdowns + checkbox pickers.
+  const entities = await loadEditorEntities(supabase);
 
   const n = article as NewsRecord;
 

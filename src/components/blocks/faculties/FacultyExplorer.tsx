@@ -5,9 +5,11 @@ import Image from 'next/image';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap, type Locale } from '@/lib/types';
+import { areaLabel } from '@/lib/programAreas';
 
-export interface ExplorerCourse {
+export interface ExplorerItem {
   id: string;
+  area: string;
   code: string | null;
   name: LocaleMap;
   credits: number | null;
@@ -21,7 +23,7 @@ export interface ExplorerProgram {
   degree: string | null;
   description: LocaleMap;
   url: string | null;
-  courses: ExplorerCourse[];
+  items: ExplorerItem[];
 }
 
 export interface ExplorerFaculty {
@@ -56,11 +58,8 @@ const LABELS = {
     programs: 'Study programs',
     program: 'study program',
     programsPlural: 'study programs',
-    courses: 'Courses',
-    viewCourses: 'View courses',
-    hideCourses: 'Hide courses',
     noPrograms: 'Study programs will appear here soon.',
-    noCourses: 'Course list coming soon.',
+    noItems: 'Nothing listed here yet.',
     credits: 'Credits',
     semester: 'Sem.',
     explore: 'Explore',
@@ -71,11 +70,8 @@ const LABELS = {
     programs: 'Program studi',
     program: 'program studi',
     programsPlural: 'program studi',
-    courses: 'Mata kuliah',
-    viewCourses: 'Lihat mata kuliah',
-    hideCourses: 'Sembunyikan mata kuliah',
     noPrograms: 'Program studi akan segera tampil di sini.',
-    noCourses: 'Daftar mata kuliah akan segera hadir.',
+    noItems: 'Belum ada yang tercantum di sini.',
     credits: 'SKS',
     semester: 'Sem.',
     explore: 'Jelajahi',
@@ -110,14 +106,14 @@ function Collapse({ open, children }: { open: boolean; children: React.ReactNode
   );
 }
 
-function CourseTable({ courses, locale, onNavy }: { courses: ExplorerCourse[]; locale: Locale; onNavy: boolean }) {
+function ItemTable({ items, locale, onNavy }: { items: ExplorerItem[]; locale: Locale; onNavy: boolean }) {
   const L = LABELS[locale === 'id' ? 'id' : 'en'];
-  if (courses.length === 0) {
-    return <p className={clsx('px-4 py-3 text-sm', onNavy ? 'text-white/50' : 'text-ink/50')}>{L.noCourses}</p>;
+  if (items.length === 0) {
+    return <p className={clsx('px-4 py-3 text-sm', onNavy ? 'text-white/50' : 'text-ink/50')}>{L.noItems}</p>;
   }
   return (
     <ul className="space-y-2">
-      {courses.map((c) => (
+      {items.map((c) => (
         <li
           key={c.id}
           className={clsx(
@@ -151,18 +147,22 @@ function ProgramRow({
   program,
   locale,
   accent,
-  showCourses,
+  areas,
   onNavy,
 }: {
   program: ExplorerProgram;
   locale: Locale;
   accent: Accent;
-  showCourses: boolean;
+  areas: string[];
   onNavy: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  // One collapsible section per selected area that actually has items, kept in
+  // the order the editor chose the areas. Single-open accordion within a row.
+  const groups = areas
+    .map((area) => ({ area, items: program.items.filter((it) => it.area === area) }))
+    .filter((g) => g.items.length > 0);
+  const [openArea, setOpenArea] = useState<string | null>(null);
   const L = LABELS[locale === 'id' ? 'id' : 'en'];
-  const hasCourses = showCourses;
   const desc = t(program.description, locale);
 
   return (
@@ -177,7 +177,7 @@ function ProgramRow({
           </div>
           {desc && <p className={clsx('mt-1 text-sm', onNavy ? 'text-white/65' : 'text-ink/65')}>{desc}</p>}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {program.url && (
             <ExternalLink
               href={program.url}
@@ -189,29 +189,37 @@ function ProgramRow({
               {L.visitProgram} ↗
             </ExternalLink>
           )}
-          {hasCourses && (
-            <button
-              type="button"
-              onClick={() => setOpen((v) => !v)}
-              aria-expanded={open}
-              className={clsx(
-                'inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm font-condensed uppercase tracking-wide transition',
-                onNavy ? 'border-white/20 text-white hover:bg-white/10' : 'border-ink/20 text-ink hover:bg-ink/5',
-              )}
-            >
-              {open ? L.hideCourses : L.viewCourses}
-              <span className={clsx('transition-transform', open && 'rotate-180')}>▾</span>
-            </button>
-          )}
+          {groups.map((g) => {
+            const open = openArea === g.area;
+            return (
+              <button
+                key={g.area}
+                type="button"
+                onClick={() => setOpenArea((v) => (v === g.area ? null : g.area))}
+                aria-expanded={open}
+                className={clsx(
+                  'inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm font-condensed uppercase tracking-wide transition',
+                  open
+                    ? accent.chip
+                    : onNavy
+                      ? 'border-white/20 text-white hover:bg-white/10'
+                      : 'border-ink/20 text-ink hover:bg-ink/5',
+                )}
+              >
+                {areaLabel(g.area, locale)}
+                <span className={clsx('transition-transform', open && 'rotate-180')}>▾</span>
+              </button>
+            );
+          })}
         </div>
       </div>
-      {hasCourses && (
-        <Collapse open={open}>
+      {groups.map((g) => (
+        <Collapse key={g.area} open={openArea === g.area}>
           <div className="pt-3">
-            <CourseTable courses={program.courses} locale={locale} onNavy={onNavy} />
+            <ItemTable items={g.items} locale={locale} onNavy={onNavy} />
           </div>
         </Collapse>
-      )}
+      ))}
     </div>
   );
 }
@@ -219,13 +227,13 @@ function ProgramRow({
 function FacultyPanel({
   faculty,
   locale,
-  showCourses,
+  areas,
   onNavy,
   defaultOpen,
 }: {
   faculty: ExplorerFaculty;
   locale: Locale;
-  showCourses: boolean;
+  areas: string[];
   onNavy: boolean;
   defaultOpen: boolean;
 }) {
@@ -298,7 +306,7 @@ function FacultyPanel({
           ) : (
             <div className="grid gap-3">
               {faculty.programs.map((p) => (
-                <ProgramRow key={p.id} program={p} locale={locale} accent={accent} showCourses={showCourses} onNavy={onNavy} />
+                <ProgramRow key={p.id} program={p} locale={locale} accent={accent} areas={areas} onNavy={onNavy} />
               ))}
             </div>
           )}
@@ -342,13 +350,13 @@ export function FacultyExplorer({
   faculties,
   locale,
   display,
-  showCourses,
+  areas,
   onNavy,
 }: {
   faculties: ExplorerFaculty[];
   locale: Locale;
   display: 'explorer' | 'grid';
-  showCourses: boolean;
+  areas: string[];
   onNavy: boolean;
 }) {
   if (display === 'grid') {
@@ -364,7 +372,7 @@ export function FacultyExplorer({
   return (
     <div className="grid gap-4">
       {faculties.map((f, i) => (
-        <FacultyPanel key={f.id} faculty={f} locale={locale} showCourses={showCourses} onNavy={onNavy} defaultOpen={i === 0} />
+        <FacultyPanel key={f.id} faculty={f} locale={locale} areas={areas} onNavy={onNavy} defaultOpen={i === 0} />
       ))}
     </div>
   );

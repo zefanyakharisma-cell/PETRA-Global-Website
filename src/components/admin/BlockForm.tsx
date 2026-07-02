@@ -1,6 +1,7 @@
 'use client';
 
 import type { EditorField, EditorSchema } from '@/components/blocks/registry.types';
+import { clsx } from '@/lib/clsx';
 import { ImageField } from './fields/ImageField';
 import { FileField, type FileValue } from './fields/FileField';
 import { LinkField } from './fields/LinkField';
@@ -9,7 +10,12 @@ import { RichTextEditor } from './fields/RichTextField';
 type Dict = Record<string, unknown>;
 
 export type EntityOption = { id: string; label: string };
-export type EntityOptions = { staff: EntityOption[]; programs: EntityOption[] };
+export type EntityOptions = {
+  staff: EntityOption[];
+  programs: EntityOption[];
+  faculties: EntityOption[];
+  study_programs: EntityOption[];
+};
 
 /**
  * Side-panel form generated from a block's EditorSchema, bound to its `config`
@@ -173,6 +179,54 @@ function FieldEditor({
         </label>
       );
     }
+    case 'multiselect': {
+      const sel = Array.isArray(value) ? (value as string[]) : [];
+      const toggle = (v: string) => onChange(sel.includes(v) ? sel.filter((x) => x !== v) : [...sel, v]);
+      return (
+        <div className="block">{label}
+          <div className="flex flex-wrap gap-1.5">
+            {field.options.map((o) => {
+              const on = sel.includes(o.value);
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => toggle(o.value)}
+                  aria-pressed={on}
+                  className={clsx(
+                    'rounded-full border px-3 py-1 text-xs transition',
+                    on ? 'border-navy bg-navy text-white' : 'border-ink/20 text-ink/70 hover:bg-ink/5',
+                  )}
+                >
+                  {o.label}
+                </button>
+              );
+            })}
+          </div>
+          {help}
+        </div>
+      );
+    }
+    case 'entitymulti': {
+      const opts = entities[field.entity] ?? [];
+      const sel = Array.isArray(value) ? (value as string[]) : [];
+      const toggle = (id: string) => onChange(sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]);
+      return (
+        <div className="block">{label}
+          <div className="max-h-44 space-y-1 overflow-auto rounded-md border border-ink/15 p-2">
+            {opts.length === 0 && <p className="text-xs text-ink/40">None available yet.</p>}
+            {opts.map((o) => (
+              <label key={o.id} className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={sel.includes(o.id)} onChange={() => toggle(o.id)} />
+                <span className="truncate">{o.label}</span>
+              </label>
+            ))}
+          </div>
+          {sel.length > 0 && <span className="mt-1 block text-[11px] text-ink/40">{sel.length} selected</span>}
+          {help}
+        </div>
+      );
+    }
     case 'list':
       return <ListField field={field} value={value} entities={entities} onChange={onChange} />;
     default:
@@ -184,7 +238,7 @@ function FieldEditor({
 function blankItem(fields: EditorField[]): Dict {
   const o: Dict = {};
   for (const f of fields) {
-    if (f.type === 'list') o[f.key] = [];
+    if (f.type === 'list' || f.type === 'multiselect' || f.type === 'entitymulti') o[f.key] = [];
     else if (f.type === 'file') o[f.key] = {};
     else if (f.type === 'boolean') o[f.key] = false;
     else if (f.type === 'select') o[f.key] = f.options[0]?.value ?? '';

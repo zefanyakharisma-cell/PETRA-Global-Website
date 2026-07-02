@@ -17,7 +17,7 @@ const NAV = [
   { href: '/admin/programs', label: 'Programs' },
   { href: '/admin/faculties', label: 'Faculties' },
   { href: '/admin/study-programs', label: 'Study Programs' },
-  { href: '/admin/courses', label: 'Courses' },
+  { href: '/admin/courses', label: 'Program Items' },
   { href: '/admin/partners', label: 'International Partners' },
   { href: '/admin/domestic-partners', label: 'Domestic Partners' },
   { href: '/admin/news', label: 'News' },

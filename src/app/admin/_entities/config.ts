@@ -1,3 +1,5 @@
+import { PROGRAM_AREAS } from '@/lib/programAreas';
+
 /** Field schema driving the generic entity admin (list + create form). */
 export type EntityTable =
   | 'staff'
@@ -22,11 +24,21 @@ export type FieldKind =
   | 'select'
   | 'relation';
 
+/** A `select` option — a bare string (value === label) or an explicit pair. */
+export type SelectOption = string | { value: string; label: string };
+
+export function optionValue(o: SelectOption): string {
+  return typeof o === 'string' ? o : o.value;
+}
+export function optionLabel(o: SelectOption): string {
+  return typeof o === 'string' ? o : o.label;
+}
+
 export interface Field {
   key: string;
   label: string;
   kind: FieldKind;
-  options?: string[];
+  options?: SelectOption[];
   /** For `relation` fields — the parent table whose rows populate the dropdown. */
   relTable?: EntityTable;
   required?: boolean;
@@ -153,11 +165,12 @@ export const ENTITY_CONFIG: Record<EntityTable, EntityConfig> = {
   },
   courses: {
     table: 'courses',
-    title: 'Courses',
-    list: ['code', 'name', 'credits', 'semester', 'is_active'],
+    title: 'Program Items',
+    list: ['area', 'code', 'name', 'credits', 'semester', 'is_active'],
     fields: [
       { key: 'study_program_id', label: 'Study program', kind: 'relation', relTable: 'study_programs', required: true },
-      { key: 'code', label: 'Course code', kind: 'text' },
+      { key: 'area', label: 'Area', kind: 'select', required: true, options: PROGRAM_AREAS.map((a) => ({ value: a.value, label: a.en })) },
+      { key: 'code', label: 'Code (optional)', kind: 'text' },
       { key: 'name', label: 'Name', kind: 'localized' },
       { key: 'credits', label: 'Credits (SKS)', kind: 'number' },
       { key: 'semester', label: 'Semester', kind: 'text' },

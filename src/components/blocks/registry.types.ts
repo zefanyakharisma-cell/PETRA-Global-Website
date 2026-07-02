@@ -66,7 +66,11 @@ export type EditorField = FieldVisibility & (
   | { key: string; label: string; type: 'number' }
   | { key: string; label: string; type: 'boolean' }
   | { key: string; label: string; type: 'select'; options: { value: string; label: string }[]; default?: string; help?: string }
+  // Pick many fixed options — value is a string[] of the chosen option values.
+  | { key: string; label: string; type: 'multiselect'; options: { value: string; label: string }[]; help?: string }
   | { key: string; label: string; type: 'entity'; entity: 'staff' | 'programs'; help?: string }
+  // Pick many rows of an entity — value is a string[] of the chosen row ids.
+  | { key: string; label: string; type: 'entitymulti'; entity: 'staff' | 'programs' | 'faculties' | 'study_programs'; help?: string }
   | { key: string; label: string; type: 'list'; itemFields: EditorField[] }
 );
 

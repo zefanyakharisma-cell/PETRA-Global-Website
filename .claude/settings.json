@@ -85,7 +85,8 @@
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",
-      "E:\\PETRA-Global-Website\\src\\app\\[locale]\\partnership"
+      "E:\\PETRA-Global-Website\\src\\app\\[locale]\\partnership",
+      "c:\\Users\\KUI\\.claude\\projects\\e--PETRA-Global-Website\\memory"
     ]
   }
 }

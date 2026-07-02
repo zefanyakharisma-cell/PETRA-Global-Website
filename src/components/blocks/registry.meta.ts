@@ -1,4 +1,5 @@
 import type { BlockMeta, EditorField } from './registry.types';
+import { PROGRAM_AREAS } from '@/lib/programAreas';
 
 
 // Bento sizes: width (columns 1–4) × height (units 1–4). See blockSize.ts.
@@ -532,7 +533,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
   },
   faculties: {
     type: 'faculties', label: 'Faculties & programs', category: 'Entity-bound',
-    defaultConfig: { background: 'paper', spacing: 'normal', display: 'explorer', showCourses: true, accent: 'magenta' },
+    defaultConfig: { background: 'paper', spacing: 'normal', display: 'explorer', areas: ['course'], facultyIds: [], programIds: [], accent: 'magenta' },
     defaultContent: { heading: {}, intro: {} },
     editor: {
       config: [
@@ -540,7 +541,15 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           { value: 'explorer', label: 'Explorer (expandable list)' },
           { value: 'grid', label: 'Grid of faculty cards' },
         ] },
-        { key: 'showCourses', label: 'Show courses (explorer)', type: 'boolean' },
+        { key: 'facultyIds', label: 'Faculties to show', type: 'entitymulti', entity: 'faculties',
+          help: 'Leave all unchecked to show every faculty.' },
+        { key: 'programIds', label: 'Study programs to show', type: 'entitymulti', entity: 'study_programs',
+          help: 'Leave all unchecked to show every study program (within the chosen faculties).',
+          showFor: { field: 'display', equals: ['explorer'] } },
+        { key: 'areas', label: 'Areas to show', type: 'multiselect',
+          options: PROGRAM_AREAS.map((a) => ({ value: a.value, label: a.en })),
+          help: 'Sections listed under each study program. Pick one or more.',
+          showFor: { field: 'display', equals: ['explorer'] } },
         ...UNIVERSAL,
       ],
       content: [

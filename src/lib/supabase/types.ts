@@ -117,6 +117,7 @@ export type StudyProgramRow = Timestamps & {
 export type CourseRow = Timestamps & {
   id: string;
   study_program_id: string | null;
+  area: string;
   code: string | null;
   name: Json;
   credits: number | null;
