@@ -81,7 +81,8 @@
       "Bash(node -e \"const l=require\\('e:/PETRA-Global-Website/node_modules/lucide-react'\\); console.log\\('GripVertical' in l, 'version exports count', Object.keys\\(l\\).length\\)\")",
       "Bash(grep -iA40 \"news\\\\|blocks\\\\|pages\")",
       "Bash(grep -n -iA10 \"admin write blocks\\\\|authenticated.*blocks\\\\|for all to authenticated\" supabase/migrations/0001_petra_io_schema.sql)",
-      "Bash(C-c)"
+      "Bash(C-c)",
+      "Bash(grep -v -e '\\\\.png$' -e '\\\\.jpg$' -e '\\\\.jpeg$' -e '\\\\.svg$')"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",
