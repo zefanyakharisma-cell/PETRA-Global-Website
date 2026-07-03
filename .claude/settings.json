@@ -91,7 +91,8 @@
       "Bash(cd \"e:/PETRA-Global-Website\" && rm -rf \".next/types/app/[locale]/[slug]\" \".next/types/app/admin/edit/[slug]\" \".next/types/app/editor-preview/[slug]\" && echo \"cleaned stale types\")",
       "Bash(ls -la e:/ 2>/dev/null; echo \"===\"; du -sh e:/PETRA-Global-Website 2>/dev/null)",
       "Read(//e//**)",
-      "PowerShell($pd='e:\\\\PETRA-Global-Website\\\\.git\\\\objects\\\\pack'; foreach\\($p in 'pack-74ba4d3e3f97a64d63e9f62b078d551db107bb31','pack-af38d889d636f71f5026721338142b39f72b9c78','pack-ada94c2360c006015a5460c4c2b436468565bf4b'\\){ $n=\\(git verify-pack -v \"$pd\\\\$p.idx\" 2>$null | Measure-Object -Line\\).Lines; \"$p objects+lines=$n\" })"
+      "PowerShell($pd='e:\\\\PETRA-Global-Website\\\\.git\\\\objects\\\\pack'; foreach\\($p in 'pack-74ba4d3e3f97a64d63e9f62b078d551db107bb31','pack-af38d889d636f71f5026721338142b39f72b9c78','pack-ada94c2360c006015a5460c4c2b436468565bf4b'\\){ $n=\\(git verify-pack -v \"$pd\\\\$p.idx\" 2>$null | Measure-Object -Line\\).Lines; \"$p objects+lines=$n\" })",
+      "Bash(xargs -I{} sh -c 'echo \"--- {} ---\"; head -40 \"{}\"')"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",

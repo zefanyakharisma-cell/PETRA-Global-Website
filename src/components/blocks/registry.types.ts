@@ -22,6 +22,7 @@ export const BLOCK_TYPES = [
   'pull_quote',
   'logo_wall',
   'embed',
+  'map',
   'downloads',
   'events',
   // Entity-bound

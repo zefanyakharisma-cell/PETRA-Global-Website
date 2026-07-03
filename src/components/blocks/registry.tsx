@@ -19,6 +19,7 @@ import { GalleryBlock } from './GalleryBlock';
 import { PullQuoteBlock } from './PullQuoteBlock';
 import { LogoWallBlock } from './LogoWallBlock';
 import { EmbedBlock } from './EmbedBlock';
+import { MapBlock } from './MapBlock';
 import { DownloadsBlock } from './DownloadsBlock';
 import { EventsBlock } from './EventsBlock';
 import { PartnerMapBlock } from './PartnerMapBlock';
@@ -54,6 +55,7 @@ const COMPONENTS: Record<BlockMeta['type'], ComponentType<BlockComponentProps>> 
   pull_quote: PullQuoteBlock,
   logo_wall: LogoWallBlock,
   embed: EmbedBlock,
+  map: MapBlock,
   downloads: DownloadsBlock,
   events: EventsBlock,
   partner_map: PartnerMapBlock,

@@ -452,45 +452,9 @@ const PAGE_BLOCKS: Record<string, Block[]> = {
     }),
   ],
 
-  'mobility/inbound/icop': [
-    hero({
-      eyebrow: t('Inbound Programs', 'Program Inbound'),
-      heading: t('International Community Outreach Program', 'International Community Outreach Program'),
-      subcopy: t(
-        'Learn by serving. ICOP connects international students with local communities through meaningful, hands-on projects.',
-        'Belajar dengan mengabdi. ICOP menghubungkan mahasiswa internasional dengan komunitas lokal melalui proyek nyata yang bermakna.',
-      ),
-      ctas: [btn(t('Apply now', 'Daftar sekarang'), APPLY, 'magenta')],
-    }, { accent: 'magenta' }),
-    imageText({
-      heading: t('Community service, real impact', 'Pengabdian masyarakat, dampak nyata'),
-      body: t(
-        'Work side by side with Petra students and local partners on projects in education, environment, and social development — while experiencing Indonesian culture first-hand.',
-        'Bekerja berdampingan dengan mahasiswa Petra dan mitra lokal dalam proyek pendidikan, lingkungan, dan pengembangan sosial — sambil merasakan langsung budaya Indonesia.',
-      ),
-    }),
-    featureList({
-      heading: t('What you’ll gain', 'Yang akan Anda peroleh'),
-      items: [
-        { icon: 'handshake', title: t('Real projects', 'Proyek nyata'), body: t('Contribute to community initiatives that matter.', 'Berkontribusi pada inisiatif komunitas yang berarti.') },
-        { icon: 'users', title: t('Cross-cultural teamwork', 'Kerja tim lintas budaya'), body: t('Collaborate with local and international peers.', 'Berkolaborasi dengan rekan lokal dan internasional.') },
-        { icon: 'heart', title: t('Personal growth', 'Pertumbuhan pribadi'), body: t('Develop empathy, leadership, and global perspective.', 'Mengembangkan empati, kepemimpinan, dan wawasan global.') },
-      ],
-    }, { accent: 'magenta' }),
-    steps({
-      heading: t('How it works', 'Cara kerjanya'),
-      steps: [
-        { title: t('Apply & get matched', 'Mendaftar & dipasangkan'), body: t('Tell us your interests and we’ll place you with a project.', 'Sampaikan minat Anda dan kami akan menempatkan Anda pada sebuah proyek.') },
-        { title: t('Orientation', 'Orientasi'), body: t('Learn about the community, culture, and safety.', 'Pelajari tentang komunitas, budaya, dan keselamatan.') },
-        { title: t('Serve & learn', 'Mengabdi & belajar'), body: t('Work on the project alongside your team.', 'Kerjakan proyek bersama tim Anda.') },
-        { title: t('Reflect & celebrate', 'Refleksi & perayaan'), body: t('Share your impact and receive your certificate.', 'Bagikan dampak Anda dan terima sertifikat.') },
-      ],
-    }, { accent: 'magenta' }),
-    cta({
-      heading: t('Ready to make an impact?', 'Siap memberi dampak?'),
-      ctas: [btn(t('Apply now', 'Daftar sekarang'), APPLY, 'magenta'), btn(t('Contact us', 'Hubungi kami'), '/about/contact-us', 'outline')],
-    }),
-  ],
+  // 'mobility/inbound/icop' is seeded from its own richer, source-accurate
+  // script (supabase/seed-icop-page.ts, `npm run db:seed:icop`) so it lives
+  // there as the single source of truth — intentionally not listed here.
 
   'mobility/inbound/indonesian-spectrum': [
     hero({

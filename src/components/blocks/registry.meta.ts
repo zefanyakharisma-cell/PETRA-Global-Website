@@ -494,6 +494,45 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
       ],
     },
   },
+  map: {
+    type: 'map', label: 'Map', category: 'Content',
+    defaultConfig: { background: 'paper', spacing: 'normal', layout: 'center', accent: 'blue', mapStyle: 'light', height: 'md', zoom: 11, showRoute: true, showControls: true },
+    defaultContent: {
+      heading: {},
+      markers: [
+        { label: { en: 'Petra Christian University', id: 'Universitas Kristen Petra' }, latitude: -7.2575, longitude: 112.7521 },
+      ],
+    },
+    editor: {
+      config: [
+        { key: 'layout', label: 'Heading layout', type: 'layout', default: 'center', options: [
+          { value: 'center', label: 'Centered', shape: 'map-center' },
+          { value: 'left', label: 'Left', shape: 'map-left' },
+        ] },
+        { key: 'mapStyle', label: 'Map style', type: 'select', default: 'light', options: [
+          { value: 'light', label: 'Light' },
+          { value: 'dark', label: 'Dark' },
+        ] },
+        { key: 'height', label: 'Height', type: 'select', default: 'md', options: [
+          { value: 'sm', label: 'Small' },
+          { value: 'md', label: 'Medium' },
+          { value: 'lg', label: 'Large' },
+        ] },
+        { key: 'zoom', label: 'Zoom (1–18)', type: 'number', help: 'Starting zoom. Ignored when 2+ markers are set — the map auto-fits to them.' },
+        { key: 'showRoute', label: 'Connect markers with a route line', type: 'boolean' },
+        { key: 'showControls', label: 'Show zoom / fullscreen controls', type: 'boolean' },
+        ...UNIVERSAL,
+      ],
+      content: [
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
+        { key: 'markers', label: 'Markers', type: 'list', itemFields: [
+          { key: 'label', label: 'Label', type: 'text', localized: true, help: 'Shown as a tooltip on hover.' },
+          { key: 'latitude', label: 'Latitude', type: 'number', help: 'e.g. -7.2575' },
+          { key: 'longitude', label: 'Longitude', type: 'number', help: 'e.g. 112.7521' },
+        ] },
+      ],
+    },
+  },
   downloads: {
     type: 'downloads', label: 'Downloads', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'list', columns: 1, accent: 'magenta' },
     defaultContent: { heading: {}, intro: {}, items: [] },
