@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { t, type LocaleMap } from '@/lib/types';
+import { partnerLogo } from '@/lib/partnerLogos';
 import type { BlockComponentProps } from './registry.types';
 import { PartnerMarquee, type MarqueePartner } from './partner-marquee/PartnerMarquee';
 
@@ -24,7 +25,9 @@ async function internationalLogos(
   return (data ?? []).map((r) => ({
     name: r.name,
     country: r.country,
-    logoUrl: r.logo_url,
+    // An admin-uploaded logo_url wins; otherwise fall back to the bundled logo
+    // manifest matched by institution name (public/partners/*).
+    logoUrl: r.logo_url ?? partnerLogo(r.name),
     url: r.url,
   }));
 }
@@ -40,7 +43,7 @@ async function domesticLogos(
   return (data ?? []).map((r) => ({
     name: r.name,
     country: r.city,
-    logoUrl: r.logo_url,
+    logoUrl: r.logo_url ?? partnerLogo(r.name),
     url: r.url,
   }));
 }
