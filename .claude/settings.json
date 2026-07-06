@@ -94,7 +94,12 @@
       "PowerShell($pd='e:\\\\PETRA-Global-Website\\\\.git\\\\objects\\\\pack'; foreach\\($p in 'pack-74ba4d3e3f97a64d63e9f62b078d551db107bb31','pack-af38d889d636f71f5026721338142b39f72b9c78','pack-ada94c2360c006015a5460c4c2b436468565bf4b'\\){ $n=\\(git verify-pack -v \"$pd\\\\$p.idx\" 2>$null | Measure-Object -Line\\).Lines; \"$p objects+lines=$n\" })",
       "Bash(xargs -I{} sh -c 'echo \"--- {} ---\"; head -40 \"{}\"')",
       "Bash(node -e \"const m=require\\('./src/lib/partnerLogos.generated.json'\\); console.log\\('entries:', m.length\\); console.log\\(JSON.stringify\\(m.slice\\(0,4\\),null,2\\)\\);\")",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "mcp__claude_ai_21st_Dev__search",
+      "mcp__claude_ai_21st_Dev__get_usage",
+      "mcp__claude_ai_21st_Dev__get_component",
+      "Skill(artifact-design)",
+      "Skill(artifact-design:*)"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",

@@ -8,6 +8,7 @@ import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap, type Locale } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
 import { HeroCarousel, type HeroSlide } from './HeroCarousel';
+import { HeroAurora } from './HeroAurora';
 import ScrollExpandHero from './ScrollExpandHero';
 import { normalizeImageUrl } from '@/lib/media';
 
@@ -86,7 +87,8 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
   const slides = !split && bgType === 'carousel' ? await carouselSlides(bgSource, locale) : [];
   const showImageBg = !split && bgType === 'image' && !!c.image_url;
   const showCarouselBg = !split && bgType === 'carousel' && slides.length > 0;
-  const hasBg = showImageBg || showCarouselBg;
+  const showAuroraBg = !split && bgType === 'aurora';
+  const hasBg = showImageBg || showCarouselBg || showAuroraBg;
 
   return (
     <Section
@@ -106,6 +108,7 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
             </>
           )}
           {showCarouselBg && <HeroCarousel slides={slides} />}
+          {showAuroraBg && <HeroAurora />}
         </div>
       )}
       <Container className="relative z-10">

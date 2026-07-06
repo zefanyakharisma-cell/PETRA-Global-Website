@@ -71,6 +71,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         { key: 'bgType', label: 'Background (centered/left)', type: 'select',
           showFor: { field: 'layout', equals: ['centered', 'left', 'split-with-image'] }, options: [
           { value: 'none', label: 'Solid colour' },
+          { value: 'aurora', label: 'Aurora (animated glow)' },
           { value: 'image', label: 'Uploaded image' },
           { value: 'carousel', label: 'Carousel (auto-rotating)' },
         ] },
