@@ -99,7 +99,8 @@
       "mcp__claude_ai_21st_Dev__get_usage",
       "mcp__claude_ai_21st_Dev__get_component",
       "Skill(artifact-design)",
-      "Skill(artifact-design:*)"
+      "Skill(artifact-design:*)",
+      "WebFetch(domain:indonesianspectrum.petra.ac.id)"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",

@@ -34,15 +34,19 @@ export function StepsBlock({ block, locale }: BlockComponentProps) {
             <Reveal key={i} delay={i * 0.06}>
               <li
                 className={clsx(
+                  'group',
                   isCards
-                    ? clsx('flex flex-col gap-3 rounded-2xl border p-6', onNavy ? 'border-white/15 bg-white/5' : 'border-ink/10 bg-white shadow-sm')
+                    ? clsx(
+                        'flex flex-col gap-3 rounded-2xl border p-6 transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift',
+                        onNavy ? 'border-white/15 bg-white/5 hover:border-white/30' : 'border-ink/10 bg-white shadow-sm hover:border-ink/20',
+                      )
                     : 'flex gap-4',
                 )}
               >
                 <span
                   className={clsx(
-                    'flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-display text-2xl',
-                    onNavy ? 'bg-amber text-ink' : 'bg-navy text-white',
+                    'flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-display text-2xl ring-4 ring-transparent transition-all duration-300 group-hover:scale-105',
+                    onNavy ? 'bg-amber text-ink group-hover:ring-amber/20' : 'bg-navy text-white group-hover:ring-navy/10',
                   )}
                 >
                   {i + 1}

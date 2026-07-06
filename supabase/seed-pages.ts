@@ -456,45 +456,10 @@ const PAGE_BLOCKS: Record<string, Block[]> = {
   // script (supabase/seed-icop-page.ts, `npm run db:seed:icop`) so it lives
   // there as the single source of truth — intentionally not listed here.
 
-  'mobility/inbound/indonesian-spectrum': [
-    hero({
-      eyebrow: t('Inbound Programs', 'Program Inbound'),
-      heading: t('Indonesian SPECTRUM', 'Indonesian SPECTRUM'),
-      subcopy: t(
-        'Immerse yourself in Indonesian language, culture, arts, and society through an engaging short program.',
-        'Selami bahasa, budaya, seni, dan masyarakat Indonesia melalui program singkat yang menarik.',
-      ),
-      ctas: [btn(t('Apply now', 'Daftar sekarang'), APPLY, 'magenta')],
-    }, { accent: 'magenta' }),
-    imageText({
-      heading: t('Experience Indonesia', 'Rasakan Indonesia'),
-      body: t(
-        'From language classes to cultural workshops and field trips, Indonesian SPECTRUM gives you an authentic window into life in Indonesia in just a few weeks.',
-        'Dari kelas bahasa hingga lokakarya budaya dan kunjungan lapangan, Indonesian SPECTRUM memberi Anda jendela autentik ke kehidupan di Indonesia hanya dalam beberapa minggu.',
-      ),
-    }),
-    featureList({
-      heading: t('Program highlights', 'Keunggulan program'),
-      items: [
-        { icon: 'book', title: t('Bahasa Indonesia', 'Bahasa Indonesia'), body: t('Practical language classes for everyday life.', 'Kelas bahasa praktis untuk kehidupan sehari-hari.') },
-        { icon: 'sparkles', title: t('Culture & arts', 'Budaya & seni'), body: t('Hands-on workshops in Indonesian traditions.', 'Lokakarya langsung tentang tradisi Indonesia.') },
-        { icon: 'compass', title: t('Field trips', 'Kunjungan lapangan'), body: t('Explore heritage sites and local communities.', 'Jelajahi situs warisan budaya dan komunitas lokal.') },
-      ],
-    }, { accent: 'magenta' }),
-    steps({
-      heading: t('How to join', 'Cara bergabung'),
-      steps: [
-        { title: t('Register', 'Mendaftar'), body: t('Submit the online application before the deadline.', 'Kirimkan aplikasi daring sebelum batas waktu.') },
-        { title: t('Confirm', 'Konfirmasi'), body: t('Receive your acceptance and program details.', 'Terima penerimaan dan detail program Anda.') },
-        { title: t('Arrive', 'Tiba'), body: t('Join orientation and settle into Surabaya.', 'Ikuti orientasi dan menetap di Surabaya.') },
-        { title: t('Experience', 'Mengalami'), body: t('Enjoy classes, workshops, and cultural trips.', 'Nikmati kelas, lokakarya, dan perjalanan budaya.') },
-      ],
-    }, { accent: 'magenta' }),
-    cta({
-      heading: t('Discover Indonesia with us', 'Temukan Indonesia bersama kami'),
-      ctas: [btn(t('Apply now', 'Daftar sekarang'), APPLY, 'magenta'), btn(t('Contact us', 'Hubungi kami'), '/about/contact-us', 'outline')],
-    }),
-  ],
+  // 'mobility/inbound/indonesian-spectrum' is seeded from its own richer,
+  // source-accurate script (supabase/seed-spectrum-page.ts, `npm run
+  // db:seed:spectrum`) so it lives there as the single source of truth —
+  // intentionally not listed here.
 
   // ===================== MOBILITY — OUTBOUND (accent amber) =====================
   'mobility/outbound': [

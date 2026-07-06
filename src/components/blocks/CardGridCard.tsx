@@ -77,11 +77,18 @@ export function CardGridCard({
   const shell = (
     <div
       className={clsx(
-        'group flex h-full overflow-hidden rounded-2xl border transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift',
+        'group relative flex h-full overflow-hidden rounded-2xl border transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift',
         horizontal ? 'flex-col sm:flex-row' : 'flex-col',
         onNavy ? 'border-white/15 bg-white/5 hover:border-white/30' : 'border-ink/10 bg-white hover:border-ink/20',
       )}
     >
+      {/* Brand accent wipes in along the bottom edge on hover. */}
+      <div
+        className={clsx(
+          'pointer-events-none absolute inset-x-0 bottom-0 z-10 h-1 origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100',
+          onNavy ? 'bg-cyan' : 'bg-magenta',
+        )}
+      />
       <div
         className={clsx(
           'media-zoom relative overflow-hidden bg-ink/5',

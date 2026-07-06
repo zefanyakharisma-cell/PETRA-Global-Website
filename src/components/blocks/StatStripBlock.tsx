@@ -1,5 +1,6 @@
 import { Section, Container } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
+import { CountUp } from './CountUp';
 import { InlineHtml } from '@/components/ui/RichText';
 import { createClient } from '@/lib/supabase/server';
 import { clsx } from '@/lib/clsx';
@@ -72,8 +73,8 @@ export async function StatStripBlock({ block, locale }: BlockComponentProps) {
                   isStacked && i > 0 && 'pt-8',
                 )}
               >
-                <dd className={clsx('text-5xl md:text-6xl', onNavy ? 'text-cyan' : 'text-magenta')}>
-                  {resolve(s)}
+                <dd className={clsx('text-5xl md:text-6xl tabular-nums', onNavy ? 'text-cyan' : 'text-magenta')}>
+                  <CountUp value={resolve(s)} />
                 </dd>
                 <InlineHtml as="dt" html={t(s.label, locale)} className={clsx('mt-2 font-condensed uppercase tracking-wide', onNavy ? 'text-white/75' : 'text-ink/60')} />
               </div>
