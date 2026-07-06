@@ -21,11 +21,14 @@ export function defaultNewsBlocks(title: LocaleMap): NewsBlockSeed[] {
     {
       type: 'hero',
       position: 0,
-      config: { background: 'navy', spacing: 'spacious', layout: 'left', bgType: 'none' },
+      // bgType 'image': the uploaded hero image becomes both the masthead
+      // backdrop and the article thumbnail (see updateBlock → news.cover_url).
+      config: { background: 'navy', spacing: 'spacious', layout: 'left', bgType: 'image' },
       content: {
         eyebrow: { en: 'News', id: 'Berita' },
         heading: { en: title.en ?? '', id: title.id ?? '' },
         subcopy: {},
+        image_url: '',
         ctas: [],
       },
     },

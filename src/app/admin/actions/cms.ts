@@ -326,6 +326,22 @@ export async function updateBlock(
 ) {
   const supabase = await createClient();
   await supabase.from('blocks').update(patch as never).eq('id', id);
+
+  // A news article's hero image doubles as the article thumbnail: mirror it into
+  // `news.cover_url` on save so feeds, card grids, and the hero carousel pick it
+  // up automatically — no separate cover upload needed. Only the hero block, and
+  // only when its image field is part of this save.
+  if (owner.kind === 'news' && patch.content && 'image_url' in patch.content) {
+    const { data: blk } = await supabase.from('blocks').select('type').eq('id', id).maybeSingle();
+    if (blk?.type === 'hero') {
+      const img = patch.content.image_url;
+      await supabase
+        .from('news')
+        .update({ cover_url: typeof img === 'string' && img ? img : null } as never)
+        .eq('id', owner.id);
+    }
+  }
+
   revalidateOwner(owner, slug);
 }
 
