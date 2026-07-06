@@ -115,7 +115,7 @@ export function PartnerMarquee({
             return (
               <div
                 key={r}
-                className="group/marquee relative flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]"
+                className="group/marquee relative flex overflow-hidden"
               >
                 <div
                   className={clsx(
