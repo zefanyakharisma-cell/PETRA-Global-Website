@@ -1,5 +1,11 @@
 [
   {
+    "key": "acetrend corporation sdn bhd",
+    "url": "/partners/malaysia-acetrend-corporation-sdn-bhd-pullman-kuala-lumpur-city-centre-hotel-residences.png",
+    "label": "Acetrend Corporation SDN BHD (Pullman Kuala Lumpur City Centre Hotel & Residences)",
+    "country": "Malaysia"
+  },
+  {
     "key": "agh university of science and technology",
     "url": "/partners/poland-agh-university-of-science-and-technology-poland.png",
     "label": "AGH University of Science and Technology, Poland",
@@ -28,6 +34,12 @@
     "url": "/partners/japan-asia-university-japan.png",
     "label": "Asia University, Japan",
     "country": "Japan"
+  },
+  {
+    "key": "asian institute of technology",
+    "url": "/partners/thailand-asian-institute-of-technology.jpg",
+    "label": "Asian Institute of Technology",
+    "country": "Thailand"
   },
   {
     "key": "assam down town university",
@@ -138,6 +150,12 @@
     "country": "China"
   },
   {
+    "key": "chinese culture university",
+    "url": "/partners/taiwan-chinese-culture-university-ccu.png",
+    "label": "Chinese Culture University (CCU)",
+    "country": "Taiwan"
+  },
+  {
     "key": "chodang university",
     "url": "/partners/south-korea-chodang-university-korea.png",
     "label": "Chodang University, Korea",
@@ -192,10 +210,22 @@
     "country": "South Korea"
   },
   {
+    "key": "dc hotel sdn bhd",
+    "url": "/partners/malaysia-dc-hotel-sdn-bhd-sofitel-kuala-lumpur-damansara.png",
+    "label": "DC Hotel SDN BHD (Sofitel Kuala Lumpur Damansara)",
+    "country": "Malaysia"
+  },
+  {
     "key": "dongseo university",
     "url": "/partners/south-korea-dongseo-university-korea.jpg",
     "label": "Dongseo University, Korea",
     "country": "South Korea"
+  },
+  {
+    "key": "filamer christian university",
+    "url": "/partners/philippines-filamer-christian-university.png",
+    "label": "Filamer Christian University",
+    "country": "Philippines"
   },
   {
     "key": "fontys university of applied sciences",
@@ -232,6 +262,12 @@
     "url": "/partners/mongolia-german-mongolian-institute-for-resources-and-technology-gmit-mongolia.png",
     "label": "German-Mongolian Institute for Resources and Technology (GMIT), Mongolia",
     "country": "Mongolia"
+  },
+  {
+    "key": "guandata",
+    "url": "/partners/china-guandata.png",
+    "label": "GUANDATA",
+    "country": "China"
   },
   {
     "key": "guangdong university of foreign studies",
@@ -282,6 +318,12 @@
     "country": "South Korea"
   },
   {
+    "key": "hanze university of applied science hanzehogeschool groningen",
+    "url": "/partners/netherlands-hanze-university-of-applied-science-hanzehogeschool-groningen.png",
+    "label": "Hanze University of Applied Science Hanzehogeschool Groningen",
+    "country": "Netherlands"
+  },
+  {
     "key": "hochschule fresenius university of applied sciences",
     "url": "/partners/germany-hochschule-fresenius-university-of-applied-sciences-germany.png",
     "label": "Hochschule Fresenius University of Applied Sciences, Germany",
@@ -292,6 +334,12 @@
     "url": "/partners/germany-hochschule-mainz-university-of-applied-sciences-germany.png",
     "label": "Hochschule Mainz - University of Applied Sciences, Germany",
     "country": "Germany"
+  },
+  {
+    "key": "hogeschool van utrecht hogeschool utrecht",
+    "url": "/partners/netherlands-hogeschool-van-utrecht-hogeschool-utrecht.png",
+    "label": "Hogeschool van Utrecht Hogeschool Utrecht",
+    "country": "Netherlands"
   },
   {
     "key": "holiday inn melaka",
@@ -336,6 +384,12 @@
     "country": "Philippines"
   },
   {
+    "key": "inholland university of applied sciences hogeschool inholland",
+    "url": "/partners/netherlands-inholland-university-of-applied-sciences-hogeschool-inholland.png",
+    "label": "Inholland University of Applied Sciences Hogeschool Inholland",
+    "country": "Netherlands"
+  },
+  {
     "key": "international christian university",
     "url": "/partners/japan-international-christian-university-icu-japan.jpg",
     "label": "International Christian University (ICU), Japan",
@@ -364,6 +418,12 @@
     "url": "/partners/united-states-of-america-iowa-state-university-of-science-and-technology-isu-usa.png",
     "label": "Iowa State University of Science and Technology (ISU), USA",
     "country": "United States of America"
+  },
+  {
+    "key": "j c homes hotels sdn bhd",
+    "url": "/partners/malaysia-j-c-homes-hotels-sdn-bhd-sheraton-petaling-jaya-hotel.jpg",
+    "label": "J&C Homes Hotels SDN. BHD. (Sheraton Petaling Jaya Hotel)",
+    "country": "Malaysia"
   },
   {
     "key": "james cook university",
@@ -474,10 +534,22 @@
     "country": "Japan"
   },
   {
+    "key": "mikrotik mikrotikls sia",
+    "url": "/partners/latvia-mikrotik-mikrotikls-sia.png",
+    "label": "MikroTIK, Mikrotikls SIA",
+    "country": "Latvia"
+  },
+  {
     "key": "ming chuan university",
     "url": "/partners/taiwan-ming-chuan-university-taiwan.png",
     "label": "Ming Chuan University, Taiwan",
     "country": "Taiwan"
+  },
+  {
+    "key": "mit art design and technology university",
+    "url": "/partners/india-mit-art-design-and-technology-university-mit-adtu.png",
+    "label": "Mit Art, Design, and Technology University (MIT ADTU)",
+    "country": "India"
   },
   {
     "key": "momoyama gakuin university",
@@ -570,6 +642,12 @@
     "country": "Singapore"
   },
   {
+    "key": "new palace restaurant new palace international co ltd",
+    "url": "/partners/taiwan-new-palace-restaurant-new-palace-international-co-ltd.jpg",
+    "label": "New Palace Restaurant, New Palace International Co., LTD",
+    "country": "Taiwan"
+  },
+  {
     "key": "new palace taichung beitun dist",
     "url": "/partners/taiwan-new-palace-taichung-beitun-dist-taiwan.jpg",
     "label": "New Palace Taichung Beitun Dist., Taiwan",
@@ -600,6 +678,12 @@
     "country": "Germany"
   },
   {
+    "key": "osnabr ck university of applied sciences",
+    "url": "/partners/germany-osnabr-ck-university-of-applied-sciences-germany.png",
+    "label": "Osnabrück University of Applied Sciences, Germany",
+    "country": "Germany"
+  },
+  {
     "key": "panpacific university",
     "url": "/partners/philippines-panpacific-university-philippines.png",
     "label": "Panpacific University, Philippines",
@@ -618,6 +702,18 @@
     "country": "Philippines"
   },
   {
+    "key": "pozna university of life science",
+    "url": "/partners/poland-pozna-university-of-life-science.png",
+    "label": "Poznań University of Life Science",
+    "country": "Poland"
+  },
+  {
+    "key": "pt sika indonesia",
+    "url": "/partners/indonesia-pt-sika-indonesia.png",
+    "label": "PT SIKA Indonesia",
+    "country": "Indonesia"
+  },
+  {
     "key": "pullman kuala lumpur",
     "url": "/partners/malaysia-pullman-kuala-lumpur-malaysia.png",
     "label": "Pullman Kuala Lumpur, Malaysia",
@@ -634,6 +730,12 @@
     "url": "/partners/australia-queensland-university-of-technology-qut-australia.jpg",
     "label": "Queensland University of Technology (QUT), Australia",
     "country": "Australia"
+  },
+  {
+    "key": "rajamangala university of technology srivijaya",
+    "url": "/partners/thailand-rajamangala-university-of-technology-srivijaya.jpg",
+    "label": "Rajamangala University of Technology Srivijaya",
+    "country": "Thailand"
   },
   {
     "key": "rennes school of business",
@@ -666,10 +768,22 @@
     "country": "China"
   },
   {
+    "key": "shangri la far eastern plaza hotel yuan ding co ltd",
+    "url": "/partners/taiwan-shangri-la-far-eastern-plaza-hotel-yuan-ding-co-ltd.png",
+    "label": "Shangri La Far Eastern Plaza Hotel, Yuan Ding Co., Ltd",
+    "country": "Taiwan"
+  },
+  {
     "key": "shangri la hotel kuala lumpur",
     "url": "/partners/malaysia-shangri-la-hotel-kuala-lumpur-malaysia.png",
     "label": "Shangri La Hotel, Kuala Lumpur, Malaysia",
     "country": "Malaysia"
+  },
+  {
+    "key": "sheraton grand taipei my humble hospitality management consulting co ltd",
+    "url": "/partners/taiwan-sheraton-grand-taipei-my-humble-hospitality-management-consulting-co-ltd.png",
+    "label": "Sheraton Grand Taipei, My Humble Hospitality Management Consulting Co., LTD",
+    "country": "Taiwan"
   },
   {
     "key": "sheraton hotels and resorts",
@@ -706,6 +820,12 @@
     "url": "/partners/thailand-silpakorn-university-thailand.png",
     "label": "Silpakorn University, Thailand",
     "country": "Thailand"
+  },
+  {
+    "key": "singapore management university",
+    "url": "/partners/singapore-singapore-management-university-smu.png",
+    "label": "Singapore Management University (SMU)",
+    "country": "Singapore"
   },
   {
     "key": "singapore university of technology",
@@ -774,6 +894,18 @@
     "country": "Malaysia"
   },
   {
+    "key": "swinburne university of technology",
+    "url": "/partners/australia-swinburne-university-of-technology.png",
+    "label": "Swinburne University of Technology",
+    "country": "Australia"
+  },
+  {
+    "key": "technische universitat ilmenau",
+    "url": "/partners/germany-technische-universitat-ilmenau.png",
+    "label": "Technische Universitat Ilmenau",
+    "country": "Germany"
+  },
+  {
     "key": "thai nichi institute of technology",
     "url": "/partners/thailand-thai-nichi-institute-of-technology-thailand.png",
     "label": "Thai-Nichi Institute of Technology, Thailand",
@@ -798,9 +930,21 @@
     "country": "China"
   },
   {
+    "key": "the westin sanya haitang bay resort sanya minsheng tourism industry co ltd",
+    "url": "/partners/china-the-westin-sanya-haitang-bay-resort-sanya-minsheng-tourism-industry-co-ltd.jpg",
+    "label": "The Westin Sanya Haitang Bay Resort, Sanya Minsheng Tourism Industry Co., Ltd",
+    "country": "China"
+  },
+  {
     "key": "tianjin foreign studies university",
     "url": "/partners/china-tianjin-foreign-studies-university-tfsu-china.jpg",
     "label": "Tianjin Foreign Studies University (TFSU), China",
+    "country": "China"
+  },
+  {
+    "key": "tianjin university tianjin",
+    "url": "/partners/china-tianjin-university-tianjin.png",
+    "label": "Tianjin University, Tianjin",
     "country": "China"
   },
   {
@@ -832,6 +976,30 @@
     "url": "/partners/timor-leste-universidade-nacional-timor-lorosa-e-untl-timor-leste.png",
     "label": "Universidade Nacional Timor Lorosa'e (UNTL), Timor-Leste",
     "country": "Timor Leste"
+  },
+  {
+    "key": "universitas diponegoro",
+    "url": "/partners/indonesia-universitas-diponegoro.png",
+    "label": "Universitas Diponegoro",
+    "country": "Indonesia"
+  },
+  {
+    "key": "universitas katolik soegijapranata",
+    "url": "/partners/indonesia-universitas-katolik-soegijapranata.png",
+    "label": "Universitas Katolik Soegijapranata",
+    "country": "Indonesia"
+  },
+  {
+    "key": "universitas kristen maranatha",
+    "url": "/partners/indonesia-universitas-kristen-maranatha.png",
+    "label": "Universitas Kristen Maranatha",
+    "country": "Indonesia"
+  },
+  {
+    "key": "universitas tarumanegara",
+    "url": "/partners/indonesia-universitas-tarumanegara.png",
+    "label": "Universitas Tarumanegara",
+    "country": "Indonesia"
   },
   {
     "key": "universiti malaya",
@@ -981,6 +1149,12 @@
     "key": "xi an jiatong liverpool university",
     "url": "/partners/china-xi-an-jiatong-liverpool-university-xjtlu-china.jpg",
     "label": "Xi'an Jiatong-Liverpool University (XJTLU), China",
+    "country": "China"
+  },
+  {
+    "key": "xiamen university",
+    "url": "/partners/china-xiamen-university.png",
+    "label": "Xiamen University",
     "country": "China"
   },
   {
