@@ -78,7 +78,7 @@ export function TabsBlock({ block, locale }: BlockComponentProps) {
   };
 
   const tablistClass = isSide
-    ? clsx('flex flex-col gap-1 border-l md:w-48 md:shrink-0', onNavy ? 'border-white/15' : 'border-ink/15')
+    ? clsx('flex flex-col gap-1 border-l md:w-64 md:shrink-0', onNavy ? 'border-white/15' : 'border-ink/15')
     : isPills
       ? 'flex flex-wrap gap-2'
       : clsx('flex flex-wrap gap-1 border-b', onNavy ? 'border-white/15' : 'border-ink/15');
@@ -94,9 +94,9 @@ export function TabsBlock({ block, locale }: BlockComponentProps) {
   );
 
   const panel = (
-    <div className={isSide ? 'flex-1' : 'pt-6'} role="tabpanel">
+    <div className={isSide ? 'min-w-0 flex-1' : 'pt-6'} role="tabpanel">
       {html ? (
-        <RichText html={html} onNavy={onNavy} className="max-w-reading" />
+        <RichText html={html} onNavy={onNavy} className={isSide ? 'max-w-[75ch]' : 'max-w-reading'} />
       ) : (
         <p className={clsx(onNavy ? 'text-white/50' : 'text-ink/40')}>
           {locale === 'id' ? 'Tambahkan teks di sini.' : 'Add your text here.'}
@@ -107,10 +107,10 @@ export function TabsBlock({ block, locale }: BlockComponentProps) {
 
   return (
     <Section config={block.config}>
-      <Container narrow>
+      <Container narrow={!isSide}>
         {t(c.heading, locale) && <InlineHtml as="h2" html={t(c.heading, locale)} className="mb-6 text-4xl md:text-5xl" />}
         {isSide ? (
-          <div className="flex flex-col gap-6 md:flex-row md:gap-10">
+          <div className="flex flex-col gap-6 md:flex-row md:gap-14">
             {tablist}
             {panel}
           </div>
