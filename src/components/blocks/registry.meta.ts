@@ -2,12 +2,11 @@ import type { BlockMeta, EditorField } from './registry.types';
 import { PROGRAM_AREAS } from '@/lib/programAreas';
 
 
-// Bento sizes: width (columns 1–4) × height (units 1–4). See blockSize.ts.
-const SIZE_OPTIONS = ([1, 2, 3, 4] as const).flatMap((w) =>
-  ([1, 2, 3, 4] as const).map((h) => ({ value: `${w}x${h}`, label: `${w}×${h}` })),
-);
+// Bento sizes (width 1–4 × height 1–4) are edited visually — dragged on the tile
+// in the live preview or stepped in the panel header — not via a form field.
+// See blockSize.ts and the SizeStepper in Editor.tsx.
 
-// Universal options every block carries (background + spacing + accent + size).
+// Universal options every block carries (background + spacing + accent).
 const UNIVERSAL: EditorField[] = [
   { key: 'background', label: 'Background', type: 'select', options: [
     { value: 'paper', label: 'Paper (light)' },
@@ -29,9 +28,6 @@ const UNIVERSAL: EditorField[] = [
     { value: 'green', label: 'Green (SBM)' },
     { value: 'yellow', label: 'Yellow (PGSD)' },
   ] },
-  { key: 'size', label: 'Block size (W×H)', type: 'select', default: '4x1',
-    help: 'Width in columns (of 4) × height units. 4×1 = full width. Narrower blocks tile side-by-side.',
-    options: SIZE_OPTIONS },
 ];
 
 // Reusable button definition — label + smart link + style + new-tab toggle.

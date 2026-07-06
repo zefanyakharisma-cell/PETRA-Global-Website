@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -16,8 +16,30 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import {
+  Monitor,
+  Tablet,
+  Smartphone,
+  Undo2,
+  Redo2,
+  Eye,
+  EyeOff,
+  Lock,
+  Unlock,
+  GripVertical,
+  Copy,
+  Trash2,
+  Minus,
+  Plus,
+  Bookmark,
+} from 'lucide-react';
 import { BLOCK_META, BLOCK_META_LIST } from '@/components/blocks/registry.meta';
+import { BLOCK_ICONS } from '@/components/blocks/registry.icons';
+import { parseBlockSize, BLOCK_SIZE_DEFAULT } from '@/components/blocks/blockSize';
 import { BlockForm, type EntityOptions } from './BlockForm';
+import { clsx } from '@/lib/clsx';
+import { postToFrame, readBridge, type FromPreview } from './preview-bridge';
+import { SECTION_TEMPLATES, type BlockSeed } from '@/lib/sectionTemplates';
 import {
   addBlock,
   updateBlock,
@@ -25,12 +47,23 @@ import {
   duplicateBlock,
   reorderBlocks,
   setOwnerPublished,
+  syncBlocks,
+  insertSection,
+  savePreset,
+  listPresets,
+  deletePreset,
   type BlockOwner,
 } from '@/app/admin/actions/cms';
 import type { Block, BlockType } from '@/lib/types';
 
 type Dict = Record<string, unknown>;
 type SaveState = 'idle' | 'dirty' | 'saving' | 'saved';
+type Device = 'desktop' | 'tablet' | 'mobile';
+type Preset = { id: string; name: string; payload: BlockSeed[] };
+
+const DEVICE_WIDTH: Record<Device, string> = { desktop: '100%', tablet: '820px', mobile: '390px' };
+const cloneBlocks = (bs: Block[]): Block[] =>
+  bs.map((b) => ({ ...b, config: { ...b.config }, content: { ...b.content } }));
 
 export function Editor({
   owner,
@@ -53,23 +86,57 @@ export function Editor({
   const [published, setPublished] = useState<boolean>(initialPublished);
   const [selectedId, setSelectedId] = useState<string | null>(initialBlocks[0]?.id ?? null);
   const [locale, setLocale] = useState<'en' | 'id'>('en');
+  const [device, setDevice] = useState<Device>('desktop');
   const [previewKey, setPreviewKey] = useState(0);
   const [picking, setPicking] = useState(false);
+  const [presets, setPresets] = useState<Preset[]>([]);
   const [saveState, setSaveState] = useState<SaveState>('idle');
-  const [pending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
   const selected = useMemo(() => blocks.find((b) => b.id === selectedId) ?? null, [blocks, selectedId]);
   const reloadPreview = () => setPreviewKey((k) => k + 1);
 
-  // ---- Debounced autosave -------------------------------------------------
-  // Edits update local state instantly; a pending change is flushed to the
-  // server ~700ms after typing stops (or immediately when switching blocks /
-  // structural actions), then the preview refreshes. No manual save needed.
+  // Mirror latest state into refs so message/keyboard handlers read fresh values.
+  const blocksRef = useRef(blocks);
+  const selectedIdRef = useRef(selectedId);
+  useEffect(() => { blocksRef.current = blocks; }, [blocks]);
+  useEffect(() => { selectedIdRef.current = selectedId; }, [selectedId]);
+
+  const lockedIds = useMemo(() => blocks.filter((b) => b.config.locked).map((b) => b.id), [blocks]);
+
+  // Load saved presets once for the Templates tab.
+  useEffect(() => { listPresets().then((p) => setPresets(p as Preset[])); }, []);
+
+  // ---- Undo / redo history --------------------------------------------------
+  // Snapshots of the whole block array captured *before* a property/order edit.
+  // Structural changes (add/delete/duplicate/insert) reset history — undo does
+  // not resurrect deleted rows (see syncBlocks). Field edits coalesce per block
+  // via `armedRef` so a burst of typing is a single undo step.
+  const past = useRef<Block[][]>([]);
+  const future = useRef<Block[][]>([]);
+  const armedRef = useRef<string | null>(null);
+  const [histVer, setHistVer] = useState(0);
+
+  const pushHistory = useCallback(() => {
+    past.current.push(cloneBlocks(blocksRef.current));
+    if (past.current.length > 50) past.current.shift();
+    future.current = [];
+    setHistVer((v) => v + 1);
+  }, []);
+  const resetHistory = useCallback(() => {
+    past.current = [];
+    future.current = [];
+    armedRef.current = null;
+    setHistVer((v) => v + 1);
+  }, []);
+
+  // ---- Debounced autosave (unchanged core) ---------------------------------
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingRef = useRef<{ id: string; config: Dict; content: Dict } | null>(null);
 
-  const flushSave = (refresh = true) => {
+  const flushSave = useCallback((refresh = true) => {
     if (timer.current) { clearTimeout(timer.current); timer.current = null; }
     const p = pendingRef.current;
     if (!p) return;
@@ -80,10 +147,9 @@ export function Editor({
       setSaveState('saved');
       if (refresh) reloadPreview();
     });
-  };
+  }, [owner, slug]);
 
   const scheduleSave = (id: string, config: Dict, content: Dict) => {
-    // Switching to a different block? flush the previous one first.
     if (pendingRef.current && pendingRef.current.id !== id) flushSave(false);
     pendingRef.current = { id, config, content };
     setSaveState('dirty');
@@ -93,25 +159,135 @@ export function Editor({
 
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
 
-  const selectBlock = (id: string | null) => { flushSave(false); setSelectedId(id); };
-
-  const onDragEnd = (e: DragEndEvent) => {
-    const { active, over } = e;
-    if (!over || active.id === over.id) return;
+  const selectBlock = useCallback((id: string | null) => {
     flushSave(false);
-    const oldIndex = blocks.findIndex((b) => b.id === active.id);
-    const newIndex = blocks.findIndex((b) => b.id === over.id);
-    const next = arrayMove(blocks, oldIndex, newIndex);
-    setBlocks(next);
+    armedRef.current = null; // start a fresh edit session for the next block
+    setSelectedId(id);
+  }, [flushSave]);
+
+  // ---- Persist a restored snapshot (undo/redo) ------------------------------
+  const applySnapshot = useCallback((snap: Block[]) => {
+    flushSave(false);
+    setBlocks(snap);
+    setSelectedId((cur) => (snap.some((b) => b.id === cur) ? cur : snap[0]?.id ?? null));
     startTransition(async () => {
-      await reorderBlocks(next.map((b) => b.id), owner, slug);
+      await syncBlocks(owner, slug, snap.map((b) => ({ id: b.id, config: b.config, content: b.content })));
       reloadPreview();
     });
-  };
+  }, [flushSave, owner, slug]);
 
+  const undo = useCallback(() => {
+    if (!past.current.length) return;
+    const prev = past.current.pop()!;
+    future.current.push(cloneBlocks(blocksRef.current));
+    armedRef.current = null;
+    applySnapshot(prev);
+    setHistVer((v) => v + 1);
+  }, [applySnapshot]);
+
+  const redo = useCallback(() => {
+    if (!future.current.length) return;
+    const next = future.current.pop()!;
+    past.current.push(cloneBlocks(blocksRef.current));
+    armedRef.current = null;
+    applySnapshot(next);
+    setHistVer((v) => v + 1);
+  }, [applySnapshot]);
+
+  // Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z / Ctrl+Y — but never hijack native text undo.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const el = document.activeElement as HTMLElement | null;
+      if (el && (el.isContentEditable || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) return;
+      const k = e.key.toLowerCase();
+      if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+      else if ((k === 'z' && e.shiftKey) || k === 'y') { e.preventDefault(); redo(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [undo, redo]);
+
+  // ---- Bridge: receive selection / resize / actions from the preview --------
+  const moveBlock = useCallback((id: string, dir: -1 | 1) => {
+    const list = blocksRef.current;
+    const idx = list.findIndex((b) => b.id === id);
+    const j = idx + dir;
+    if (idx < 0 || j < 0 || j >= list.length) return;
+    pushHistory();
+    const next = arrayMove(list, idx, j);
+    setBlocks(next);
+    flushSave(false);
+    startTransition(async () => { await reorderBlocks(next.map((b) => b.id), owner, slug); reloadPreview(); });
+  }, [flushSave, owner, slug, pushHistory]);
+
+  const applyResize = useCallback((id: string, size: string) => {
+    const blk = blocksRef.current.find((b) => b.id === id);
+    if (!blk || blk.config.locked) return;
+    pushHistory();
+    armedRef.current = null;
+    const nextConfig = { ...blk.config, size };
+    setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, config: nextConfig } : b)));
+    flushSave(false);
+    // Persist WITHOUT reloading — the overlay already shows the new size live.
+    startTransition(async () => { await updateBlock(id, owner, slug, { config: nextConfig }); setSaveState('saved'); });
+  }, [flushSave, owner, slug, pushHistory]);
+
+  const onDuplicate = useCallback((id: string) => {
+    flushSave(false);
+    resetHistory();
+    startTransition(async () => { await duplicateBlock(id, owner, slug); location.reload(); });
+  }, [flushSave, owner, slug, resetHistory]);
+
+  const onDelete = useCallback((id: string) => {
+    if (pendingRef.current?.id === id) pendingRef.current = null;
+    resetHistory();
+    startTransition(async () => {
+      await deleteBlock(id, owner, slug);
+      setBlocks((prev) => prev.filter((b) => b.id !== id));
+      setSelectedId((cur) => (cur === id ? null : cur));
+      reloadPreview();
+    });
+  }, [owner, slug, resetHistory]);
+
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      const m = readBridge<FromPreview>(e);
+      if (!m) return;
+      switch (m.type) {
+        case 'ready':
+          postToFrame(iframeRef.current, { type: 'select', id: selectedIdRef.current });
+          postToFrame(iframeRef.current, { type: 'locked', ids: blocksRef.current.filter((b) => b.config.locked).map((b) => b.id) });
+          break;
+        case 'select':
+          selectBlock(m.id);
+          break;
+        case 'resize':
+          applyResize(m.id, m.size);
+          break;
+        case 'action':
+          if (m.action === 'moveUp') moveBlock(m.id, -1);
+          else if (m.action === 'moveDown') moveBlock(m.id, 1);
+          else if (m.action === 'duplicate') onDuplicate(m.id);
+          else if (m.action === 'delete') onDelete(m.id);
+          break;
+        default:
+          break;
+      }
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, [selectBlock, applyResize, moveBlock, onDuplicate, onDelete]);
+
+  // Reflect selection + lock changes down into a live (non-reloading) preview.
+  useEffect(() => { postToFrame(iframeRef.current, { type: 'select', id: selectedId }); }, [selectedId, previewKey]);
+  useEffect(() => { postToFrame(iframeRef.current, { type: 'locked', ids: lockedIds }); }, [lockedIds, previewKey]);
+
+  // ---- Structural adds ------------------------------------------------------
   const onAdd = (type: BlockType) => {
     setPicking(false);
     flushSave(false);
+    resetHistory();
     startTransition(async () => {
       const res = await addBlock(owner, type, slug);
       if (res?.ok && res.id) {
@@ -125,21 +301,72 @@ export function Editor({
     });
   };
 
+  const onInsertSection = (seeds: BlockSeed[]) => {
+    setPicking(false);
+    flushSave(false);
+    resetHistory();
+    startTransition(async () => {
+      const res = await insertSection(owner, seeds as never, slug);
+      if (res?.ok && res.ids) {
+        const ownerRef = owner.kind === 'news' ? { news_id: owner.id } : { page_id: owner.id };
+        const created: Block[] = res.ids.map((id, i) => ({
+          id, ...ownerRef, type: seeds[i].type, position: blocks.length + i,
+          config: seeds[i].config as Block['config'], content: seeds[i].content,
+        }));
+        setBlocks((prev) => [...prev, ...created]);
+        setSelectedId(res.ids[0] ?? null);
+        reloadPreview();
+      }
+    });
+  };
+
+  const onSaveAsPreset = (id: string) => {
+    const blk = blocksRef.current.find((b) => b.id === id);
+    if (!blk) return;
+    const name = window.prompt('Save this block as a template. Name:', BLOCK_META[blk.type].label);
+    if (!name) return;
+    startTransition(async () => {
+      await savePreset(name, [{ type: blk.type, config: blk.config, content: blk.content }]);
+      setPresets(await listPresets() as Preset[]);
+    });
+  };
+
+  const onDeletePreset = (id: string) => {
+    startTransition(async () => { await deletePreset(id); setPresets((p) => p.filter((x) => x.id !== id)); });
+  };
+
+  // ---- Form + layers edits --------------------------------------------------
   const onFormChange = (next: { config: Dict; content: Dict }) => {
     if (!selected) return;
+    if (armedRef.current !== selected.id) { pushHistory(); armedRef.current = selected.id; }
     setBlocks((prev) => prev.map((b) => (b.id === selected.id ? { ...b, config: next.config as Block['config'], content: next.content } : b)));
     scheduleSave(selected.id, next.config, next.content);
   };
 
-  const onDuplicate = (id: string) => { flushSave(false); startTransition(async () => { await duplicateBlock(id, owner, slug); location.reload(); }); };
-  const onDelete = (id: string) => {
-    if (pendingRef.current?.id === id) pendingRef.current = null;
+  const toggleFlag = (id: string, flag: 'hidden' | 'locked') => {
+    const blk = blocksRef.current.find((b) => b.id === id);
+    if (!blk) return;
+    pushHistory();
+    armedRef.current = null;
+    const nextConfig = { ...blk.config, [flag]: !blk.config[flag] };
+    setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, config: nextConfig } : b)));
     startTransition(async () => {
-      await deleteBlock(id, owner, slug);
-      setBlocks((prev) => prev.filter((b) => b.id !== id));
-      if (selectedId === id) setSelectedId(null);
-      reloadPreview();
+      await updateBlock(id, owner, slug, { config: nextConfig });
+      // Visibility changes what renders → reload; lock is editor-only → no reload.
+      if (flag === 'hidden') reloadPreview();
     });
+  };
+
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    pushHistory();
+    flushSave(false);
+    const oldIndex = blocks.findIndex((b) => b.id === active.id);
+    const newIndex = blocks.findIndex((b) => b.id === over.id);
+    const next = arrayMove(blocks, oldIndex, newIndex);
+    setBlocks(next);
+    startTransition(async () => { await reorderBlocks(next.map((b) => b.id), owner, slug); reloadPreview(); });
   };
 
   const togglePublish = () => {
@@ -153,6 +380,10 @@ export function Editor({
     saveState === 'dirty' ? 'Unsaved changes' :
     saveState === 'saved' ? 'All changes saved ✓' : '';
 
+  const canUndo = past.current.length > 0;
+  const canRedo = future.current.length > 0;
+  void histVer; // re-render trigger for canUndo/canRedo
+
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col">
       {/* Toolbar */}
@@ -162,7 +393,22 @@ export function Editor({
           <span className="font-medium">/{publicPath}</span>
           {saveLabel && <span className="text-xs text-ink/40">{saveLabel}</span>}
         </div>
+
         <div className="flex items-center gap-2">
+          {/* Undo / redo */}
+          <div className="flex overflow-hidden rounded-md border border-ink/20">
+            <IconBtn title="Undo (Ctrl+Z)" disabled={!canUndo} onClick={undo}><Undo2 size={15} /></IconBtn>
+            <IconBtn title="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={redo}><Redo2 size={15} /></IconBtn>
+          </div>
+
+          {/* Device width */}
+          <div className="flex overflow-hidden rounded-md border border-ink/20">
+            {([['desktop', Monitor], ['tablet', Tablet], ['mobile', Smartphone]] as const).map(([d, Icon]) => (
+              <IconBtn key={d} title={d} active={device === d} onClick={() => setDevice(d)}><Icon size={15} /></IconBtn>
+            ))}
+          </div>
+
+          {/* Locale */}
           <div className="flex overflow-hidden rounded-md border border-ink/20 text-sm">
             {(['en', 'id'] as const).map((l) => (
               <button key={l} onClick={() => { setLocale(l); reloadPreview(); }} className={l === locale ? 'bg-navy px-3 py-1 text-white' : 'px-3 py-1'}>
@@ -170,6 +416,7 @@ export function Editor({
               </button>
             ))}
           </div>
+
           <button onClick={togglePublish} className={'rounded-md px-4 py-1.5 text-sm font-medium ' + (published ? 'bg-green-600 text-white' : 'bg-amber text-ink')}>
             {published ? 'Published' : 'Publish'}
           </button>
@@ -177,20 +424,33 @@ export function Editor({
         </div>
       </div>
 
-      <div className="grid flex-1 grid-cols-[260px_1fr_340px] overflow-hidden">
-        {/* Block list */}
+      <div className="grid flex-1 grid-cols-[280px_1fr_340px] overflow-hidden">
+        {/* Layers panel */}
         <div className="overflow-y-auto border-r border-ink/10 bg-paper p-3">
-          <button onClick={() => setPicking((v) => !v)} className="mb-3 w-full rounded-md bg-magenta py-2 font-condensed uppercase tracking-wide text-white">+ Add block</button>
-          {picking && <BlockPicker onPick={onAdd} />}
+          <button onClick={() => setPicking((v) => !v)} className="mb-3 flex w-full items-center justify-center gap-1.5 rounded-md bg-magenta py-2 font-condensed uppercase tracking-wide text-white">
+            <Plus size={16} /> Add block
+          </button>
+          {picking && (
+            <BlockPicker
+              templates={SECTION_TEMPLATES}
+              presets={presets}
+              onPickBlock={onAdd}
+              onInsertSection={onInsertSection}
+              onDeletePreset={onDeletePreset}
+            />
+          )}
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
             <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
-              <ul className="space-y-2">
+              <ul className="space-y-1.5">
                 {blocks.map((b) => (
                   <SortableBlockItem
                     key={b.id}
                     block={b}
                     selected={b.id === selectedId}
                     onSelect={() => selectBlock(b.id)}
+                    onToggleHidden={() => toggleFlag(b.id, 'hidden')}
+                    onToggleLocked={() => toggleFlag(b.id, 'locked')}
+                    onSavePreset={() => onSaveAsPreset(b.id)}
                     onDuplicate={() => onDuplicate(b.id)}
                     onDelete={() => onDelete(b.id)}
                   />
@@ -201,19 +461,35 @@ export function Editor({
           {blocks.length === 0 && <p className="text-sm text-ink/40">No blocks yet. Add one to start.</p>}
         </div>
 
-        {/* Live preview (real components, draft state) */}
-        <div className="overflow-hidden bg-ink/5">
-          <iframe key={previewKey} src={`/editor-preview/${previewPath}?locale=${locale}`} className="h-full w-full border-0" title="Live preview" />
+        {/* Live preview (real components, draft state, interactive overlay) */}
+        <div className="flex justify-center overflow-auto bg-ink/5 p-0 md:p-4">
+          <iframe
+            key={previewKey}
+            ref={iframeRef}
+            src={`/editor-preview/${previewPath}?locale=${locale}&edit=1`}
+            style={{ width: DEVICE_WIDTH[device] }}
+            className={clsx('h-full border-0 bg-white transition-[width] duration-200', device !== 'desktop' && 'rounded-lg border border-ink/15 shadow-lg')}
+            title="Live preview"
+          />
         </div>
 
         {/* Side panel */}
         <div className="overflow-y-auto border-l border-ink/10 bg-white p-4">
           {selected ? (
             <>
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-condensed text-lg uppercase tracking-wide">{BLOCK_META[selected.type].label}</h2>
-                <span className="text-xs text-ink/40">{saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved ✓' : ''}</span>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h2 className="truncate font-condensed text-lg uppercase tracking-wide">{BLOCK_META[selected.type].label}</h2>
+                <SizeStepper
+                  size={(selected.config.size as string) ?? BLOCK_SIZE_DEFAULT}
+                  disabled={!!selected.config.locked}
+                  onChange={(s) => applyResize(selected.id, s)}
+                />
               </div>
+              {selected.config.locked && (
+                <p className="mb-3 flex items-center gap-1.5 rounded-md bg-ink/5 px-2 py-1.5 text-xs text-ink/50">
+                  <Lock size={12} /> Locked — unlock in the layers panel to edit size &amp; position.
+                </p>
+              )}
               <BlockForm
                 schema={BLOCK_META[selected.type].editor}
                 config={selected.config as Dict}
@@ -231,22 +507,129 @@ export function Editor({
   );
 }
 
-function BlockPicker({ onPick }: { onPick: (type: BlockType) => void }) {
+function IconBtn({
+  title,
+  onClick,
+  active,
+  disabled,
+  children,
+}: {
+  title: string;
+  onClick: () => void;
+  active?: boolean;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      onClick={onClick}
+      disabled={disabled}
+      className={clsx(
+        'flex items-center justify-center px-2.5 py-1.5 capitalize',
+        active ? 'bg-navy text-white' : 'text-ink/70 hover:bg-ink/5',
+        disabled && 'opacity-30',
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Compact W×H stepper — the precise, accessible twin of the preview handles. */
+function SizeStepper({ size, disabled, onChange }: { size: string; disabled?: boolean; onChange: (s: string) => void }) {
+  const { w, h } = parseBlockSize(size);
+  const clamp = (n: number) => Math.max(1, Math.min(4, n));
+  const set = (nw: number, nh: number) => onChange(`${clamp(nw)}x${clamp(nh)}`);
+  return (
+    <div className={clsx('flex shrink-0 items-center gap-1 rounded-md border border-ink/15 px-1 py-0.5 text-xs', disabled && 'pointer-events-none opacity-40')}>
+      {(['W', 'H'] as const).map((axis) => {
+        const cur = axis === 'W' ? Number(w) : Number(h);
+        return (
+          <span key={axis} className="flex items-center gap-0.5">
+            <span className="text-ink/40">{axis}</span>
+            <button type="button" title={`${axis} smaller`} onClick={() => (axis === 'W' ? set(cur - 1, Number(h)) : set(Number(w), cur - 1))} className="rounded p-0.5 hover:bg-ink/5"><Minus size={12} /></button>
+            <span className="w-3 text-center tabular-nums">{cur}</span>
+            <button type="button" title={`${axis} larger`} onClick={() => (axis === 'W' ? set(cur + 1, Number(h)) : set(Number(w), cur + 1))} className="rounded p-0.5 hover:bg-ink/5"><Plus size={12} /></button>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function BlockPicker({
+  templates,
+  presets,
+  onPickBlock,
+  onInsertSection,
+  onDeletePreset,
+}: {
+  templates: typeof SECTION_TEMPLATES;
+  presets: Preset[];
+  onPickBlock: (type: BlockType) => void;
+  onInsertSection: (seeds: BlockSeed[]) => void;
+  onDeletePreset: (id: string) => void;
+}) {
+  const [tab, setTab] = useState<'blocks' | 'templates'>('blocks');
   const categories = ['Layout & hero', 'Content', 'Entity-bound', 'Conversion'] as const;
   return (
     <div className="mb-3 rounded-lg border border-ink/10 bg-white p-2">
-      {categories.map((cat) => (
-        <div key={cat} className="mb-2">
-          <p className="px-1 font-condensed text-xs uppercase tracking-widest text-ink/40">{cat}</p>
-          <div className="mt-1 grid grid-cols-2 gap-1">
-            {BLOCK_META_LIST.filter((d) => d.category === cat).map((d) => (
-              <button key={d.type} onClick={() => onPick(d.type)} className="rounded-md bg-paper px-2 py-1.5 text-left text-xs hover:bg-navy hover:text-white">
-                {d.label}
-              </button>
-            ))}
+      <div className="mb-2 flex gap-1 rounded-md bg-paper p-0.5 text-xs">
+        {(['blocks', 'templates'] as const).map((t) => (
+          <button key={t} onClick={() => setTab(t)} className={clsx('flex-1 rounded px-2 py-1 font-condensed uppercase tracking-wide', tab === t ? 'bg-white shadow-sm' : 'text-ink/50')}>
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'blocks' ? (
+        categories.map((cat) => (
+          <div key={cat} className="mb-2">
+            <p className="px-1 font-condensed text-xs uppercase tracking-widest text-ink/40">{cat}</p>
+            <div className="mt-1 grid grid-cols-2 gap-1">
+              {BLOCK_META_LIST.filter((d) => d.category === cat).map((d) => {
+                const Icon = BLOCK_ICONS[d.type];
+                return (
+                  <button key={d.type} onClick={() => onPickBlock(d.type)} className="flex items-center gap-1.5 rounded-md bg-paper px-2 py-1.5 text-left text-xs hover:bg-navy hover:text-white">
+                    <Icon size={13} className="shrink-0 opacity-60" /> {d.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))
+      ) : (
+        <div className="space-y-2">
+          <div>
+            <p className="px-1 font-condensed text-xs uppercase tracking-widest text-ink/40">Starter sections</p>
+            <div className="mt-1 space-y-1">
+              {templates.map((tpl) => (
+                <button key={tpl.id} onClick={() => onInsertSection(tpl.blocks)} className="block w-full rounded-md bg-paper px-2 py-1.5 text-left hover:bg-navy hover:text-white">
+                  <span className="text-xs font-medium">{tpl.name}</span>
+                  <span className="block text-[11px] opacity-60">{tpl.description}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="px-1 font-condensed text-xs uppercase tracking-widest text-ink/40">Saved templates</p>
+            {presets.length === 0 ? (
+              <p className="px-1 py-1 text-[11px] text-ink/40">None yet — save a block from its layers row.</p>
+            ) : (
+              <div className="mt-1 space-y-1">
+                {presets.map((p) => (
+                  <div key={p.id} className="flex items-center gap-1 rounded-md bg-paper px-2 py-1.5">
+                    <button onClick={() => onInsertSection(p.payload)} className="flex-1 truncate text-left text-xs font-medium hover:text-navy">{p.name}</button>
+                    <button onClick={() => onDeletePreset(p.id)} title="Delete template" className="text-ink/30 hover:text-magenta"><Trash2 size={12} /></button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-      ))}
+      )}
     </div>
   );
 }
@@ -255,27 +638,75 @@ function SortableBlockItem({
   block,
   selected,
   onSelect,
+  onToggleHidden,
+  onToggleLocked,
+  onSavePreset,
   onDuplicate,
   onDelete,
 }: {
   block: Block;
   selected: boolean;
   onSelect: () => void;
+  onToggleHidden: () => void;
+  onToggleLocked: () => void;
+  onSavePreset: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: block.id });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+  const Icon = BLOCK_ICONS[block.type];
+  const hidden = !!block.config.hidden;
+  const locked = !!block.config.locked;
+  const size = (block.config.size as string) ?? BLOCK_SIZE_DEFAULT;
+
   return (
-    <li ref={setNodeRef} style={style} className={'rounded-md border bg-white p-2 ' + (selected ? 'border-magenta' : 'border-ink/10')}>
-      <div className="flex items-center gap-2">
-        <button {...attributes} {...listeners} className="cursor-grab text-ink/30" aria-label="Drag to reorder">⠿</button>
-        <button onClick={onSelect} className="flex-1 text-left font-condensed uppercase tracking-wide text-ink/80">
+    <li ref={setNodeRef} style={style} className={clsx('rounded-md border bg-white', selected ? 'border-magenta ring-1 ring-magenta/30' : 'border-ink/10')}>
+      <div className="flex items-center gap-1.5 px-2 py-1.5">
+        <button {...attributes} {...listeners} className="cursor-grab text-ink/25 hover:text-ink/50" aria-label="Drag to reorder"><GripVertical size={14} /></button>
+        <Icon size={14} className="shrink-0 text-ink/40" />
+        <button onClick={onSelect} className={clsx('flex-1 truncate text-left text-sm', hidden ? 'text-ink/40 line-through' : 'text-ink/80')}>
           {BLOCK_META[block.type].label}
         </button>
-        <button onClick={onDuplicate} title="Duplicate" className="text-ink/40 hover:text-navy">⧉</button>
-        <button onClick={onDelete} title="Delete" className="text-ink/40 hover:text-magenta">✕</button>
+        <span className="shrink-0 rounded bg-ink/5 px-1 text-[10px] tabular-nums text-ink/50">{size}</span>
+      </div>
+      {/* Row actions */}
+      <div className={clsx('flex items-center gap-0.5 border-t px-1.5 py-0.5', selected ? 'border-magenta/20' : 'border-ink/5')}>
+        <RowBtn title={hidden ? 'Show' : 'Hide'} onClick={onToggleHidden} active={hidden}>{hidden ? <EyeOff size={13} /> : <Eye size={13} />}</RowBtn>
+        <RowBtn title={locked ? 'Unlock' : 'Lock'} onClick={onToggleLocked} active={locked}>{locked ? <Lock size={13} /> : <Unlock size={13} />}</RowBtn>
+        <RowBtn title="Save as template" onClick={onSavePreset}><Bookmark size={13} /></RowBtn>
+        <span className="flex-1" />
+        <RowBtn title="Duplicate" onClick={onDuplicate}><Copy size={13} /></RowBtn>
+        <RowBtn title="Delete" onClick={onDelete} danger><Trash2 size={13} /></RowBtn>
       </div>
     </li>
+  );
+}
+
+function RowBtn({
+  title,
+  onClick,
+  active,
+  danger,
+  children,
+}: {
+  title: string;
+  onClick: () => void;
+  active?: boolean;
+  danger?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      onClick={onClick}
+      className={clsx(
+        'rounded p-1 hover:bg-ink/5',
+        active ? 'text-navy' : danger ? 'text-ink/40 hover:text-magenta' : 'text-ink/40 hover:text-navy',
+      )}
+    >
+      {children}
+    </button>
   );
 }

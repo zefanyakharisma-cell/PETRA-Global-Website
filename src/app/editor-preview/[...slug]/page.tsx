@@ -3,7 +3,9 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
+import { PreviewEditorLayer, type PreviewBlockInfo } from '@/components/admin/PreviewEditorLayer';
 import { routing } from '@/i18n/routing';
+import { BLOCK_SIZE_DEFAULT } from '@/components/blocks/blockSize';
 import type { Block, Locale, PageRecord } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -18,11 +20,12 @@ export default async function EditorPreview({
   searchParams,
 }: {
   params: Promise<{ slug: string[] }>;
-  searchParams: Promise<{ locale?: string }>;
+  searchParams: Promise<{ locale?: string; edit?: string }>;
 }) {
   const { slug } = await params;
   const path = slug.join('/');
-  const { locale: rawLocale = 'en' } = await searchParams;
+  const { locale: rawLocale = 'en', edit } = await searchParams;
+  const editMode = edit === '1';
   const locale = routing.locales.includes(rawLocale as never)
     ? rawLocale
     : routing.defaultLocale;
@@ -43,14 +46,23 @@ export default async function EditorPreview({
     .eq('page_id', page.id)
     .order('position');
 
+  const blockList = (blocks ?? []) as Block[];
+  const info: PreviewBlockInfo[] = blockList.map((b) => ({
+    id: b.id,
+    type: b.type,
+    size: (b.config.size as string) ?? BLOCK_SIZE_DEFAULT,
+    locked: !!b.config.locked,
+  }));
+
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <BlockRenderer
-        blocks={(blocks ?? []) as Block[]}
+        blocks={blockList}
         locale={locale as Locale}
-        mode="public"
+        mode={editMode ? 'edit' : 'public'}
         pageOwnerStaffId={(page as PageRecord).owner_staff_id}
       />
+      {editMode && <PreviewEditorLayer blocks={info} />}
     </NextIntlClientProvider>
   );
 }

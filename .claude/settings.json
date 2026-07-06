@@ -100,13 +100,22 @@
       "mcp__claude_ai_21st_Dev__get_component",
       "Skill(artifact-design)",
       "Skill(artifact-design:*)",
-      "WebFetch(domain:indonesianspectrum.petra.ac.id)"
+      "WebFetch(domain:indonesianspectrum.petra.ac.id)",
+      "Bash(node -e \"const l=require\\('lucide-react'\\); ['ArrowUp','ArrowDown','Copy','Trash2','Move','Eye','EyeOff','Lock','Unlock','GripVertical','Monitor','Tablet','Smartphone','LayoutTemplate','Undo2','Redo2','Plus','Type','Image','Images','LayoutGrid','Rows3','Quote','BarChart3','Users','Newspaper','Map','ListChecks','SquareStack','PanelTop','Minus','FileText','Play','Building2','Handshake','MessageSquareQuote','GraduationCap','Download','CalendarDays',' send'.trim\\(\\)].forEach\\(n=>{if\\(!l[n]\\)console.log\\('MISSING',n\\)}\\); console.log\\('done'\\)\")",
+      "Bash(node -e \"const l=require\\('lucide-react'\\); ['Sparkles','Heading','DoorOpen','Minus','Type','Columns2','BarChart3','LayoutGrid','ListChecks','ChevronsUpDown','PanelTop','Footprints','GitCommitHorizontal','Images','Quote','Building2','Code2','Map','Download','CalendarDays','Globe2','Megaphone','MessageSquareQuote','Newspaper','Users','GraduationCap','Send'].forEach\\(n=>{if\\(!l[n]\\)console.log\\('MISSING',n\\)}\\); console.log\\('icons ok'\\)\")",
+      "Bash(rm \"e:/PETRA-Global-Website/src/app/[locale]/news/page.tsx\" && echo \"deleted\")",
+      "Bash(git stash *)",
+      "Bash(echo \"TYPECHECK_DONE_EXIT=$?\")",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(taskkill //F //IM node.exe //T)"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",
       "E:\\PETRA-Global-Website\\src\\app\\[locale]\\partnership",
       "c:\\Users\\KUI\\.claude\\projects\\e--PETRA-Global-Website\\memory",
-      "E:\\PETRA-Global-Website\\.next\\types\\app\\[locale]\\[slug]"
+      "E:\\PETRA-Global-Website\\.next\\types\\app\\[locale]\\[slug]",
+      "e:\\PETRA-Global-Website\\src\\app\\[locale]\\news"
     ]
   }
 }

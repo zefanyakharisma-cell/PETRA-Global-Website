@@ -8,8 +8,10 @@ import type { Locale } from '@/lib/types';
 
 export const revalidate = 60;
 
-// Reserved first segments handled by their own routes.
-const RESERVED = new Set(['programs', 'news', 'thank-you', 'api', 'admin']);
+// Reserved first segments handled by their own routes. `/news/[slug]` articles
+// have their own route, but the bare `/news` landing is a CMS page, so `news`
+// is intentionally NOT reserved here.
+const RESERVED = new Set(['programs', 'thank-you', 'api', 'admin']);
 
 export async function generateMetadata({
   params,

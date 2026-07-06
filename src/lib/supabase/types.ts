@@ -159,6 +159,13 @@ export type BlockRow = Timestamps & {
   content: Json;
 };
 
+export type BlockPresetRow = Timestamps & {
+  id: string;
+  name: string;
+  /** Ordered array of block seeds: [{ type, config, content }, ...]. */
+  payload: Json;
+};
+
 type TableShape<Row, Required extends keyof Row = never> = {
   Row: Row;
   Insert: Partial<Row> & Pick<Row, Required>;
@@ -184,6 +191,7 @@ export interface Database {
       inquiries: TableShape<InquiryRow, 'kind' | 'payload'>;
       pages: TableShape<PageRow, 'slug'>;
       blocks: TableShape<BlockRow, 'type' | 'position'>;
+      block_presets: TableShape<BlockPresetRow, 'name'>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

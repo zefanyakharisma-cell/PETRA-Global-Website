@@ -376,6 +376,89 @@ export async function reorderBlocks(ids: string[], owner: BlockOwner, slug: stri
 }
 
 /**
+ * Bulk-persist config/content/position for an ordered list of existing blocks.
+ * Backs the editor's undo/redo (which restores a whole snapshot) and any batch
+ * state reconciliation — a single fan-out mirroring `reorderBlocks`. Does NOT
+ * create or delete rows: only ids that still exist are updated.
+ */
+export async function syncBlocks(
+  owner: BlockOwner,
+  slug: string,
+  blocks: { id: string; config: Record<string, unknown>; content: Record<string, unknown> }[],
+) {
+  const supabase = await createClient();
+  await Promise.all(
+    blocks.map((b, index) =>
+      supabase
+        .from('blocks')
+        .update({ config: b.config, content: b.content, position: index } as never)
+        .eq('id', b.id),
+    ),
+  );
+  revalidateOwner(owner, slug);
+}
+
+// ---- Block presets / templates ---------------------------------------------
+export type PresetSeed = { type: BlockType; config: Record<string, unknown>; content: Record<string, unknown> };
+
+/** Save one or more blocks as a reusable named preset. */
+export async function savePreset(name: string, payload: PresetSeed[]) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('block_presets').insert({ name, payload } as never);
+  if (error) return { error: error.message };
+  revalidatePath('/admin');
+  return { ok: true };
+}
+
+/** List saved presets (most recent first) for the editor's Templates tab. */
+export async function listPresets() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('block_presets')
+    .select('id, name, payload')
+    .order('created_at', { ascending: false });
+  return (data ?? []) as { id: string; name: string; payload: PresetSeed[] }[];
+}
+
+export async function deletePreset(id: string) {
+  const supabase = await createClient();
+  await supabase.from('block_presets').delete().eq('id', id);
+  revalidatePath('/admin');
+}
+
+/**
+ * Insert a section (one or more block seeds) onto an owner, appended after the
+ * last block. Returns the created ids in order so the editor can splice them
+ * into local state and select the first. Reuses the same append-position logic
+ * as `addBlock`.
+ */
+export async function insertSection(owner: BlockOwner, seeds: PresetSeed[], slug: string) {
+  const supabase = await createClient();
+  const col = ownerColumn(owner);
+
+  const { data: last } = await supabase
+    .from('blocks')
+    .select('position')
+    .eq(col, owner.id)
+    .order('position', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const start = (last?.position ?? -1) + 1;
+
+  const rows = seeds.map((s, i) => ({
+    [col]: owner.id,
+    type: s.type,
+    position: start + i,
+    config: s.config,
+    content: s.content,
+  }));
+  const { data, error } = await supabase.from('blocks').insert(rows as never).select('id');
+  if (error) return { error: error.message };
+  revalidateOwner(owner, slug);
+  return { ok: true, ids: (data ?? []).map((r) => r.id as string) };
+}
+
+/**
  * Toggle an owner's published state from the editor. Pages carry a `status`
  * enum; news uses `published_at` (set → published, null → draft).
  */

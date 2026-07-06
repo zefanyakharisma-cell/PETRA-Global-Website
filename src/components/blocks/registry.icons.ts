@@ -1,0 +1,67 @@
+import type { LucideIcon } from 'lucide-react';
+import {
+  Sparkles,
+  Heading,
+  DoorOpen,
+  Minus,
+  Type,
+  Columns2,
+  BarChart3,
+  LayoutGrid,
+  ListChecks,
+  ChevronsUpDown,
+  PanelTop,
+  Footprints,
+  GitCommitHorizontal,
+  Images,
+  Quote,
+  Building2,
+  Code2,
+  Map as MapIcon,
+  Download,
+  CalendarDays,
+  Globe2,
+  Megaphone,
+  MessageSquareQuote,
+  Newspaper,
+  Users,
+  GraduationCap,
+  Send,
+} from 'lucide-react';
+import type { BlockType } from '@/lib/types';
+
+/**
+ * Block-type → icon used by the editor's layers panel and pickers so long block
+ * lists are scannable at a glance. Keyed by the same `BlockType` union that
+ * drives the registry, so a missing icon is a compile error.
+ */
+export const BLOCK_ICONS: Record<BlockType, LucideIcon> = {
+  hero: Sparkles,
+  section_header: Heading,
+  audience_doors: DoorOpen,
+  divider: Minus,
+  rich_text: Type,
+  image_text_split: Columns2,
+  stat_strip: BarChart3,
+  card_grid: LayoutGrid,
+  feature_list: ListChecks,
+  accordion: ChevronsUpDown,
+  tabs: PanelTop,
+  steps: Footprints,
+  timeline: GitCommitHorizontal,
+  gallery: Images,
+  pull_quote: Quote,
+  logo_wall: Building2,
+  embed: Code2,
+  map: MapIcon,
+  downloads: Download,
+  events: CalendarDays,
+  partner_map: Globe2,
+  partner_marquee: Building2,
+  testimonials: MessageSquareQuote,
+  news_feed: Newspaper,
+  staff: Users,
+  faculties: GraduationCap,
+  cta_banner: Megaphone,
+  inquiry_form: Send,
+};
