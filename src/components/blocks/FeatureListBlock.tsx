@@ -73,7 +73,7 @@ export function FeatureListBlock({ block, locale }: BlockComponentProps) {
     <Section config={block.config}>
       <Container>
         {(c.heading || c.intro) && (
-          <div className="mb-10 max-w-2xl">
+          <div className="mb-10 mx-auto max-w-2xl text-center">
             {t(c.heading, locale) && (
               <Reveal>
                 <InlineHtml as="h2" html={t(c.heading, locale)} className="text-4xl md:text-5xl" />
@@ -117,20 +117,22 @@ export function FeatureListBlock({ block, locale }: BlockComponentProps) {
               </div>
             );
             // Cards wrap each feature in a bordered tile that lifts on hover.
+            // `h-full` lets every tile fill its grid cell so tiles in a row stay
+            // equal height regardless of body length.
             const cardClass = isCards
               ? clsx(
-                  'rounded-2xl border p-6 transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift',
+                  'h-full rounded-2xl border p-6 transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift',
                   onNavy ? 'border-white/15 bg-white/5 hover:border-white/30' : 'border-ink/10 bg-white shadow-sm hover:border-ink/20',
                 )
               : 'transition duration-300 ease-out hover:-translate-y-1';
             return (
-              <Reveal key={i} delay={i * 0.05}>
+              <Reveal key={i} delay={i * 0.05} className={clsx(isCards && 'h-full')}>
                 {f.href ? (
                   <Link href={f.href} className={clsx('group block', cardClass)}>
                     {inner}
                   </Link>
                 ) : (
-                  <div className={clsx('group', isCards && cardClass)}>{inner}</div>
+                  <div className={clsx('group', isCards ? cardClass : 'h-full')}>{inner}</div>
                 )}
               </Reveal>
             );
