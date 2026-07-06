@@ -119,7 +119,10 @@
       "Bash(curl -s -m 20 \"https://en.wikipedia.org/w/api.php?action=query&titles=Xiamen%20University&prop=pageimages&piprop=thumbnail&pithumbsize=512&format=json\")",
       "WebFetch(domain:en.wikipedia.org)",
       "WebFetch(domain:ko.wikipedia.org)",
-      "WebFetch(domain:mituniversity.ac.in)"
+      "WebFetch(domain:mituniversity.ac.in)",
+      "Bash(cp \"C:/Users/KUI/AppData/Local/Temp/claude/e--PETRA-Global-Website/ab82b1fb-884c-4194-af1c-1b451c785d69/scratchpad/find-missing.ts\" \"__find-missing.ts\")",
+      "Bash(rm -f \"__find-missing.ts\" __dl-logos.ts __dl-commons.ts __dl-infobox.ts __dl-wikidata.ts)",
+      "Bash(git -C \"e:/PETRA-Global-Website\" status --short)"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",
