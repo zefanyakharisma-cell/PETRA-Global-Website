@@ -3,6 +3,7 @@
 import type { EditorField, EditorSchema } from '@/components/blocks/registry.types';
 import { clsx } from '@/lib/clsx';
 import { ImageField } from './fields/ImageField';
+import { VideoField } from './fields/VideoField';
 import { FileField, type FileValue } from './fields/FileField';
 import { LinkField } from './fields/LinkField';
 import { LayoutField } from './fields/LayoutField';
@@ -153,6 +154,8 @@ function FieldEditor({
       return <label className="block">{label}<textarea className={input} rows={4} value={(value as string) ?? ''} onChange={(e) => onChange(e.target.value)} />{help}</label>;
     case 'image':
       return <ImageField label={field.label} value={(value as string) ?? ''} onChange={onChange} />;
+    case 'video':
+      return <VideoField label={field.label} value={(value as string) ?? ''} onChange={onChange} />;
     case 'file':
       return <FileField label={field.label} value={(value as FileValue) ?? {}} onChange={onChange} />;
     case 'link':

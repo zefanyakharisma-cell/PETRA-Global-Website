@@ -111,15 +111,22 @@
 @layer components {
   /* Styling for Tiptap rich-text output (RichTextBlock). */
   .prose-block {
-    @apply text-lg leading-relaxed text-ink/85;
+    @apply text-lg leading-[1.75] text-ink/85;
   }
-  .prose-block h2 { @apply mt-8 text-3xl text-navy; }
-  .prose-block h3 { @apply mt-6 text-2xl text-navy; }
-  .prose-block p { @apply mt-4; }
-  .prose-block ul { @apply mt-4 list-disc space-y-1 pl-6; }
-  .prose-block ol { @apply mt-4 list-decimal space-y-1 pl-6; }
-  .prose-block a { @apply text-magenta underline underline-offset-2; }
-  .prose-block blockquote { @apply my-6 border-l-4 border-magenta pl-4 font-editorial text-2xl text-navy; }
+  .prose-block h2 { @apply mt-10 text-3xl font-semibold leading-tight text-navy; }
+  .prose-block h3 { @apply mt-8 text-2xl font-semibold leading-tight text-navy; }
+  .prose-block p { @apply mt-5; }
+  .prose-block ul { @apply mt-5 list-disc space-y-2 pl-6 marker:text-magenta; }
+  .prose-block ol { @apply mt-5 list-decimal space-y-2 pl-6 marker:text-ink/50; }
+  .prose-block li > ul, .prose-block li > ol { @apply mt-2; }
+  .prose-block a { @apply text-magenta underline underline-offset-2 transition-colors hover:text-navy; }
+  .prose-block blockquote { @apply my-8 border-l-4 border-magenta pl-5 font-editorial text-2xl leading-snug text-navy; }
+  .prose-block hr { @apply my-10 border-0 border-t border-ink/10; }
+  /* Inline / embedded imagery reads as a tidy figure with rounded corners. */
+  .prose-block img { @apply my-8 w-full rounded-2xl; }
+  .prose-block figure { @apply my-8; }
+  .prose-block figure img { @apply my-0; }
+  .prose-block figcaption { @apply mt-2 text-center text-sm text-ink/55; }
   /* First child never adds a top margin — the wrapper controls the offset. */
   .prose-block > :first-child { @apply mt-0; }
   /* Word-like inline marks (shared by block prose + inline fields). */

@@ -422,9 +422,11 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         ...UNIVERSAL,
       ],
       content: [
-        { key: 'images', label: 'Images', type: 'list', itemFields: [
-          { key: 'url', label: 'Image', type: 'image' },
-          { key: 'alt', label: 'Alt text', type: 'text' },
+        { key: 'images', label: 'Media', type: 'list', itemFields: [
+          { key: 'url', label: 'Image / video poster', type: 'image' },
+          { key: 'video', label: 'Video (optional)', type: 'video',
+            help: 'Add a video to make this tile a video. Upload a file, or paste a YouTube / Google Drive link. The image above is used as the poster (auto-fetched for YouTube if left blank).' },
+          { key: 'alt', label: 'Caption / alt text', type: 'text' },
         ] },
       ],
     },

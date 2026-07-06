@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { BLOCK_META } from '@/components/blocks/registry.meta';
 import { defaultHomeBlocks } from '@/lib/defaultHome';
+import { defaultNewsBlocks } from '@/lib/defaultNews';
 import type { BlockType, LocaleMap, NavSection, PageStatus } from '@/lib/types';
 
 /** Refresh public ISR for a page (both locales) plus the home. */
@@ -207,15 +208,34 @@ export async function createNews(formData: FormData) {
   const titleEn = String(formData.get('title_en') ?? '');
   const titleId = String(formData.get('title_id') ?? '');
 
-  const { error } = await supabase.from('news').insert({
-    slug,
-    title: { en: titleEn, id: titleId },
-    published_at: null, // starts as a draft until published from the editor/list
-  } as never);
+  const title = { en: titleEn, id: titleId };
+  const { data: created, error } = await supabase
+    .from('news')
+    .insert({
+      slug,
+      title,
+      published_at: null, // starts as a draft until published from the editor/list
+    } as never)
+    .select('id')
+    .single();
   if (error) {
     if (error.code === '23505') return { error: 'That slug is already in use.' };
     return { error: error.message };
   }
+
+  // Seed a default, editable block layout so the article opens ready to write in.
+  const newsId = (created as { id: string } | null)?.id;
+  if (newsId) {
+    const seeds = defaultNewsBlocks(title).map((b) => ({
+      news_id: newsId,
+      type: b.type,
+      position: b.position,
+      config: b.config,
+      content: b.content,
+    }));
+    await supabase.from('blocks').insert(seeds as never);
+  }
+
   revalidatePath('/admin/news');
   revalidateNews(slug);
   return { ok: true };

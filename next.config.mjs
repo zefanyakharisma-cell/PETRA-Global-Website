@@ -19,6 +19,8 @@ const nextConfig = {
         hostname: 'qxuvcopjyixdbtibxxjm.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      // YouTube thumbnails — used as auto posters for gallery video tiles.
+      { protocol: 'https', hostname: 'img.youtube.com', pathname: '/vi/**' },
     ],
   },
 };

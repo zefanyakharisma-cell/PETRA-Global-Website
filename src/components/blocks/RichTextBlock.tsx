@@ -26,7 +26,7 @@ export function RichTextBlock({ block, locale }: BlockComponentProps) {
           <RichText
             html={html}
             onNavy={onNavy}
-            className={twoColumn ? 'md:columns-2 md:gap-10 [&>*]:break-inside-avoid' : 'max-w-reading'}
+            className={twoColumn ? 'md:columns-2 md:gap-12 [&>*]:break-inside-avoid' : narrow ? 'mx-auto max-w-reading' : 'max-w-reading'}
           />
         ) : (
           <p className="text-ink/40">

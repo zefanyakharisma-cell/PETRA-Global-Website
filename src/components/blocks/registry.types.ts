@@ -63,6 +63,8 @@ export type EditorField = FieldVisibility & (
   // inline HTML (no block wrapper) so it injects into the block's own tag.
   | { key: string; label: string; type: 'richtext-inline'; localized?: boolean; help?: string }
   | { key: string; label: string; type: 'image' }
+  // Video source — upload a file to storage, or paste a YouTube / Drive / direct URL.
+  | { key: string; label: string; type: 'video'; help?: string }
   | { key: string; label: string; type: 'url'; help?: string }
   | { key: string; label: string; type: 'link'; help?: string }
   | { key: string; label: string; type: 'file'; help?: string }
