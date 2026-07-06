@@ -75,6 +75,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           showFor: { field: 'layout', equals: ['centered', 'left', 'split-with-image'] }, options: [
           { value: 'programs', label: 'Programs (featured first)' },
           { value: 'news', label: 'News & announcements' },
+          { value: 'custom', label: 'Uploaded pictures (hand-picked)' },
         ] },
         // Scroll-to-expand layout options (shown only for that layout).
         { key: 'scrollMediaType', label: 'Media type', type: 'select', default: 'video',
@@ -94,6 +95,16 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         // Standard-hero content (hidden for scroll-expand).
         { key: 'image_url', label: 'Background / split image', type: 'image',
           showFor: { field: 'layout', equals: ['centered', 'left', 'split-with-image'] } },
+        // Hand-picked carousel pictures — shown only when the carousel source is
+        // "Uploaded pictures". Each image uploads to storage or is chosen from the
+        // media library (of everything already uploaded to Supabase).
+        { key: 'carouselImages', label: 'Carousel pictures', type: 'list',
+          showFor: { field: 'bgSource', equals: ['custom'] },
+          itemFields: [
+            { key: 'image', label: 'Picture', type: 'image' },
+            { key: 'title', label: 'Caption (optional)', type: 'text', localized: true },
+            { key: 'href', label: 'Link (optional)', type: 'link' },
+          ] },
         { key: 'ctas', label: 'Buttons (max 2)', type: 'list', itemFields: BUTTON_FIELDS,
           showFor: { field: 'layout', equals: ['centered', 'left', 'split-with-image'] } },
         // Scroll-to-expand content (shown only for that layout).

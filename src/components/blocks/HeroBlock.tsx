@@ -17,12 +17,27 @@ interface HeroContent {
   heading?: LocaleMap;
   subcopy?: LocaleMap;
   image_url?: string;
+  // Hand-picked carousel pictures (bgSource = 'custom').
+  carouselImages?: { image?: string; title?: LocaleMap; href?: string }[];
   ctas?: { label: LocaleMap; href: string; variant?: 'magenta' | 'amber' | 'blue' | 'navy' | 'outline'; newTab?: boolean }[];
   // Scroll-to-expand layout fields.
   scrollVideoUrl?: string;
   scrollBgImage?: string;
   scrollMediaImage?: string;
   scrollCaption?: LocaleMap;
+}
+
+/** Build carousel slides from the admin's hand-picked, uploaded pictures. */
+function customSlides(c: HeroContent, locale: Locale): HeroSlide[] {
+  return (c.carouselImages ?? [])
+    .filter((i) => i.image)
+    .map((i) => ({
+      // Accept Google Drive share links too; normalizeImageUrl is idempotent for
+      // ordinary storage URLs.
+      image_url: normalizeImageUrl(i.image as string),
+      title: t(i.title, locale) || undefined,
+      href: i.href || undefined,
+    }));
 }
 
 /** Resolve cover images for the carousel background from a chosen entity source. */
@@ -84,7 +99,12 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
   const bgType = (block.config.bgType as string) ?? (c.image_url ? 'image' : 'none');
   const bgSource = (block.config.bgSource as string) ?? 'programs';
 
-  const slides = !split && bgType === 'carousel' ? await carouselSlides(bgSource, locale) : [];
+  const slides =
+    !split && bgType === 'carousel'
+      ? bgSource === 'custom'
+        ? customSlides(c, locale)
+        : await carouselSlides(bgSource, locale)
+      : [];
   const showImageBg = !split && bgType === 'image' && !!c.image_url;
   const showCarouselBg = !split && bgType === 'carousel' && slides.length > 0;
   const showAuroraBg = !split && bgType === 'aurora';
