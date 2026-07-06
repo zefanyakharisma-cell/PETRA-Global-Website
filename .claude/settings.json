@@ -109,7 +109,17 @@
       "Skill(run)",
       "Skill(run:*)",
       "Bash(taskkill //F //IM node.exe //T)",
-      "Bash(node -e \"const l=require\\('lucide-react'\\); ['PanelLeft','PanelRight','PanelLeftClose','PanelRightClose','Maximize2','Minimize2','X','Layers','SlidersHorizontal'].forEach\\(n=>console.log\\(\\(l[n]?'ok  ':'MISS'\\),n\\)\\)\")"
+      "Bash(node -e \"const l=require\\('lucide-react'\\); ['PanelLeft','PanelRight','PanelLeftClose','PanelRightClose','Maximize2','Minimize2','X','Layers','SlidersHorizontal'].forEach\\(n=>console.log\\(\\(l[n]?'ok  ':'MISS'\\),n\\)\\)\")",
+      "Bash(cp \"C:/Users/KUI/AppData/Local/Temp/claude/e--PETRA-Global-Website/ab82b1fb-884c-4194-af1c-1b451c785d69/scratchpad/find-missing.ts\" \"e:/PETRA-Global-Website/__find-missing.ts\")",
+      "Bash(rm -f \"e:/PETRA-Global-Website/__find-missing.ts\")",
+      "Bash(curl -s -L -o /tmp/test_logo.png \"https://logo.clearbit.com/smu.edu.sg\" -w \"HTTP:%{http_code} size:%{size_download}\\\\n\")",
+      "Bash(curl -s -m 10 -o /dev/null -w \"clearbit:%{http_code}\\\\n\" \"https://logo.clearbit.com/smu.edu.sg\")",
+      "Bash(curl -s -m 10 -o /dev/null -w \"google:%{http_code}\\\\n\" \"https://www.google.com\")",
+      "Bash(curl -s -m 20 \"https://en.wikipedia.org/w/api.php?action=query&titles=Xiamen%20University&prop=pageimages&piprop=original&format=json\")",
+      "Bash(curl -s -m 20 \"https://en.wikipedia.org/w/api.php?action=query&titles=Xiamen%20University&prop=pageimages&piprop=thumbnail&pithumbsize=512&format=json\")",
+      "WebFetch(domain:en.wikipedia.org)",
+      "WebFetch(domain:ko.wikipedia.org)",
+      "WebFetch(domain:mituniversity.ac.in)"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",
