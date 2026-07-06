@@ -59,27 +59,40 @@ export async function Navbar({ locale }: { locale: string }) {
         </Link>
 
         <ul className="ml-4 hidden items-center gap-1 md:flex">
-          {sections.map((s) => (
-            <li key={s.key} className="group/nav relative">
-              <Link
-                href={s.href}
-                className={clsx(
-                  'relative flex items-center gap-1 rounded-md px-3 py-2 font-condensed text-lg uppercase tracking-wide text-white/85 transition-colors hover:text-white',
-                  'after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-cyan after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100 group-hover/nav:after:scale-x-100',
+          {sections.map((s) => {
+            const hasItems = s.items.length > 0;
+            return (
+              <li key={s.key} className="group/nav relative">
+                <Link
+                  href={s.href}
+                  aria-haspopup={hasItems || undefined}
+                  className={clsx(
+                    'relative flex items-center gap-1 rounded-md px-3 py-2 font-condensed text-lg uppercase tracking-wide text-white/85 transition-colors hover:text-white',
+                    'focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-navy',
+                    'after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-cyan after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100 group-hover/nav:after:scale-x-100 group-focus-within/nav:after:scale-x-100',
+                  )}
+                >
+                  {s.label}
+                  {hasItems && (
+                    <ChevronDown
+                      className="h-4 w-4 opacity-70 transition-transform duration-200 group-hover/nav:rotate-180 group-focus-within/nav:rotate-180"
+                      aria-hidden
+                    />
+                  )}
+                </Link>
+                {hasItems && (
+                  // Transparent pt-2 bridge keeps hover continuous across the visual gap.
+                  <div className="invisible absolute left-0 top-full translate-y-1 pt-2 opacity-0 transition duration-200 ease-out group-hover/nav:visible group-hover/nav:translate-y-0 group-hover/nav:opacity-100 group-focus-within/nav:visible group-focus-within/nav:translate-y-0 group-focus-within/nav:opacity-100">
+                    <ul className="min-w-60 rounded-xl border border-ink/10 bg-white p-2 text-ink shadow-xl">
+                      {s.items.map((item) => (
+                        <MenuEntry key={item.slug} item={item} />
+                      ))}
+                    </ul>
+                  </div>
                 )}
-              >
-                {s.label}
-                {s.items.length > 0 && <ChevronDown className="h-4 w-4 opacity-70" aria-hidden />}
-              </Link>
-              {s.items.length > 0 && (
-                <ul className="invisible absolute left-0 top-full mt-1 min-w-60 translate-y-1 rounded-xl border border-ink/10 bg-white p-2 text-ink opacity-0 shadow-xl transition duration-200 ease-out group-hover/nav:visible group-hover/nav:translate-y-0 group-hover/nav:opacity-100">
-                  {s.items.map((item) => (
-                    <MenuEntry key={item.slug} item={item} />
-                  ))}
-                </ul>
-              )}
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
 
         <div className="ml-auto flex items-center gap-2">
@@ -95,7 +108,7 @@ export async function Navbar({ locale }: { locale: string }) {
 /** A dropdown row. If it has children, it opens a flyout submenu to the side. */
 function MenuEntry({ item }: { item: MenuItem }) {
   const linkClass =
-    'flex items-center justify-between gap-2 rounded-md px-3 py-2 text-ink/80 transition-colors hover:bg-paper hover:text-navy';
+    'flex items-center justify-between gap-2 rounded-md px-3 py-2 text-ink/80 transition-colors hover:bg-paper hover:text-navy focus-visible:bg-paper focus-visible:text-navy focus-visible:outline-none';
 
   if (item.children.length === 0) {
     return (
@@ -109,19 +122,22 @@ function MenuEntry({ item }: { item: MenuItem }) {
 
   return (
     <li className="group/sub relative">
-      <Link href={`/${item.slug}`} className={linkClass}>
+      <Link href={`/${item.slug}`} aria-haspopup className={linkClass}>
         {item.label}
         <ChevronRight className="h-4 w-4 opacity-60" aria-hidden />
       </Link>
-      <ul className="invisible absolute left-full top-0 ml-1 min-w-60 -translate-x-1 rounded-xl border border-ink/10 bg-white p-2 text-ink opacity-0 shadow-xl transition duration-200 ease-out group-hover/sub:visible group-hover/sub:translate-x-0 group-hover/sub:opacity-100">
-        {item.children.map((child) => (
-          <li key={child.slug}>
-            <Link href={`/${child.slug}`} className={linkClass}>
-              {child.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      {/* Transparent pl-1 bridge keeps hover continuous into the flyout. */}
+      <div className="invisible absolute left-full top-0 -translate-x-1 pl-1 opacity-0 transition duration-200 ease-out group-hover/sub:visible group-hover/sub:translate-x-0 group-hover/sub:opacity-100 group-focus-within/sub:visible group-focus-within/sub:translate-x-0 group-focus-within/sub:opacity-100">
+        <ul className="min-w-60 rounded-xl border border-ink/10 bg-white p-2 text-ink shadow-xl">
+          {item.children.map((child) => (
+            <li key={child.slug}>
+              <Link href={`/${child.slug}`} className={linkClass}>
+                {child.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
     </li>
   );
 }

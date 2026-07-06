@@ -32,7 +32,10 @@ export async function TestimonialsBlock({ block, locale }: BlockComponentProps) 
         : 'grid gap-6 md:grid-cols-2 lg:grid-cols-3';
 
   const figureClass = clsx(
-    'group relative flex flex-col overflow-hidden rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 transition duration-300 ease-out hover:-translate-y-1 hover:bg-white/[0.08] hover:ring-cyan/30',
+    'group relative flex flex-col overflow-hidden rounded-2xl p-6 ring-1 transition duration-300 ease-out hover:-translate-y-1',
+    onNavy
+      ? 'bg-white/5 ring-white/10 hover:bg-white/[0.08] hover:ring-cyan/30'
+      : 'bg-white shadow-sm ring-ink/10 hover:shadow-lift hover:ring-magenta/30',
     layout === 'carousel' && 'min-w-[85%] shrink-0 snap-start sm:min-w-[46%] lg:min-w-[31%]',
     layout === 'masonry' && 'break-inside-avoid',
     layout === 'grid' && 'h-full',
@@ -52,21 +55,27 @@ export async function TestimonialsBlock({ block, locale }: BlockComponentProps) 
             {items.map((item, i) => (
               <Reveal key={i} delay={i * 0.05}>
                 <figure className={figureClass}>
-                  <span aria-hidden className="pointer-events-none absolute -right-2 -top-4 font-editorial text-8xl leading-none text-cyan/10 transition-colors duration-300 group-hover:text-cyan/20">
+                  <span
+                    aria-hidden
+                    className={clsx(
+                      'pointer-events-none absolute -right-2 -top-4 font-editorial text-8xl leading-none transition-colors duration-300',
+                      onNavy ? 'text-cyan/10 group-hover:text-cyan/20' : 'text-magenta/10 group-hover:text-magenta/20',
+                    )}
+                  >
                     &rdquo;
                   </span>
-                  <blockquote className="relative font-editorial text-xl leading-snug text-white">
+                  <blockquote className={clsx('relative font-editorial text-xl leading-snug', onNavy ? 'text-white' : 'text-ink')}>
                     &ldquo;{t(item.quote as LocaleMap, locale)}&rdquo;
                   </blockquote>
                   <figcaption className="mt-5 flex items-center gap-3">
                     {item.photo_url && (
-                      <span className="relative h-10 w-10 overflow-hidden rounded-full">
+                      <span className={clsx('relative h-10 w-10 overflow-hidden rounded-full ring-2 transition-colors', onNavy ? 'ring-white/10 group-hover:ring-cyan/40' : 'ring-ink/10 group-hover:ring-magenta/40')}>
                         <Image src={item.photo_url} alt={item.person_name} fill className="object-cover" />
                       </span>
                     )}
                     <span>
-                      <span className="block font-semibold text-white">{item.person_name}</span>
-                      {item.country && <span className="block text-sm text-cyan">{item.country}</span>}
+                      <span className={clsx('block font-semibold', onNavy ? 'text-white' : 'text-ink')}>{item.person_name}</span>
+                      {item.country && <span className={clsx('block text-sm', onNavy ? 'text-cyan' : 'text-magenta')}>{item.country}</span>}
                     </span>
                   </figcaption>
                 </figure>

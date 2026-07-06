@@ -43,6 +43,11 @@ export function LogoWallBlock({ block, locale }: BlockComponentProps) {
   const logos = c.logos ?? [];
   const grayscale = (block.config.style as string) !== 'color';
   const columns = Number(block.config.columns ?? 4);
+  const onNavy = (block.config.background ?? 'paper') === 'navy';
+  const tileClass = clsx(
+    'group flex items-center justify-center rounded-xl p-4 transition duration-300 ease-out hover:-translate-y-1',
+    onNavy ? 'hover:bg-white/10' : 'hover:bg-white hover:shadow-sm',
+  );
 
   return (
     <Section config={{ ...block.config, background: block.config.background ?? 'paper' }}>
@@ -78,12 +83,12 @@ export function LogoWallBlock({ block, locale }: BlockComponentProps) {
                 href={logo.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group block transition-transform duration-300 ease-out hover:-translate-y-1"
+                className={tileClass}
               >
                 {img}
               </a>
             ) : (
-              <div key={i} className="group">{img}</div>
+              <div key={i} className={tileClass}>{img}</div>
             );
           })}
         </div>

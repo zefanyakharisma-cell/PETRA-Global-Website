@@ -116,18 +116,21 @@ export function FeatureListBlock({ block, locale }: BlockComponentProps) {
                 </div>
               </div>
             );
-            // Cards wrap each feature in a bordered tile.
+            // Cards wrap each feature in a bordered tile that lifts on hover.
             const cardClass = isCards
-              ? clsx('rounded-2xl border p-6', onNavy ? 'border-white/15 bg-white/5' : 'border-ink/10 bg-white shadow-sm')
-              : '';
+              ? clsx(
+                  'rounded-2xl border p-6 transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift',
+                  onNavy ? 'border-white/15 bg-white/5 hover:border-white/30' : 'border-ink/10 bg-white shadow-sm hover:border-ink/20',
+                )
+              : 'transition duration-300 ease-out hover:-translate-y-1';
             return (
               <Reveal key={i} delay={i * 0.05}>
                 {f.href ? (
-                  <Link href={f.href} className={clsx('group block transition duration-300 ease-out hover:-translate-y-1', cardClass)}>
+                  <Link href={f.href} className={clsx('group block', cardClass)}>
                     {inner}
                   </Link>
                 ) : (
-                  <div className={clsx('group', cardClass)}>{inner}</div>
+                  <div className={clsx('group', isCards && cardClass)}>{inner}</div>
                 )}
               </Reveal>
             );

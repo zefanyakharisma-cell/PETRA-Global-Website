@@ -3,9 +3,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
-import { NewsArticleHeader } from '@/components/blocks/NewsArticleHeader';
 import { routing } from '@/i18n/routing';
-import type { Block, Locale, NewsRecord } from '@/lib/types';
+import type { Block, Locale } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,7 +41,6 @@ export default async function NewsEditorPreview({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <NewsArticleHeader article={article as NewsRecord} locale={locale as Locale} />
       <BlockRenderer blocks={(blocks ?? []) as Block[]} locale={locale as Locale} mode="public" />
     </NextIntlClientProvider>
   );

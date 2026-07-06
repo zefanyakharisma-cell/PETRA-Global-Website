@@ -39,12 +39,15 @@ export function ImageTextSplitBlock({ block, locale }: BlockComponentProps) {
           {locale === 'id' ? 'Gambar' : 'Image'}
         </div>
       )}
+      {/* Quiet gradient that lifts on hover, echoing the card treatment. */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy/25 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
     </div>
   );
 
   const copy = (
     <>
       <InlineHtml as="h2" html={t(c.heading, locale)} fallback="Heading" className="text-3xl md:text-4xl" />
+      <span aria-hidden className={clsx('mt-4 inline-block h-1 w-12 rounded-full align-middle', onNavy ? 'bg-cyan' : 'bg-magenta')} />
       {t(c.body, locale) && (
         <RichText html={t(c.body, locale)} onNavy={onNavy} className={clsx('mt-4 text-lg', !onNavy && 'text-ink/70')} />
       )}

@@ -35,8 +35,14 @@ export function CtaBannerBlock({ block, locale }: BlockComponentProps) {
   const stacked = align === 'stacked';
 
   return (
-    <Section config={{ ...block.config, background: block.config.background ?? 'navy' }}>
-      <Container>
+    <Section config={{ ...block.config, background: block.config.background ?? 'navy' }} className="relative overflow-hidden">
+      {onNavy && (
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-24 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-cyan/10 blur-3xl" />
+          <div className="absolute -right-24 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-magenta/10 blur-3xl" />
+        </div>
+      )}
+      <Container className="relative z-10">
         <div
           className={clsx(
             'flex flex-col gap-6',

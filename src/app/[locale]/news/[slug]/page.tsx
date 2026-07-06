@@ -3,8 +3,6 @@ import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { Container } from '@/components/ui/Section';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
-import { NewsArticleHeader } from '@/components/blocks/NewsArticleHeader';
-import { NewsFeedBlock } from '@/components/blocks/NewsFeedBlock';
 import { getNewsBySlug } from '@/lib/queries';
 import { localeAlternates } from '@/lib/seo';
 import { t, type Locale, type LocaleMap } from '@/lib/types';
@@ -39,16 +37,15 @@ export default async function NewsArticlePage({
   if (!data) notFound();
   const { article, blocks } = data;
   const loc = locale as Locale;
-  const tags = (article.tags ?? []) as string[];
 
-  // Articles built with the block editor render their blocks. Legacy articles
-  // that only carry a rich-text `body` fall back to that HTML.
+  // Everything on a news article is now block-driven — the masthead/hero is a
+  // Hero block, the body is content blocks, related stories a News feed block.
+  // Legacy articles that predate the block editor and only carry a rich-text
+  // `body` fall back to that HTML.
   const body = t(article.body as LocaleMap, loc);
 
   return (
     <article>
-      <NewsArticleHeader article={article} locale={loc} />
-
       {blocks.length > 0 ? (
         <BlockRenderer blocks={blocks} locale={loc} />
       ) : (
@@ -60,17 +57,6 @@ export default async function NewsArticlePage({
           )}
         </Container>
       )}
-
-      {/* Contextual: more from the first tag. */}
-      <NewsFeedBlock
-        block={{
-          id: 'related', news_id: article.id, type: 'news_feed', position: 0,
-          config: { background: 'paper', spacing: 'normal', count: 3, tag: tags[0] },
-          content: { heading: { en: 'More stories', id: 'Berita lainnya' } },
-        }}
-        locale={loc}
-        mode="public"
-      />
     </article>
   );
 }
