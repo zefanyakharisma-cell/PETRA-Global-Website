@@ -108,7 +108,8 @@
       "Bash(echo \"TYPECHECK_DONE_EXIT=$?\")",
       "Skill(run)",
       "Skill(run:*)",
-      "Bash(taskkill //F //IM node.exe //T)"
+      "Bash(taskkill //F //IM node.exe //T)",
+      "Bash(node -e \"const l=require\\('lucide-react'\\); ['PanelLeft','PanelRight','PanelLeftClose','PanelRightClose','Maximize2','Minimize2','X','Layers','SlidersHorizontal'].forEach\\(n=>console.log\\(\\(l[n]?'ok  ':'MISS'\\),n\\)\\)\")"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",

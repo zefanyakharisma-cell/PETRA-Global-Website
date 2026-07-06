@@ -32,6 +32,12 @@ import {
   Minus,
   Plus,
   Bookmark,
+  PanelLeft,
+  PanelRight,
+  Maximize2,
+  Minimize2,
+  Layers,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { BLOCK_META, BLOCK_META_LIST } from '@/components/blocks/registry.meta';
 import { BLOCK_ICONS } from '@/components/blocks/registry.icons';
@@ -62,6 +68,8 @@ type Device = 'desktop' | 'tablet' | 'mobile';
 type Preset = { id: string; name: string; payload: BlockSeed[] };
 
 const DEVICE_WIDTH: Record<Device, string> = { desktop: '100%', tablet: '820px', mobile: '390px' };
+const LAYERS_W = 280; // px — width of the left (layers) drawer
+const PROPS_W = 340; // px — width of the right (properties) drawer
 const cloneBlocks = (bs: Block[]): Block[] =>
   bs.map((b) => ({ ...b, config: { ...b.config }, content: { ...b.content } }));
 
@@ -89,6 +97,11 @@ export function Editor({
   const [device, setDevice] = useState<Device>('desktop');
   const [previewKey, setPreviewKey] = useState(0);
   const [picking, setPicking] = useState(false);
+  // Fullscreen canvas + pop-out drawers. Panels overlay the edges of a
+  // full-bleed preview; the canvas pads itself so nothing is ever hidden.
+  const [fullscreen, setFullscreen] = useState(false);
+  const [showLayers, setShowLayers] = useState(true);
+  const [showProps, setShowProps] = useState(true);
   const [presets, setPresets] = useState<Preset[]>([]);
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [, startTransition] = useTransition();
@@ -163,6 +176,7 @@ export function Editor({
     flushSave(false);
     armedRef.current = null; // start a fresh edit session for the next block
     setSelectedId(id);
+    if (id) setShowProps(true); // picking a block pops its properties drawer open
   }, [flushSave]);
 
   // ---- Persist a restored snapshot (undo/redo) ------------------------------
@@ -197,6 +211,7 @@ export function Editor({
   // Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z / Ctrl+Y — but never hijack native text undo.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setFullscreen(false); return; }
       if (!(e.ctrlKey || e.metaKey)) return;
       const el = document.activeElement as HTMLElement | null;
       if (el && (el.isContentEditable || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) return;
@@ -385,10 +400,12 @@ export function Editor({
   void histVer; // re-render trigger for canUndo/canRedo
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col">
+    <div className={clsx('flex flex-col bg-white', fullscreen ? 'fixed inset-0 z-50 h-screen' : 'h-[calc(100vh-4rem)]')}>
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-3 border-b border-ink/10 bg-white px-4 py-2">
         <div className="flex items-center gap-2">
+          {/* Left drawer toggle */}
+          <IconBtn title={showLayers ? 'Hide layers' : 'Show layers'} active={showLayers} onClick={() => setShowLayers((v) => !v)}><Layers size={15} /></IconBtn>
           <span className="font-condensed uppercase tracking-wide text-ink/60">Editing</span>
           <span className="font-medium">/{publicPath}</span>
           {saveLabel && <span className="text-xs text-ink/40">{saveLabel}</span>}
@@ -421,12 +438,51 @@ export function Editor({
             {published ? 'Published' : 'Publish'}
           </button>
           <a href={`/${locale}/${publicPath}`} target="_blank" rel="noreferrer" className="rounded-md border border-ink/20 px-3 py-1.5 text-sm">View live ↗</a>
+
+          {/* Right drawer + fullscreen toggles */}
+          <div className="flex overflow-hidden rounded-md border border-ink/20">
+            <IconBtn title={showProps ? 'Hide properties' : 'Show properties'} active={showProps} onClick={() => setShowProps((v) => !v)}><SlidersHorizontal size={15} /></IconBtn>
+            <IconBtn title={fullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen'} active={fullscreen} onClick={() => setFullscreen((v) => !v)}>
+              {fullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            </IconBtn>
+          </div>
         </div>
       </div>
 
-      <div className="grid flex-1 grid-cols-[280px_1fr_340px] overflow-hidden">
-        {/* Layers panel */}
-        <div className="overflow-y-auto border-r border-ink/10 bg-paper p-3">
+      {/* Full-bleed canvas with pop-out drawers overlaying the edges. The canvas
+          pads itself to the open drawers so blocks are never hidden behind them. */}
+      <div className="relative flex-1 overflow-hidden bg-ink/5">
+        {/* Live preview (real components, draft state, interactive overlay) */}
+        <div
+          className="absolute inset-0 flex justify-center overflow-auto transition-[padding] duration-200"
+          style={{
+            paddingTop: 16,
+            paddingBottom: 16,
+            paddingLeft: (showLayers ? LAYERS_W : 0) + 16,
+            paddingRight: (showProps ? PROPS_W : 0) + 16,
+          }}
+        >
+          <iframe
+            key={previewKey}
+            ref={iframeRef}
+            src={`/editor-preview/${previewPath}?locale=${locale}&edit=1`}
+            style={{ width: DEVICE_WIDTH[device] }}
+            className={clsx('h-full border-0 bg-white transition-[width] duration-200', device !== 'desktop' && 'rounded-lg border border-ink/15 shadow-lg')}
+            title="Live preview"
+          />
+        </div>
+
+        {/* Layers drawer (left) */}
+        <aside
+          className={clsx(
+            'absolute inset-y-0 left-0 z-20 flex w-[280px] flex-col overflow-y-auto border-r border-ink/10 bg-paper/95 p-3 shadow-xl backdrop-blur transition-transform duration-200',
+            showLayers ? 'translate-x-0' : '-translate-x-full',
+          )}
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <span className="flex items-center gap-1.5 font-condensed text-sm uppercase tracking-wide text-ink/50"><Layers size={14} /> Layers</span>
+            <button onClick={() => setShowLayers(false)} title="Hide layers" className="rounded p-1 text-ink/40 hover:bg-ink/5"><PanelLeft size={15} /></button>
+          </div>
           <button onClick={() => setPicking((v) => !v)} className="mb-3 flex w-full items-center justify-center gap-1.5 rounded-md bg-magenta py-2 font-condensed uppercase tracking-wide text-white">
             <Plus size={16} /> Add block
           </button>
@@ -459,31 +515,27 @@ export function Editor({
             </SortableContext>
           </DndContext>
           {blocks.length === 0 && <p className="text-sm text-ink/40">No blocks yet. Add one to start.</p>}
-        </div>
+        </aside>
 
-        {/* Live preview (real components, draft state, interactive overlay) */}
-        <div className="flex justify-center overflow-auto bg-ink/5 p-0 md:p-4">
-          <iframe
-            key={previewKey}
-            ref={iframeRef}
-            src={`/editor-preview/${previewPath}?locale=${locale}&edit=1`}
-            style={{ width: DEVICE_WIDTH[device] }}
-            className={clsx('h-full border-0 bg-white transition-[width] duration-200', device !== 'desktop' && 'rounded-lg border border-ink/15 shadow-lg')}
-            title="Live preview"
-          />
-        </div>
-
-        {/* Side panel */}
-        <div className="overflow-y-auto border-l border-ink/10 bg-white p-4">
+        {/* Properties drawer (right) */}
+        <aside
+          className={clsx(
+            'absolute inset-y-0 right-0 z-20 flex w-[340px] flex-col overflow-y-auto border-l border-ink/10 bg-white/95 p-4 shadow-xl backdrop-blur transition-transform duration-200',
+            showProps ? 'translate-x-0' : 'translate-x-full',
+          )}
+        >
           {selected ? (
             <>
               <div className="mb-3 flex items-center justify-between gap-2">
                 <h2 className="truncate font-condensed text-lg uppercase tracking-wide">{BLOCK_META[selected.type].label}</h2>
-                <SizeStepper
-                  size={(selected.config.size as string) ?? BLOCK_SIZE_DEFAULT}
-                  disabled={!!selected.config.locked}
-                  onChange={(s) => applyResize(selected.id, s)}
-                />
+                <div className="flex items-center gap-2">
+                  <SizeStepper
+                    size={(selected.config.size as string) ?? BLOCK_SIZE_DEFAULT}
+                    disabled={!!selected.config.locked}
+                    onChange={(s) => applyResize(selected.id, s)}
+                  />
+                  <button onClick={() => setShowProps(false)} title="Hide properties" className="rounded p-1 text-ink/40 hover:bg-ink/5"><PanelRight size={15} /></button>
+                </div>
               </div>
               {selected.config.locked && (
                 <p className="mb-3 flex items-center gap-1.5 rounded-md bg-ink/5 px-2 py-1.5 text-xs text-ink/50">
@@ -499,9 +551,24 @@ export function Editor({
               />
             </>
           ) : (
-            <p className="text-sm text-ink/40">Select a block to edit, or add a new one.</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-ink/40">Select a block to edit.</p>
+              <button onClick={() => setShowProps(false)} title="Hide properties" className="rounded p-1 text-ink/40 hover:bg-ink/5"><PanelRight size={15} /></button>
+            </div>
           )}
-        </div>
+        </aside>
+
+        {/* Reopen tabs when a drawer is hidden — the "pop out" affordance. */}
+        {!showLayers && (
+          <button onClick={() => setShowLayers(true)} title="Show layers" className="absolute left-0 top-3 z-20 flex items-center gap-1 rounded-r-md border border-l-0 border-ink/15 bg-white py-2 pl-2 pr-2.5 text-xs font-medium shadow hover:bg-paper">
+            <Layers size={14} /> Layers
+          </button>
+        )}
+        {!showProps && (
+          <button onClick={() => setShowProps(true)} title="Show properties" className="absolute right-0 top-3 z-20 flex items-center gap-1 rounded-l-md border border-r-0 border-ink/15 bg-white py-2 pl-2.5 pr-2 text-xs font-medium shadow hover:bg-paper">
+            <SlidersHorizontal size={14} /> Properties
+          </button>
+        )}
       </div>
     </div>
   );
