@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { Fragment, useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -23,6 +23,17 @@ import { createPage, createHomePage, updatePage, deletePage, reorderPages } from
 import type { LocaleMap, NavSection, PageRecord, PageStatus } from '@/lib/types';
 
 const SECTIONS: NavSection[] = ['none', 'about', 'mobility', 'partnership', 'life', 'news'];
+
+// Human-friendly labels for the section separators in the list below. Rows arrive
+// sorted by nav_section, so grouping is just a header before each new section.
+const SECTION_LABELS: Record<NavSection, string> = {
+  none: 'No section — standalone pages',
+  about: 'About',
+  mobility: 'Mobility',
+  partnership: 'Partnership',
+  life: 'Life',
+  news: 'News',
+};
 
 type Draft = {
   title_en: string;
@@ -309,20 +320,31 @@ export function PagesManager({ initialPages }: { initialPages: PageRecord[] }) {
             )}
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
               <SortableContext items={visible.map((p) => p.id)} strategy={verticalListSortingStrategy}>
-                {visible.map((p) => (
-                  <SortableRow
-                    key={p.id}
-                    page={p}
-                    draft={drafts[p.id] ?? toDraft(p)}
-                    dirty={isDirty(p.id)}
-                    busy={isPending && busyId === p.id}
-                    parentOptions={parentOptions}
-                    onField={setField}
-                    onSave={saveRow}
-                    onStatus={setStatus}
-                    onRemove={remove}
-                  />
-                ))}
+                {visible.map((p, i) => {
+                  const showHeader = i === 0 || visible[i - 1].nav_section !== p.nav_section;
+                  return (
+                    <Fragment key={p.id}>
+                      {showHeader && (
+                        <tr className="bg-navy/5">
+                          <td colSpan={9} className="px-3 py-2 font-condensed text-xs uppercase tracking-wider text-navy">
+                            {SECTION_LABELS[p.nav_section] ?? p.nav_section}
+                          </td>
+                        </tr>
+                      )}
+                      <SortableRow
+                        page={p}
+                        draft={drafts[p.id] ?? toDraft(p)}
+                        dirty={isDirty(p.id)}
+                        busy={isPending && busyId === p.id}
+                        parentOptions={parentOptions}
+                        onField={setField}
+                        onSave={saveRow}
+                        onStatus={setStatus}
+                        onRemove={remove}
+                      />
+                    </Fragment>
+                  );
+                })}
               </SortableContext>
             </DndContext>
           </tbody>

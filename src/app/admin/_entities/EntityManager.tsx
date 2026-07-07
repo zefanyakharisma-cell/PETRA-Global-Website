@@ -159,6 +159,39 @@ export function EntityManager({
     [rows, hasArchive],
   );
 
+  // Optional folder view: bucket the list by `cfg.groupBy` so a long flat list
+  // reads as labelled sections. Buckets follow the group field's select-option
+  // order (with any unknown values appended), and each renders a header row.
+  const groupField = cfg.groupBy ? cfg.fields.find((f) => f.key === cfg.groupBy) : undefined;
+
+  const groupLabel = (value: string) => {
+    const opt = groupField?.options?.find((o) => optionValue(o) === value);
+    return opt ? optionLabel(opt) : value || '—';
+  };
+
+  const renderedItems = useMemo(() => {
+    if (!cfg.groupBy) return visibleRows.map((row) => ({ kind: 'row' as const, row }));
+    const key = cfg.groupBy;
+    const buckets = new Map<string, Row[]>();
+    for (const row of visibleRows) {
+      const g = String(row[key] ?? '');
+      (buckets.get(g) ?? buckets.set(g, []).get(g)!).push(row);
+    }
+    const optionOrder = groupField?.options?.map(optionValue) ?? [];
+    const orderedKeys = [
+      ...optionOrder.filter((k) => buckets.has(k)),
+      ...[...buckets.keys()].filter((k) => !optionOrder.includes(k)),
+    ];
+    const items: ({ kind: 'header'; value: string; count: number } | { kind: 'row'; row: Row })[] = [];
+    for (const k of orderedKeys) {
+      const bucket = buckets.get(k)!;
+      items.push({ kind: 'header', value: k, count: bucket.length });
+      for (const row of bucket) items.push({ kind: 'row', row });
+    }
+    return items;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleRows, cfg.groupBy]);
+
   function handleCreate(formData: FormData) {
     setError(null);
     startTransition(async () => {
@@ -193,6 +226,68 @@ export function EntityManager({
       if (res?.error) setError(res.error);
     });
   }
+
+  const renderRow = (row: Row) => {
+    const id = String(row.id);
+    const archived = hasArchive && row.is_active === false;
+    if (editingId === id) {
+      return (
+        <tr key={id} className="bg-paper/60">
+          <td colSpan={cfg.list.length + 1} className="p-5">
+            <form
+              action={(fd) => handleUpdate(id, fd)}
+              className="grid gap-3 rounded-xl bg-white p-4 ring-1 ring-ink/10 md:grid-cols-2"
+            >
+              <p className="md:col-span-2 font-condensed uppercase tracking-wide text-ink/60">Editing {singular}</p>
+              <FieldGrid cfg={cfg} relations={relations} row={row} />
+              <div className="md:col-span-2 flex gap-2">
+                <button disabled={pending} className="rounded-md bg-magenta px-5 py-2 font-condensed uppercase tracking-wide text-white disabled:opacity-50">
+                  Save
+                </button>
+                <button type="button" onClick={() => setEditingId(null)} className="rounded-md border border-ink/20 px-5 py-2 text-ink/70">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </td>
+        </tr>
+      );
+    }
+    return (
+      <tr key={id} className={archived ? 'opacity-50' : undefined}>
+        {cfg.list.map((c) => <td key={c} className="px-4 py-3">{cell(row, c)}</td>)}
+        <td className="px-4 py-3">
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => { setEditingId(id); setError(null); }}
+              className="rounded-md border border-navy px-3 py-1.5 text-navy hover:bg-navy hover:text-white"
+            >
+              Edit
+            </button>
+            {hasArchive && (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => handleArchive(id, archived)}
+                className="rounded-md border border-ink/30 px-3 py-1.5 text-ink/70 hover:bg-ink/5 disabled:opacity-50"
+              >
+                {archived ? 'Restore' : 'Archive'}
+              </button>
+            )}
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => handleDelete(id, cell(row, cfg.list[0]))}
+              className="rounded-md border border-magenta px-3 py-1.5 text-magenta hover:bg-magenta hover:text-white disabled:opacity-50"
+            >
+              Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+    );
+  };
 
   const cell = (row: Row, key: string) => {
     const v = row[key];
@@ -252,67 +347,21 @@ export function EntityManager({
             {visibleRows.length === 0 && (
               <tr><td colSpan={cfg.list.length + 1} className="px-4 py-8 text-center text-ink/40">Nothing here yet.</td></tr>
             )}
-            {visibleRows.map((row) => {
-              const id = String(row.id);
-              const archived = hasArchive && row.is_active === false;
-              if (editingId === id) {
-                return (
-                  <tr key={id} className="bg-paper/60">
-                    <td colSpan={cfg.list.length + 1} className="p-5">
-                      <form
-                        action={(fd) => handleUpdate(id, fd)}
-                        className="grid gap-3 rounded-xl bg-white p-4 ring-1 ring-ink/10 md:grid-cols-2"
-                      >
-                        <p className="md:col-span-2 font-condensed uppercase tracking-wide text-ink/60">Editing {singular}</p>
-                        <FieldGrid cfg={cfg} relations={relations} row={row} />
-                        <div className="md:col-span-2 flex gap-2">
-                          <button disabled={pending} className="rounded-md bg-magenta px-5 py-2 font-condensed uppercase tracking-wide text-white disabled:opacity-50">
-                            Save
-                          </button>
-                          <button type="button" onClick={() => setEditingId(null)} className="rounded-md border border-ink/20 px-5 py-2 text-ink/70">
-                            Cancel
-                          </button>
-                        </div>
-                      </form>
-                    </td>
-                  </tr>
-                );
-              }
-              return (
-                <tr key={id} className={archived ? 'opacity-50' : undefined}>
-                  {cfg.list.map((c) => <td key={c} className="px-4 py-3">{cell(row, c)}</td>)}
-                  <td className="px-4 py-3">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={() => { setEditingId(id); setError(null); }}
-                        className="rounded-md border border-navy px-3 py-1.5 text-navy hover:bg-navy hover:text-white"
-                      >
-                        Edit
-                      </button>
-                      {hasArchive && (
-                        <button
-                          type="button"
-                          disabled={pending}
-                          onClick={() => handleArchive(id, archived)}
-                          className="rounded-md border border-ink/30 px-3 py-1.5 text-ink/70 hover:bg-ink/5 disabled:opacity-50"
-                        >
-                          {archived ? 'Restore' : 'Archive'}
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        disabled={pending}
-                        onClick={() => handleDelete(id, cell(row, cfg.list[0]))}
-                        className="rounded-md border border-magenta px-3 py-1.5 text-magenta hover:bg-magenta hover:text-white disabled:opacity-50"
-                      >
-                        Delete
-                      </button>
-                    </div>
+            {renderedItems.map((item) =>
+              item.kind === 'header' ? (
+                <tr key={`group-${item.value}`} className="bg-navy/5">
+                  <td
+                    colSpan={cfg.list.length + 1}
+                    className="px-4 py-2 font-condensed text-xs uppercase tracking-wider text-navy"
+                  >
+                    {groupLabel(item.value)}
+                    <span className="ml-2 font-sans normal-case tracking-normal text-ink/40">({item.count})</span>
                   </td>
                 </tr>
-              );
-            })}
+              ) : (
+                renderRow(item.row)
+              ),
+            )}
           </tbody>
         </table>
       </div>

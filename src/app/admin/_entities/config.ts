@@ -75,6 +75,13 @@ export interface EntityConfig {
    * (position, is_active) fields. Keys must all appear in `fields`.
    */
   areaFields?: Record<string, Field[]>;
+  /**
+   * Optional field key to visually group the list by. Rows are bucketed by this
+   * field's value and each bucket gets a labelled separator header, so a long
+   * flat list (e.g. Program Items) reads as tidy folders per category. When the
+   * field is a `select`, buckets follow its option order and use option labels.
+   */
+  groupBy?: string;
 }
 
 export const ENTITY_CONFIG: Record<EntityTable, EntityConfig> = {
@@ -192,6 +199,8 @@ export const ENTITY_CONFIG: Record<EntityTable, EntityConfig> = {
     table: 'courses',
     title: 'Program Items',
     list: ['area', 'code', 'name', 'credits', 'semester', 'is_active'],
+    // Folder the flat list into one labelled section per area for easy navigation.
+    groupBy: 'area',
     // Union of every field any area can store — drives the list + record builder.
     // The form renders a tailored per-area subset from `areaFields` below.
     fields: [
