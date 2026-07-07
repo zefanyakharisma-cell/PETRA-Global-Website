@@ -132,17 +132,36 @@
   /* Word-like inline marks (shared by block prose + inline fields). */
   .prose-block mark, .rich-inline mark { @apply rounded bg-amber/40 px-0.5 text-inherit; }
   .prose-block u, .rich-inline u { @apply underline underline-offset-2; }
+  /* Tables (TipTap output). Horizontal scroll on narrow viewports. */
+  .prose-block table { @apply my-8 block w-full max-w-full table-fixed overflow-x-auto border-collapse text-base leading-normal md:table; }
+  .prose-block th, .prose-block td { @apply border border-ink/15 px-3 py-2 align-top; }
+  .prose-block th { @apply bg-navy/5 text-left font-semibold text-navy; }
+  .prose-block table p { @apply mt-0; }
   .prose-on-navy { @apply text-white/85; }
   .prose-on-navy h2, .prose-on-navy h3 { @apply text-white; }
   .prose-on-navy a { @apply text-cyan; }
   .prose-on-navy blockquote { @apply border-cyan text-white; }
   .prose-on-navy mark { @apply bg-amber/60 text-ink; }
+  .prose-on-navy th, .prose-on-navy td { @apply border-white/20; }
+  .prose-on-navy th { @apply bg-white/10 text-white; }
 
   /* Inline rich-text (headings, labels, buttons). Inherits the host element's
      size/colour; only links + highlight marks add their own styling. Any single
      wrapping paragraph the editor emits collapses to inline. */
   .rich-inline > p { @apply m-0 inline; }
   .rich-inline a { @apply underline underline-offset-2; }
+
+  /* Editor-only table affordances (TipTap adds these while editing). */
+  .prose-block .tableWrapper { @apply overflow-x-auto; }
+  .prose-block .selectedCell { @apply relative; }
+  .prose-block .selectedCell::after {
+    content: '';
+    @apply pointer-events-none absolute inset-0 z-10 bg-magenta/15;
+  }
+  .prose-block .column-resize-handle {
+    @apply pointer-events-none absolute -right-0.5 top-0 -bottom-0.5 z-20 w-1 bg-magenta;
+  }
+  .prose-block table.resize-cursor { cursor: col-resize; }
 
   /* ------------------------------------------------------------------------
      Shared micro-interactions. Kept as component utilities so blocks and

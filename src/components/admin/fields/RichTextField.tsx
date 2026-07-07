@@ -9,6 +9,10 @@ import Color from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
 import Link from '@tiptap/extension-link';
+import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableHeader from '@tiptap/extension-table-header';
+import TableCell from '@tiptap/extension-table-cell';
 
 /**
  * Adds a `fontSize` attribute onto the TextStyle mark so the toolbar can offer
@@ -77,6 +81,10 @@ export function RichTextEditor({
       StarterKit,
       ...MARK_EXTENSIONS,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content: value || '',
     immediatelyRender: false,
@@ -269,8 +277,45 @@ function Toolbar({ editor, inline }: { editor: Editor; inline: boolean }) {
       <Btn title="Highlight" label="🖍" active={editor.isActive('highlight')} onClick={() => editor.chain().focus().toggleHighlight().run()} />
       <Btn title="Link" label="🔗" active={editor.isActive('link')} onClick={setLink} />
 
+      {!inline && <TableControls editor={editor} />}
+
       <Sep />
       <Btn title="Clear formatting" label="⌫" onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()} />
     </div>
+  );
+}
+
+/**
+ * Table controls. Collapses to a single "insert table" button when the caret is
+ * outside a table; expands to the row/column/delete operations once inside one,
+ * so the toolbar only shows table editing when it's actionable.
+ */
+function TableControls({ editor }: { editor: Editor }) {
+  const inTable = editor.isActive('table');
+  return (
+    <>
+      <Sep />
+      {!inTable ? (
+        <Btn
+          title="Insert table"
+          label="⊞"
+          onClick={() =>
+            editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+          }
+        />
+      ) : (
+        <>
+          <Btn title="Add column before" label="⊣+" onClick={() => editor.chain().focus().addColumnBefore().run()} />
+          <Btn title="Add column after" label="+⊢" onClick={() => editor.chain().focus().addColumnAfter().run()} />
+          <Btn title="Delete column" label="⊟C" onClick={() => editor.chain().focus().deleteColumn().run()} />
+          <Btn title="Add row before" label="⊤+" onClick={() => editor.chain().focus().addRowBefore().run()} />
+          <Btn title="Add row after" label="+⊥" onClick={() => editor.chain().focus().addRowAfter().run()} />
+          <Btn title="Delete row" label="⊟R" onClick={() => editor.chain().focus().deleteRow().run()} />
+          <Btn title="Toggle header row" label="⊤H" onClick={() => editor.chain().focus().toggleHeaderRow().run()} />
+          <Btn title="Merge / split cells" label="⧉" onClick={() => editor.chain().focus().mergeOrSplit().run()} />
+          <Btn title="Delete table" label="⊞✕" onClick={() => editor.chain().focus().deleteTable().run()} />
+        </>
+      )}
+    </>
   );
 }
