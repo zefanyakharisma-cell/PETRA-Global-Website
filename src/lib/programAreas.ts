@@ -13,6 +13,7 @@ export const PROGRAM_AREAS = [
   { value: 'joint_degree', en: 'Joint Degree', id: 'Gelar Bersama' },
   { value: 'double_degree', en: 'Double Degree', id: 'Gelar Ganda' },
   { value: 'international_internship', en: 'International Internship', id: 'Magang Internasional' },
+  { value: 'accreditation', en: 'Accreditation', id: 'Akreditasi' },
 ] as const;
 
 export type ProgramArea = (typeof PROGRAM_AREAS)[number]['value'];
