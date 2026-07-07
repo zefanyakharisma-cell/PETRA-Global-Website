@@ -12,7 +12,8 @@
     "db:seed": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed.ts",
     "db:seed:pages": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed-pages.ts",
     "db:seed:icop": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed-icop-page.ts",
-    "db:seed:spectrum": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed-spectrum-page.ts"
+    "db:seed:spectrum": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed-spectrum-page.ts",
+    "db:seed:accreditation": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed-accreditation-page.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",
