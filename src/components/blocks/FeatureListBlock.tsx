@@ -3,10 +3,11 @@ import {
   MapPin, Plane, Building2, Heart, Lightbulb, Sparkles,
   Calendar, Mail, Compass, Star, type LucideIcon,
 } from 'lucide-react';
+import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { Section, Container } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
-import { RichText, InlineHtml } from '@/components/ui/RichText';
+import { RichText, InlineHtml, stripHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
@@ -21,6 +22,7 @@ const ICONS: Record<string, LucideIcon> = {
 
 interface Feature {
   icon?: string;
+  image_url?: string;
   title?: LocaleMap;
   body?: LocaleMap;
   href?: string;
@@ -96,18 +98,38 @@ export function FeatureListBlock({ block, locale }: BlockComponentProps) {
         >
           {items.map((f, i) => {
             const Icon = ICONS[f.icon ?? ''] ?? Sparkles;
+            // A feature can carry an uploaded photo *or* fall back to its icon.
+            // When present the photo becomes the media — a banner above the text
+            // in grid/cards, a square thumbnail beside it in the inline layout.
+            const media = f.image_url ? (
+              <div
+                className={clsx(
+                  'relative shrink-0 overflow-hidden rounded-xl bg-ink/5',
+                  isInline ? 'h-20 w-20' : 'aspect-[16/10] w-full',
+                )}
+              >
+                <Image
+                  src={f.image_url}
+                  alt={stripHtml(t(f.title, locale)) || 'Feature'}
+                  fill
+                  className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+                />
+              </div>
+            ) : (
+              <span
+                className={clsx(
+                  'inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-300 ease-out',
+                  onNavy ? 'bg-white/10 group-hover:bg-white/20' : 'bg-ink/5 group-hover:bg-ink/[0.08]',
+                  'group-hover:-rotate-6 group-hover:scale-110',
+                  ACCENT_TEXT[accent],
+                )}
+              >
+                <Icon className="h-6 w-6" strokeWidth={1.75} />
+              </span>
+            );
             const inner = (
               <div className={clsx('flex gap-3', isInline ? 'flex-row items-start gap-4' : 'flex-col')}>
-                <span
-                  className={clsx(
-                    'inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-300 ease-out',
-                    onNavy ? 'bg-white/10 group-hover:bg-white/20' : 'bg-ink/5 group-hover:bg-ink/[0.08]',
-                    'group-hover:-rotate-6 group-hover:scale-110',
-                    ACCENT_TEXT[accent],
-                  )}
-                >
-                  <Icon className="h-6 w-6" strokeWidth={1.75} />
-                </span>
+                {media}
                 <div className={clsx(isInline && 'flex-1')}>
                   <InlineHtml as="h3" html={t(f.title, locale)} fallback="Feature" className={clsx('text-xl transition-colors', f.href && ACCENT_GROUP_HOVER[accent])} />
                   {t(f.body, locale) && (

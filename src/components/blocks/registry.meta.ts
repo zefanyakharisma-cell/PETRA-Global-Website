@@ -319,6 +319,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
             { value: 'compass', label: 'Compass' },
             { value: 'star', label: 'Star' },
           ] },
+          { key: 'image_url', label: 'Photo (optional)', type: 'image' },
           { key: 'title', label: 'Title', type: 'richtext-inline', localized: true },
           { key: 'body', label: 'Body', type: 'richtext', localized: true },
           { key: 'href', label: 'Link (optional)', type: 'url' },
