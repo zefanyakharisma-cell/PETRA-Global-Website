@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
-import { FacultyExplorer, type ExplorerFaculty } from './faculties/FacultyExplorer';
+import { FacultyExplorer, type ExplorerFaculty, type FacultyDisplay } from './faculties/FacultyExplorer';
 import { PROGRAM_AREA_VALUES } from '@/lib/programAreas';
 
 interface FacultiesContent {
@@ -27,7 +27,7 @@ function asStringArray(v: unknown): string[] {
  */
 export async function FacultiesBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as FacultiesContent;
-  const display = (block.config.display as 'explorer' | 'grid') ?? 'explorer';
+  const display = (block.config.display as FacultyDisplay) ?? 'explorer';
   // Which areas (courses / joint degree / …) to list under each program.
   // Back-compat: older blocks stored a `showCourses` boolean instead of `areas`.
   const areas = 'areas' in block.config

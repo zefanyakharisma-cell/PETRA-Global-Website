@@ -316,6 +316,92 @@ function FacultyPanel({
   );
 }
 
+/** List mode — dense, scannable directory rows that link to each faculty site. */
+function FacultyListRow({ faculty, locale, onNavy }: { faculty: ExplorerFaculty; locale: Locale; onNavy: boolean }) {
+  const L = LABELS[locale === 'id' ? 'id' : 'en'];
+  const accent = ACCENT[faculty.accent] ?? ACCENT.magenta;
+  const count = faculty.programs.length;
+
+  const inner = (
+    <div
+      className={clsx(
+        'group flex items-center gap-4 px-4 py-4 transition sm:px-5',
+        onNavy ? 'hover:bg-white/[0.04]' : 'hover:bg-paper',
+      )}
+    >
+      <span className={clsx('h-10 w-1.5 shrink-0 rounded-full', accent.bar)} />
+      {faculty.logo_url && (
+        <span className="relative hidden h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-white/10 sm:block">
+          <Image src={faculty.logo_url} alt="" fill className="object-contain p-1" />
+        </span>
+      )}
+      <span className="min-w-0 flex-1">
+        <span className={clsx('block text-lg leading-tight md:text-xl', onNavy && 'text-white')}>
+          {t(faculty.name, locale)}
+        </span>
+        {t(faculty.tagline, locale) && (
+          <span className={clsx('mt-0.5 block truncate text-sm', onNavy ? 'text-white/60' : 'text-ink/60')}>
+            {t(faculty.tagline, locale)}
+          </span>
+        )}
+      </span>
+      <span className={clsx('hidden shrink-0 font-condensed text-sm uppercase tracking-wide sm:block', onNavy ? 'text-white/50' : 'text-ink/45')}>
+        {count} {count === 1 ? L.program : L.programsPlural}
+      </span>
+      {faculty.url && (
+        <span className={clsx('shrink-0 text-lg transition-transform group-hover:translate-x-0.5', accent.dot)}>↗</span>
+      )}
+    </div>
+  );
+
+  if (faculty.url) return <ExternalLink href={faculty.url}>{inner}</ExternalLink>;
+  return inner;
+}
+
+/** Cover mode — image-forward tiles using each faculty's cover image. */
+function FacultyCoverCard({ faculty, locale, onNavy }: { faculty: ExplorerFaculty; locale: Locale; onNavy: boolean }) {
+  const L = LABELS[locale === 'id' ? 'id' : 'en'];
+  const accent = ACCENT[faculty.accent] ?? ACCENT.magenta;
+  const count = faculty.programs.length;
+
+  const inner = (
+    <div
+      className={clsx(
+        'group relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-2xl transition hover:-translate-y-1 hover:shadow-lg',
+        onNavy ? 'ring-1 ring-white/10' : 'ring-1 ring-ink/10',
+      )}
+    >
+      {faculty.cover_url ? (
+        <Image
+          src={faculty.cover_url}
+          alt=""
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+      ) : (
+        <span className={clsx('absolute inset-0', accent.bar)} />
+      )}
+      {/* Gradient scrim so text stays legible over any image. */}
+      <span className="absolute inset-0 bg-gradient-to-t from-navy/85 via-navy/25 to-transparent" />
+      <span className={clsx('absolute left-4 top-4 h-1.5 w-10 rounded-full', accent.bar)} />
+      <div className="relative p-5">
+        <h3 className="text-2xl leading-tight text-white">{t(faculty.name, locale)}</h3>
+        {t(faculty.tagline, locale) && (
+          <p className="mt-1 text-sm text-white/75">{t(faculty.tagline, locale)}</p>
+        )}
+        <span className="mt-3 block font-condensed text-sm uppercase tracking-wide text-white/60">
+          {count} {count === 1 ? L.program : L.programsPlural}
+          {faculty.url ? ` · ${L.explore} ↗` : ''}
+        </span>
+      </div>
+    </div>
+  );
+
+  if (faculty.url) return <ExternalLink href={faculty.url} className="block h-full">{inner}</ExternalLink>;
+  return inner;
+}
+
 /** Grid mode — compact faculty cards that link straight to each faculty site. */
 function FacultyCard({ faculty, locale, onNavy }: { faculty: ExplorerFaculty; locale: Locale; onNavy: boolean }) {
   const L = LABELS[locale === 'id' ? 'id' : 'en'];
@@ -346,6 +432,8 @@ function FacultyCard({ faculty, locale, onNavy }: { faculty: ExplorerFaculty; lo
   return inner;
 }
 
+export type FacultyDisplay = 'explorer' | 'grid' | 'list' | 'cover';
+
 export function FacultyExplorer({
   faculties,
   locale,
@@ -355,7 +443,7 @@ export function FacultyExplorer({
 }: {
   faculties: ExplorerFaculty[];
   locale: Locale;
-  display: 'explorer' | 'grid';
+  display: FacultyDisplay;
   areas: string[];
   onNavy: boolean;
 }) {
@@ -364,6 +452,26 @@ export function FacultyExplorer({
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {faculties.map((f) => (
           <FacultyCard key={f.id} faculty={f} locale={locale} onNavy={onNavy} />
+        ))}
+      </div>
+    );
+  }
+
+  if (display === 'cover') {
+    return (
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {faculties.map((f) => (
+          <FacultyCoverCard key={f.id} faculty={f} locale={locale} onNavy={onNavy} />
+        ))}
+      </div>
+    );
+  }
+
+  if (display === 'list') {
+    return (
+      <div className={clsx('divide-y overflow-hidden rounded-2xl border', onNavy ? 'divide-white/10 border-white/10' : 'divide-ink/10 border-ink/10')}>
+        {faculties.map((f) => (
+          <FacultyListRow key={f.id} faculty={f} locale={locale} onNavy={onNavy} />
         ))}
       </div>
     );

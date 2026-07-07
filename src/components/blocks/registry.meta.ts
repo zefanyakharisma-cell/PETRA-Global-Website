@@ -702,6 +702,8 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         { key: 'display', label: 'Layout', type: 'layout', default: 'explorer', options: [
           { value: 'explorer', label: 'Explorer', shape: 'explorer' },
           { value: 'grid', label: 'Faculty cards', shape: 'faculty-grid' },
+          { value: 'cover', label: 'Cover tiles', shape: 'faculty-cover' },
+          { value: 'list', label: 'Directory list', shape: 'faculty-list' },
         ] },
         { key: 'facultyIds', label: 'Faculties to show', type: 'entitymulti', entity: 'faculties',
           help: 'Leave all unchecked to show every faculty.' },
