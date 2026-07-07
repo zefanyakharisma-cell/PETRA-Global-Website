@@ -164,6 +164,11 @@ const SHAPES: Record<string, Rect[]> = {
     [6, 9, 20, 22, 'strong'], [9, 24, 14, 4, 'soft'],
     [30, 9, 20, 22, 'strong'], [33, 24, 14, 4, 'soft'],
   ],
+  'faculty-finder': [
+    [8, 7, 44, 5, 'strong'],
+    [8, 15, 8, 3, 'dark'], [18, 15, 8, 3, 'soft'], [28, 15, 8, 3, 'soft'],
+    [8, 22, 44, 5, 'soft'], [8, 29, 44, 5, 'soft'],
+  ],
 
   // Forms
   'form-center': [[16, 8, 28, 4, 'strong'], [14, 15, 32, 5, 'soft'], [14, 22, 32, 5, 'soft'], [22, 30, 16, 5, 'dark']],

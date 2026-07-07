@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { clsx } from '@/lib/clsx';
@@ -63,6 +63,14 @@ const LABELS = {
     credits: 'Credits',
     semester: 'Sem.',
     explore: 'Explore',
+    searchPlaceholder: 'Search by program or opportunity…',
+    all: 'All',
+    opportunity: 'opportunity',
+    opportunities: 'opportunities',
+    across: 'across',
+    programsLower: 'programs',
+    noResults: 'No matching opportunities. Try another keyword or filter.',
+    clear: 'Clear',
   },
   id: {
     visitFaculty: 'Kunjungi situs fakultas',
@@ -75,6 +83,14 @@ const LABELS = {
     credits: 'SKS',
     semester: 'Sem.',
     explore: 'Jelajahi',
+    searchPlaceholder: 'Cari berdasarkan program atau peluang…',
+    all: 'Semua',
+    opportunity: 'peluang',
+    opportunities: 'peluang',
+    across: 'di',
+    programsLower: 'program',
+    noResults: 'Tidak ada peluang yang cocok. Coba kata kunci atau filter lain.',
+    clear: 'Hapus',
   },
 } as const;
 
@@ -432,7 +448,208 @@ function FacultyCard({ faculty, locale, onNavy }: { faculty: ExplorerFaculty; lo
   return inner;
 }
 
-export type FacultyDisplay = 'explorer' | 'grid' | 'list' | 'cover';
+/**
+ * Finder mode — flips the explorer hierarchy for opportunity-seekers. Instead of
+ * drilling faculty → program → area, the audience searches by keyword and filters
+ * by area (e.g. International Internship, Study Abroad), then sees every matching
+ * opportunity across all faculties in one flat list, each still tied to its
+ * study program and faculty so they know it fits their field.
+ */
+function FacultyFinder({
+  faculties,
+  locale,
+  areas,
+  onNavy,
+}: {
+  faculties: ExplorerFaculty[];
+  locale: Locale;
+  areas: string[];
+  onNavy: boolean;
+}) {
+  const L = LABELS[locale === 'id' ? 'id' : 'en'];
+
+  // Flatten to (faculty, program, items) entries, keeping only the chosen areas.
+  const entries = useMemo(() => {
+    const out: { faculty: ExplorerFaculty; program: ExplorerProgram; items: ExplorerItem[] }[] = [];
+    for (const f of faculties) {
+      for (const p of f.programs) {
+        const items = p.items.filter((it) => areas.includes(it.area));
+        if (items.length) out.push({ faculty: f, program: p, items });
+      }
+    }
+    return out;
+  }, [faculties, areas]);
+
+  // Only offer area filters that actually have items, in the editor's chosen order.
+  const availableAreas = useMemo(
+    () => areas.filter((a) => entries.some((e) => e.items.some((it) => it.area === a))),
+    [areas, entries],
+  );
+
+  const [activeArea, setActiveArea] = useState<string>('all');
+  const [query, setQuery] = useState('');
+  const q = query.trim().toLowerCase();
+
+  const results = useMemo(() => {
+    return entries
+      .map((e) => {
+        const items = e.items.filter((it) => {
+          if (activeArea !== 'all' && it.area !== activeArea) return false;
+          if (!q) return true;
+          const hay = [t(e.program.name, locale), t(e.faculty.name, locale), t(it.name, locale), it.code ?? '']
+            .join(' ')
+            .toLowerCase();
+          return hay.includes(q);
+        });
+        return { ...e, items };
+      })
+      .filter((e) => e.items.length > 0);
+  }, [entries, activeArea, q, locale]);
+
+  const total = results.reduce((n, e) => n + e.items.length, 0);
+  const showAreaFilter = availableAreas.length > 1;
+
+  const chip = (active: boolean) =>
+    clsx(
+      'inline-flex items-center rounded-full border px-3.5 py-1.5 text-sm font-condensed uppercase tracking-wide transition',
+      active
+        ? 'border-transparent bg-navy text-white'
+        : onNavy
+          ? 'border-white/20 text-white/80 hover:bg-white/10'
+          : 'border-ink/20 text-ink/70 hover:bg-ink/5',
+    );
+
+  return (
+    <div>
+      {/* Search + area filters */}
+      <div className="flex flex-col gap-3">
+        <div className="relative">
+          <svg
+            aria-hidden
+            viewBox="0 0 20 20"
+            className={clsx('pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2', onNavy ? 'text-white/40' : 'text-ink/40')}
+          >
+            <path
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              d="M8.5 3a5.5 5.5 0 1 0 3.9 9.4l4.1 4.1M8.5 3a5.5 5.5 0 0 1 3.9 9.4"
+            />
+          </svg>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={L.searchPlaceholder}
+            aria-label={L.searchPlaceholder}
+            className={clsx(
+              'w-full rounded-xl border py-3 pl-11 pr-10 text-base outline-none transition focus:border-navy focus:ring-2 focus:ring-navy/15',
+              onNavy ? 'border-white/15 bg-white/5 text-white placeholder:text-white/40' : 'border-ink/15 bg-white text-ink placeholder:text-ink/40',
+            )}
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              aria-label={L.clear}
+              className={clsx('absolute right-3 top-1/2 -translate-y-1/2 text-xl leading-none', onNavy ? 'text-white/50 hover:text-white' : 'text-ink/40 hover:text-ink')}
+            >
+              ×
+            </button>
+          )}
+        </div>
+
+        {showAreaFilter && (
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => setActiveArea('all')} aria-pressed={activeArea === 'all'} className={chip(activeArea === 'all')}>
+              {L.all}
+            </button>
+            {availableAreas.map((a) => (
+              <button key={a} type="button" onClick={() => setActiveArea(a)} aria-pressed={activeArea === a} className={chip(activeArea === a)}>
+                {areaLabel(a, locale)}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Result count */}
+      <p className={clsx('mt-4 text-sm', onNavy ? 'text-white/55' : 'text-ink/55')} aria-live="polite">
+        {total} {total === 1 ? L.opportunity : L.opportunities} {L.across} {results.length} {L.programsLower}
+      </p>
+
+      {/* Results */}
+      {results.length === 0 ? (
+        <p className={clsx('mt-6 rounded-xl border border-dashed px-4 py-8 text-center text-sm', onNavy ? 'border-white/15 text-white/55' : 'border-ink/15 text-ink/55')}>
+          {L.noResults}
+        </p>
+      ) : (
+        <div className="mt-4 grid gap-3">
+          {results.map((e) => {
+            const accent = ACCENT[e.faculty.accent] ?? ACCENT.magenta;
+            return (
+              <div key={e.program.id} className={clsx('rounded-xl border p-4', onNavy ? 'border-white/10 bg-white/[0.03]' : 'border-ink/10 bg-white')}>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-[12rem] flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className={clsx('text-lg md:text-xl', onNavy && 'text-white')}>{t(e.program.name, locale)}</h4>
+                      {e.program.degree && (
+                        <span className={clsx('rounded-full px-2.5 py-0.5 text-xs font-medium', accent.chip)}>{e.program.degree}</span>
+                      )}
+                    </div>
+                    <span className={clsx('mt-0.5 flex items-center gap-1.5 text-sm', onNavy ? 'text-white/55' : 'text-ink/55')}>
+                      <span className={clsx('inline-block h-2 w-2 rounded-full', accent.bar)} />
+                      {t(e.faculty.name, locale)}
+                    </span>
+                  </div>
+                  {e.program.url && (
+                    <ExternalLink
+                      href={e.program.url}
+                      className={clsx(
+                        'inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-condensed uppercase tracking-wide transition',
+                        onNavy ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-navy text-white hover:bg-navy-2',
+                      )}
+                    >
+                      {L.visitProgram} ↗
+                    </ExternalLink>
+                  )}
+                </div>
+                <ul className="mt-3 space-y-2">
+                  {e.items.map((it) => (
+                    <li
+                      key={it.id}
+                      className={clsx('flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-3 py-2 text-sm', onNavy ? 'bg-white/5' : 'bg-paper')}
+                    >
+                      {/* Area badge — the audience's primary lens, so lead with it. */}
+                      <span className={clsx('rounded-full px-2 py-0.5 text-xs font-medium', accent.chip)}>{areaLabel(it.area, locale)}</span>
+                      {it.code && (
+                        <span className={clsx('font-condensed uppercase tracking-wide', onNavy ? 'text-cyan' : 'text-magenta')}>{it.code}</span>
+                      )}
+                      <span className={clsx('flex-1 min-w-[8rem]', onNavy ? 'text-white' : 'text-ink')}>{t(it.name, locale)}</span>
+                      {it.semester && (
+                        <span className={clsx('text-xs', onNavy ? 'text-white/50' : 'text-ink/50')}>
+                          {L.semester} {it.semester}
+                        </span>
+                      )}
+                      {it.credits != null && (
+                        <span className={clsx('rounded-full px-2 py-0.5 text-xs font-medium', onNavy ? 'bg-white/10 text-white/80' : 'bg-ink/10 text-ink/70')}>
+                          {it.credits} {L.credits}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export type FacultyDisplay = 'explorer' | 'grid' | 'list' | 'cover' | 'opportunities';
 
 export function FacultyExplorer({
   faculties,
@@ -447,6 +664,10 @@ export function FacultyExplorer({
   areas: string[];
   onNavy: boolean;
 }) {
+  if (display === 'opportunities') {
+    return <FacultyFinder faculties={faculties} locale={locale} areas={areas} onNavy={onNavy} />;
+  }
+
   if (display === 'grid') {
     return (
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
