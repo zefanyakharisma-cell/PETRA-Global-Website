@@ -12,6 +12,7 @@ export const PROGRAM_AREAS = [
   { value: 'course', en: 'Courses', id: 'Mata Kuliah' },
   { value: 'joint_degree', en: 'Joint Degree', id: 'Gelar Bersama' },
   { value: 'double_degree', en: 'Double Degree', id: 'Gelar Ganda' },
+  { value: 'study_abroad', en: 'Study Abroad', id: 'Studi ke Luar Negeri' },
   { value: 'international_internship', en: 'International Internship', id: 'Magang Internasional' },
   { value: 'accreditation', en: 'Accreditation', id: 'Akreditasi' },
 ] as const;
