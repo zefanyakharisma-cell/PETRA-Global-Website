@@ -123,6 +123,7 @@ export type CourseRow = Timestamps & {
   credits: number | null;
   semester: string | null;
   description: Json;
+  meta: Json;
   position: number;
   is_active: boolean;
 };

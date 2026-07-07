@@ -15,6 +15,8 @@ export interface ExplorerItem {
   credits: number | null;
   semester: string | null;
   description: LocaleMap;
+  /** Area-specific attributes (partner/host institution, country, credential, duration, detail). */
+  meta: Record<string, string>;
 }
 
 export interface ExplorerProgram {
@@ -122,6 +124,50 @@ function Collapse({ open, children }: { open: boolean; children: React.ReactNode
   );
 }
 
+/**
+ * A single program-item row, rendered per its area so each type is presented
+ * with the right fields. Courses keep their code / semester / credits look;
+ * the mobility & partnership areas lead with an institution · country subtitle
+ * and show their credential / duration / detail as badges. Shared by the
+ * accordion (ItemTable) and the opportunity finder — pass `areaChipClass` to
+ * prefix the row with an area badge (the finder's flat list needs it).
+ */
+function ItemRow({
+  item,
+  locale,
+  onNavy,
+  areaChipClass,
+}: {
+  item: ExplorerItem;
+  locale: Locale;
+  onNavy: boolean;
+  areaChipClass?: string;
+}) {
+  const L = LABELS[locale === 'id' ? 'id' : 'en'];
+  const isCourse = item.area === 'course';
+  const subtitle = [item.meta.institution, item.meta.country].filter(Boolean).join(' · ');
+  const badges = isCourse ? [] : [item.meta.credential, item.meta.duration, item.meta.detail].filter(Boolean);
+  const pill = clsx('rounded-full px-2 py-0.5 text-xs font-medium', onNavy ? 'bg-white/10 text-white/80' : 'bg-ink/10 text-ink/70');
+
+  return (
+    <li className={clsx('flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-3 py-2 text-sm', onNavy ? 'bg-white/5' : 'bg-paper')}>
+      {areaChipClass && <span className={clsx('rounded-full px-2 py-0.5 text-xs font-medium', areaChipClass)}>{areaLabel(item.area, locale)}</span>}
+      {item.code && (
+        <span className={clsx('font-condensed uppercase tracking-wide', onNavy ? 'text-cyan' : 'text-magenta')}>{item.code}</span>
+      )}
+      <span className="flex-1 min-w-[8rem]">
+        <span className={clsx('block', onNavy ? 'text-white' : 'text-ink')}>{t(item.name, locale)}</span>
+        {subtitle && <span className={clsx('block text-xs', onNavy ? 'text-white/50' : 'text-ink/50')}>{subtitle}</span>}
+      </span>
+      {isCourse && item.semester && (
+        <span className={clsx('text-xs', onNavy ? 'text-white/50' : 'text-ink/50')}>{L.semester} {item.semester}</span>
+      )}
+      {isCourse && item.credits != null && <span className={pill}>{item.credits} {L.credits}</span>}
+      {badges.map((b) => <span key={b} className={pill}>{b}</span>)}
+    </li>
+  );
+}
+
 function ItemTable({ items, locale, onNavy }: { items: ExplorerItem[]; locale: Locale; onNavy: boolean }) {
   const L = LABELS[locale === 'id' ? 'id' : 'en'];
   if (items.length === 0) {
@@ -130,30 +176,7 @@ function ItemTable({ items, locale, onNavy }: { items: ExplorerItem[]; locale: L
   return (
     <ul className="space-y-2">
       {items.map((c) => (
-        <li
-          key={c.id}
-          className={clsx(
-            'flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-3 py-2 text-sm',
-            onNavy ? 'bg-white/5' : 'bg-paper',
-          )}
-        >
-          {c.code && (
-            <span className={clsx('font-condensed uppercase tracking-wide', onNavy ? 'text-cyan' : 'text-magenta')}>
-              {c.code}
-            </span>
-          )}
-          <span className={clsx('flex-1 min-w-[8rem]', onNavy ? 'text-white' : 'text-ink')}>{t(c.name, locale)}</span>
-          {c.semester && (
-            <span className={clsx('text-xs', onNavy ? 'text-white/50' : 'text-ink/50')}>
-              {L.semester} {c.semester}
-            </span>
-          )}
-          {c.credits != null && (
-            <span className={clsx('rounded-full px-2 py-0.5 text-xs font-medium', onNavy ? 'bg-white/10 text-white/80' : 'bg-ink/10 text-ink/70')}>
-              {c.credits} {L.credits}
-            </span>
-          )}
-        </li>
+        <ItemRow key={c.id} item={c} locale={locale} onNavy={onNavy} />
       ))}
     </ul>
   );
@@ -616,28 +639,9 @@ function FacultyFinder({
                   )}
                 </div>
                 <ul className="mt-3 space-y-2">
+                  {/* Area badge leads each row — it's the finder audience's primary lens. */}
                   {e.items.map((it) => (
-                    <li
-                      key={it.id}
-                      className={clsx('flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-3 py-2 text-sm', onNavy ? 'bg-white/5' : 'bg-paper')}
-                    >
-                      {/* Area badge — the audience's primary lens, so lead with it. */}
-                      <span className={clsx('rounded-full px-2 py-0.5 text-xs font-medium', accent.chip)}>{areaLabel(it.area, locale)}</span>
-                      {it.code && (
-                        <span className={clsx('font-condensed uppercase tracking-wide', onNavy ? 'text-cyan' : 'text-magenta')}>{it.code}</span>
-                      )}
-                      <span className={clsx('flex-1 min-w-[8rem]', onNavy ? 'text-white' : 'text-ink')}>{t(it.name, locale)}</span>
-                      {it.semester && (
-                        <span className={clsx('text-xs', onNavy ? 'text-white/50' : 'text-ink/50')}>
-                          {L.semester} {it.semester}
-                        </span>
-                      )}
-                      {it.credits != null && (
-                        <span className={clsx('rounded-full px-2 py-0.5 text-xs font-medium', onNavy ? 'bg-white/10 text-white/80' : 'bg-ink/10 text-ink/70')}>
-                          {it.credits} {L.credits}
-                        </span>
-                      )}
-                    </li>
+                    <ItemRow key={it.id} item={it} locale={locale} onNavy={onNavy} areaChipClass={accent.chip} />
                   ))}
                 </ul>
               </div>

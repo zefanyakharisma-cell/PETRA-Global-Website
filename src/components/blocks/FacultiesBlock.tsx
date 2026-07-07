@@ -69,7 +69,7 @@ export async function FacultiesBlock({ block, locale }: BlockComponentProps) {
   const { data: courseRows } = areas.length && programIds.length
     ? await supabase
         .from('courses')
-        .select('id,study_program_id,area,code,name,credits,semester,description')
+        .select('id,study_program_id,area,code,name,credits,semester,description,meta')
         .eq('is_active', true)
         .in('study_program_id', programIds)
         .in('area', areas)
@@ -104,6 +104,7 @@ export async function FacultiesBlock({ block, locale }: BlockComponentProps) {
             credits: cr.credits,
             semester: cr.semester,
             description: cr.description as LocaleMap,
+            meta: (cr.meta ?? {}) as Record<string, string>,
           })),
       })),
   }));

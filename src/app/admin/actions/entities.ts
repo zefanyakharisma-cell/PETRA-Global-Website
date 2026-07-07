@@ -2,12 +2,22 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
-import { ENTITY_CONFIG, type EntityTable } from '../_entities/config';
+import { ENTITY_CONFIG, isMetaField, metaSubkey, type EntityTable } from '../_entities/config';
 
 function buildRecord(table: EntityTable, formData: FormData): Record<string, unknown> {
   const cfg = ENTITY_CONFIG[table];
   const rec: Record<string, unknown> = {};
+  // Area-specific attributes are stored under the `meta` jsonb column. Rebuilt
+  // fresh from whatever fields the active area rendered; unshown keys drop out.
+  const meta: Record<string, string> = {};
+  let hasMeta = false;
   for (const f of cfg.fields) {
+    if (isMetaField(f.key)) {
+      hasMeta = true;
+      const v = String(formData.get(f.key) ?? '').trim();
+      if (v) meta[metaSubkey(f.key)] = v;
+      continue;
+    }
     switch (f.kind) {
       case 'localized':
         rec[f.key] = { en: String(formData.get(`${f.key}_en`) ?? ''), id: String(formData.get(`${f.key}_id`) ?? '') };
@@ -36,6 +46,7 @@ function buildRecord(table: EntityTable, formData: FormData): Record<string, unk
       }
     }
   }
+  if (hasMeta) rec.meta = meta;
   return rec;
 }
 

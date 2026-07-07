@@ -34,6 +34,19 @@ export function optionLabel(o: SelectOption): string {
   return typeof o === 'string' ? o : o.label;
 }
 
+/**
+ * Fields whose key is `meta.<subkey>` are stored inside the row's `meta` jsonb
+ * column rather than a dedicated column. This lets area-specific attributes
+ * (partner university, country, grade, …) live on the shared `courses` table
+ * without a column per area. See `areaFields` on the courses config.
+ */
+export function isMetaField(key: string): boolean {
+  return key.startsWith('meta.');
+}
+export function metaSubkey(key: string): string {
+  return key.slice('meta.'.length);
+}
+
 export interface Field {
   key: string;
   label: string;
@@ -49,7 +62,19 @@ export interface EntityConfig {
   title: string;
   /** Columns shown in the list table (plain or localized → shown as EN). */
   list: string[];
+  /**
+   * The union of every field the table can store. Drives the list rendering and
+   * the server-side record builder. For area-aware tables (see `areaFields`) the
+   * create/edit form renders a per-area subset instead of this whole list.
+   */
   fields: Field[];
+  /**
+   * Optional per-area form personalization. When set, the form watches the
+   * `area` select and renders `areaFields[selectedArea]` (with area-specific
+   * labels) between the always-on head (study_program_id, area) and tail
+   * (position, is_active) fields. Keys must all appear in `fields`.
+   */
+  areaFields?: Record<string, Field[]>;
 }
 
 export const ENTITY_CONFIG: Record<EntityTable, EntityConfig> = {
@@ -167,6 +192,8 @@ export const ENTITY_CONFIG: Record<EntityTable, EntityConfig> = {
     table: 'courses',
     title: 'Program Items',
     list: ['area', 'code', 'name', 'credits', 'semester', 'is_active'],
+    // Union of every field any area can store — drives the list + record builder.
+    // The form renders a tailored per-area subset from `areaFields` below.
     fields: [
       { key: 'study_program_id', label: 'Study program', kind: 'relation', relTable: 'study_programs', required: true },
       { key: 'area', label: 'Area', kind: 'select', required: true, options: PROGRAM_AREAS.map((a) => ({ value: a.value, label: a.en })) },
@@ -174,9 +201,64 @@ export const ENTITY_CONFIG: Record<EntityTable, EntityConfig> = {
       { key: 'name', label: 'Name', kind: 'localized' },
       { key: 'credits', label: 'Credits (SKS)', kind: 'number' },
       { key: 'semester', label: 'Semester', kind: 'text' },
+      { key: 'meta.institution', label: 'Institution', kind: 'text' },
+      { key: 'meta.country', label: 'Country', kind: 'text' },
+      { key: 'meta.credential', label: 'Credential', kind: 'text' },
+      { key: 'meta.duration', label: 'Duration', kind: 'text' },
+      { key: 'meta.detail', label: 'Detail', kind: 'text' },
       { key: 'description', label: 'Description', kind: 'localized' },
       { key: 'position', label: 'Order', kind: 'number' },
       { key: 'is_active', label: 'Active', kind: 'bool' },
     ],
+    // Personalizes the form per area so each program item type is described with
+    // the right fields + labels. Head (study_program_id, area) and tail
+    // (position, is_active) are always rendered around these.
+    areaFields: {
+      course: [
+        { key: 'code', label: 'Course code (e.g. IF2110)', kind: 'text' },
+        { key: 'name', label: 'Course name', kind: 'localized' },
+        { key: 'credits', label: 'Credits (SKS)', kind: 'number' },
+        { key: 'semester', label: 'Semester', kind: 'text' },
+        { key: 'description', label: 'Description', kind: 'localized' },
+      ],
+      double_degree: [
+        { key: 'name', label: 'Program title (e.g. Double Degree in Informatics)', kind: 'localized' },
+        { key: 'meta.institution', label: 'Partner university', kind: 'text' },
+        { key: 'meta.country', label: 'Country', kind: 'text' },
+        { key: 'meta.credential', label: 'Degrees awarded (e.g. S.Kom + B.Sc)', kind: 'text' },
+        { key: 'meta.duration', label: 'Study pattern (e.g. 2+2 years)', kind: 'text' },
+        { key: 'description', label: 'Description', kind: 'localized' },
+      ],
+      joint_degree: [
+        { key: 'name', label: 'Program title', kind: 'localized' },
+        { key: 'meta.institution', label: 'Partner university', kind: 'text' },
+        { key: 'meta.country', label: 'Country', kind: 'text' },
+        { key: 'meta.credential', label: 'Joint degree awarded', kind: 'text' },
+        { key: 'meta.duration', label: 'Duration', kind: 'text' },
+        { key: 'description', label: 'Description', kind: 'localized' },
+      ],
+      accreditation: [
+        { key: 'name', label: 'Accreditation / certification', kind: 'localized' },
+        { key: 'meta.institution', label: 'Accrediting body (e.g. BAN-PT, ABET)', kind: 'text' },
+        { key: 'meta.credential', label: 'Grade / level (e.g. A, Unggul)', kind: 'text' },
+        { key: 'meta.detail', label: 'Valid until (e.g. 2028)', kind: 'text' },
+        { key: 'description', label: 'Description', kind: 'localized' },
+      ],
+      study_abroad: [
+        { key: 'name', label: 'Program / destination', kind: 'localized' },
+        { key: 'meta.institution', label: 'Host university', kind: 'text' },
+        { key: 'meta.country', label: 'Country', kind: 'text' },
+        { key: 'meta.duration', label: 'Duration (e.g. 1 semester)', kind: 'text' },
+        { key: 'meta.detail', label: 'Term / intake (e.g. Fall 2026)', kind: 'text' },
+        { key: 'description', label: 'Description', kind: 'localized' },
+      ],
+      international_internship: [
+        { key: 'name', label: 'Role / program title', kind: 'localized' },
+        { key: 'meta.institution', label: 'Host organization', kind: 'text' },
+        { key: 'meta.country', label: 'Country', kind: 'text' },
+        { key: 'meta.duration', label: 'Duration (e.g. 3–6 months)', kind: 'text' },
+        { key: 'description', label: 'Description', kind: 'localized' },
+      ],
+    },
   },
 };

@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from 'react';
 import { createEntity, updateEntity, deleteEntity, setEntityActive } from '../actions/entities';
-import { optionLabel, optionValue, type EntityConfig, type EntityTable, type Field } from './config';
+import { isMetaField, metaSubkey, optionLabel, optionValue, type EntityConfig, type EntityTable, type Field } from './config';
 
 export type RelOption = { id: string; label: string };
 export type Relations = Record<string, { options: RelOption[]; labels: Record<string, string> }>;
@@ -48,7 +48,10 @@ function FieldInput({ f, relOptions, row }: { f: Field; relOptions?: RelOption[]
   const type = f.kind === 'email' ? 'email' : f.kind === 'number' ? 'number' : f.kind === 'date' ? 'date' : f.kind === 'url' ? 'url' : 'text';
   let def: string | undefined;
   if (editing) {
-    const raw = row?.[f.key];
+    // meta.* fields live inside the row's `meta` jsonb, not a top-level column.
+    const raw = isMetaField(f.key)
+      ? (row?.meta as Record<string, unknown> | undefined)?.[metaSubkey(f.key)]
+      : row?.[f.key];
     def = raw == null ? '' : f.kind === 'date' ? String(raw).slice(0, 10) : String(raw);
   }
   return (
@@ -64,14 +67,62 @@ function FieldInput({ f, relOptions, row }: { f: Field; relOptions?: RelOption[]
   );
 }
 
+/** One field cell in the form grid (localized fields span both columns). */
+function FieldCell({ f, relations, row }: { f: Field; relations: Relations; row?: Row }) {
+  return (
+    <div className={f.kind === 'localized' ? 'md:col-span-2' : ''}>
+      <FieldInput f={f} relOptions={relations[f.key]?.options} row={row} />
+    </div>
+  );
+}
+
+/**
+ * Area-aware grid: watches the `area` select and renders a per-area subset of
+ * fields (with area-specific labels) so each program-item type is described with
+ * the right inputs. `study_program_id` leads, then a controlled area picker,
+ * then the area's fields, then the shared tail (position, is_active).
+ */
+function AreaFieldGrid({ cfg, relations, row }: { cfg: EntityConfig; relations: Relations; row?: Row }) {
+  const areaField = cfg.fields.find((f) => f.key === 'area')!;
+  const firstArea = optionValue(areaField.options![0]);
+  const [area, setArea] = useState<string>(row ? String(row.area ?? firstArea) : firstArea);
+
+  const head = cfg.fields.filter((f) => f.key === 'study_program_id');
+  const tail = cfg.fields.filter((f) => f.key === 'position' || f.key === 'is_active');
+  const mid = cfg.areaFields![area] ?? [];
+
+  return (
+    <>
+      {head.map((f) => <FieldCell key={f.key} f={f} relations={relations} row={row} />)}
+      <div>
+        <select
+          name="area"
+          value={area}
+          onChange={(e) => setArea(e.target.value)}
+          required
+          className={inputBase}
+        >
+          {areaField.options?.map((o) => {
+            const val = optionValue(o);
+            return <option key={val} value={val}>{optionLabel(o)}</option>;
+          })}
+        </select>
+      </div>
+      {mid.map((f) => <FieldCell key={f.key} f={f} relations={relations} row={row} />)}
+      {tail.map((f) => <FieldCell key={f.key} f={f} relations={relations} row={row} />)}
+    </>
+  );
+}
+
 /** Grid of field inputs shared by the create + edit forms. */
 function FieldGrid({ cfg, relations, row }: { cfg: EntityConfig; relations: Relations; row?: Row }) {
+  if (cfg.areaFields) {
+    return <AreaFieldGrid cfg={cfg} relations={relations} row={row} />;
+  }
   return (
     <>
       {cfg.fields.map((f) => (
-        <div key={f.key} className={f.kind === 'localized' ? 'md:col-span-2' : ''}>
-          <FieldInput f={f} relOptions={relations[f.key]?.options} row={row} />
-        </div>
+        <FieldCell key={f.key} f={f} relations={relations} row={row} />
       ))}
     </>
   );

@@ -122,7 +122,11 @@
       "WebFetch(domain:mituniversity.ac.in)",
       "Bash(cp \"C:/Users/KUI/AppData/Local/Temp/claude/e--PETRA-Global-Website/ab82b1fb-884c-4194-af1c-1b451c785d69/scratchpad/find-missing.ts\" \"__find-missing.ts\")",
       "Bash(rm -f \"__find-missing.ts\" __dl-logos.ts __dl-commons.ts __dl-infobox.ts __dl-wikidata.ts)",
-      "Bash(git -C \"e:/PETRA-Global-Website\" status --short)"
+      "Bash(git -C \"e:/PETRA-Global-Website\" status --short)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/en)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -L http://localhost:3000/admin/courses)",
+      "Bash(curl -s \"http://localhost:3000/en/mobility/outbound/joint-double-degree\")",
+      "Bash(curl -s \"http://localhost:3000/en/about/programs\")"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",
