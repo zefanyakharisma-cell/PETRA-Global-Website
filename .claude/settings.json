@@ -143,7 +143,9 @@
       "Read(//c/Users/KUI/AppData/Local/Temp/claude/e--PETRA-Global-Website/8defc493-576e-4987-ac38-9071c2eb6f5f/scratchpad/**)",
       "Bash(node discover.mjs)",
       "Bash(node search2.mjs)",
-      "Bash(node verify.mjs)"
+      "Bash(node verify.mjs)",
+      "Bash(node tmp-cleanup.mjs)",
+      "Bash(rm -f tmp-cleanup.mjs)"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",

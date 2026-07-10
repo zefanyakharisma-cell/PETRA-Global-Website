@@ -61,8 +61,8 @@ interface Logo {
   city?: string;       // only used when inserting a marquee-only row
 }
 
-// ── 38 real domestic partners (already seeded from the CSV) — logo added ────────
-// ── 12 marquee-only famous brands (existing:false) — inserted for decoration ───
+// ── 37 real domestic partners (already seeded from the CSV) — logo added ────────
+// ── 13 marquee-only famous brands (existing:false) — inserted for decoration ───
 const LOGOS: Logo[] = [
   // Banks & finance
   { name: 'PT Bank Central Asia Tbk (BCA)', slug: 'bca', commons: 'Bank Central Asia.svg', existing: true },
@@ -98,7 +98,6 @@ const LOGOS: Logo[] = [
   { name: 'Gramedia Specialized Publications', slug: 'gramedia', commons: 'Gramedia wordmark.svg', existing: true },
   // Professional bodies & consulting
   { name: 'PT Grant Thornton Indonesia', slug: 'grant-thornton', commons: 'Grant Thornton logo.png', existing: true },
-  { name: 'RSM Indonesia', slug: 'rsm', commons: 'RSM-RVB logo-couleur.svg', existing: true },
   { name: 'Association of Chartered Cerified Accountants (ACCA) Indonesia', slug: 'acca', commons: 'ACCA logo.svg', existing: true },
   { name: 'The Institute of Chartered Accountants in England and Wales (ICAEW) Indonesia', slug: 'icaew', commons: 'Logo icaew.svg', existing: true },
   // Education & culture
@@ -116,7 +115,8 @@ const LOGOS: Logo[] = [
   { name: 'PT Bank Syariah Indonesia Tbk (BSI)', slug: 'bsi', commons: 'Bank Syariah Indonesia.svg', existing: false, city: 'Jakarta' },
   { name: 'PT Bank CIMB Niaga Tbk', slug: 'cimb-niaga', commons: 'CIMB Niaga logo.svg', existing: false, city: 'Jakarta' },
   { name: 'PT Indofood Sukses Makmur Tbk', slug: 'indofood', commons: 'Indofood logo-en.svg', existing: false, city: 'Jakarta' },
-  { name: 'PT Mayora Indah Tbk', slug: 'mayora', commons: 'Kopiko.svg', existing: false, city: 'Tangerang' },
+  { name: 'Kopiko (Mayora Indah)', slug: 'kopiko', commons: 'Kopiko.svg', existing: false, city: 'Tangerang' },
+  { name: 'PT Sumber Alfaria Trijaya Tbk (Alfamart)', slug: 'alfamart', commons: 'Alfamart logo.svg', existing: false, city: 'Tangerang' },
   { name: 'PT Industri Jamu dan Farmasi Sido Muncul Tbk', slug: 'sido-muncul', commons: 'Logo Official SidoMuncul. Tbk.svg', existing: false, city: 'Semarang' },
   { name: 'PT Telkom Indonesia (Persero) Tbk', slug: 'telkom', commons: 'Telkom Indonesia logo.png', existing: false, city: 'Jakarta' },
   { name: 'PT Indosat Tbk (Indosat Ooredoo Hutchison)', slug: 'indosat', commons: 'Indosat Ooredoo Hutchison.svg', existing: false, city: 'Jakarta' },
@@ -126,10 +126,25 @@ const LOGOS: Logo[] = [
   { name: 'PT Trinusa Travelindo (Traveloka)', slug: 'traveloka', commons: 'Logo Traveloka.png', existing: false, city: 'Jakarta' },
 ];
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** fetch() with polite retry on 429/5xx (Wikimedia rate-limits bursts). */
+async function fetchRetry(u: string, tries = 5): Promise<Response> {
+  for (let i = 0; ; i++) {
+    const r = await fetch(u, { headers: { 'User-Agent': UA } });
+    if (r.ok) return r;
+    if ((r.status === 429 || r.status >= 500) && i < tries) {
+      const wait = 1500 * (i + 1);
+      console.log(`    …${r.status}, retrying in ${wait}ms`);
+      await sleep(wait);
+      continue;
+    }
+    throw new Error(`HTTP ${r.status} for ${u}`);
+  }
+}
+
 async function j(u: string): Promise<any> {
-  const r = await fetch(u, { headers: { 'User-Agent': UA } });
-  if (!r.ok) throw new Error(`HTTP ${r.status} for ${u}`);
-  return r.json();
+  return (await fetchRetry(u)).json();
 }
 
 /** Resolve a Commons file title to a rasterized PNG URL (512px wide) and download it. */
@@ -144,9 +159,7 @@ async function fetchLogoPng(commons: string): Promise<Buffer> {
   // thumburl is the PNG raster of an SVG; for raster sources it's a resized PNG/JPEG.
   const dl = ii?.thumburl ?? ii?.url;
   if (!dl) throw new Error(`No image URL for ${commons}`);
-  const res = await fetch(dl, { headers: { 'User-Agent': UA } });
-  if (!res.ok) throw new Error(`Download failed (${res.status}) for ${dl}`);
-  return Buffer.from(await res.arrayBuffer());
+  return Buffer.from(await (await fetchRetry(dl)).arrayBuffer());
 }
 
 const publicUrl = (dbKey: string) => supabase.storage.from(BUCKET).getPublicUrl(dbKey).data.publicUrl;
@@ -186,6 +199,7 @@ async function main() {
       console.warn(`  ⚠ ${l.name}: ${e.message}`);
       warn++;
     }
+    await sleep(350); // be gentle with the Wikimedia servers
   }
   console.log(`\nDone. ${ok} logos set, ${warn} warnings. The domestic marquee now shows the logo'd partners only.`);
 }
