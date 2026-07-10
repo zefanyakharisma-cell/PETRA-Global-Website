@@ -215,6 +215,7 @@ export const ENTITY_CONFIG: Record<EntityTable, EntityConfig> = {
       { key: 'meta.credential', label: 'Credential', kind: 'text' },
       { key: 'meta.duration', label: 'Duration', kind: 'text' },
       { key: 'meta.detail', label: 'Detail', kind: 'text' },
+      { key: 'meta.logo', label: 'Logo URL', kind: 'url' },
       { key: 'description', label: 'Description', kind: 'localized' },
       { key: 'position', label: 'Order', kind: 'number' },
       { key: 'is_active', label: 'Active', kind: 'bool' },
@@ -251,6 +252,7 @@ export const ENTITY_CONFIG: Record<EntityTable, EntityConfig> = {
         { key: 'meta.institution', label: 'Accrediting body (e.g. BAN-PT, ABET)', kind: 'text' },
         { key: 'meta.credential', label: 'Grade / level (e.g. A, Unggul)', kind: 'text' },
         { key: 'meta.detail', label: 'Valid until (e.g. 2028)', kind: 'text' },
+        { key: 'meta.logo', label: 'Accreditor logo (image URL)', kind: 'url' },
         { key: 'description', label: 'Description', kind: 'localized' },
       ],
       study_abroad: [

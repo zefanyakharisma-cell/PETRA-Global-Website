@@ -280,6 +280,12 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           { key: 'body', label: 'Body', type: 'richtext', localized: true },
           { key: 'image_url', label: 'Image', type: 'image' },
           { key: 'href', label: 'Link', type: 'url' },
+          // Extra call-to-action + contact details shown inside the popup.
+          { key: 'link_label', label: 'Button label', type: 'richtext-inline', localized: true, help: 'Optional button shown in the popup. Defaults to “Open”.' },
+          { key: 'link_url', label: 'Button link', type: 'url', help: 'Page or external URL for the button.' },
+          { key: 'link_file', label: 'Button file (download)', type: 'file', help: 'Upload a document to download. Overrides the button link above.' },
+          { key: 'contact_email', label: 'Contact email', type: 'text' },
+          { key: 'contact_phone', label: 'Contact phone', type: 'text' },
         ] },
       ],
     },

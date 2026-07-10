@@ -11,6 +11,12 @@ export interface CardGridCardData {
   body: string;
   image_url?: string;
   href?: string;
+  /** Optional extra call-to-action shown in the popup (download / page link). */
+  linkLabel?: string;
+  linkHref?: string;
+  /** Optional contact details shown in the popup. */
+  contactEmail?: string;
+  contactPhone?: string;
 }
 
 export interface CardGridOptions {
@@ -56,23 +62,46 @@ export function CardGridCard({
   // The primary action when the card/button is activated.
   const action: 'popup' | 'link' | 'none' = options.enablePopup ? 'popup' : canLink ? 'link' : 'none';
 
-  // An explicit button rendered inside the card footer.
-  const button = options.showButton ? (
-    action === 'link' && card.href ? (
-      <CardLink href={card.href} external={isExternal} className={buttonClass(onNavy)}>
-        <InlineHtml as="span" html={buttonLabel} />
-      </CardLink>
-    ) : (
-      <button
-        type="button"
-        onClick={() => action === 'popup' && setOpen(true)}
-        disabled={action === 'none'}
-        className={clsx(buttonClass(onNavy), action === 'none' && 'cursor-default opacity-60')}
-      >
-        <InlineHtml as="span" html={buttonLabel} />
-      </button>
-    )
+  const hasFaceLink = !!card.linkHref;
+  // A per-card link/download button lives on the card face. Because it is itself
+  // interactive, its presence forces explicit buttons (the card body can no
+  // longer be the trigger — nesting interactive elements is invalid).
+  const useExplicitButtons = options.showButton || hasFaceLink;
+
+  // Primary action button in the footer. Shown when the admin asked for an
+  // explicit button, or when a face link forces buttons and there is an action.
+  const primaryButton =
+    options.showButton || (hasFaceLink && action !== 'none') ? (
+      action === 'link' && card.href ? (
+        <CardLink href={card.href} external={isExternal} className={buttonClass(onNavy)}>
+          <InlineHtml as="span" html={buttonLabel} />
+        </CardLink>
+      ) : (
+        <button
+          type="button"
+          onClick={() => action === 'popup' && setOpen(true)}
+          disabled={action === 'none'}
+          className={clsx(buttonClass(onNavy), action === 'none' && 'cursor-default opacity-60')}
+        >
+          <InlineHtml as="span" html={buttonLabel} />
+        </button>
+      )
+    ) : null;
+
+  // The download / page-link button, styled as an outlined secondary action.
+  const faceLinkButton = card.linkHref ? (
+    <CardLink href={card.linkHref} external={card.linkHref.startsWith('http')} className={outlineButtonClass(onNavy)}>
+      <InlineHtml as="span" html={card.linkLabel || 'Open'} />
+    </CardLink>
   ) : null;
+
+  const footer =
+    primaryButton || faceLinkButton ? (
+      <div className="mt-4 flex flex-wrap gap-2">
+        {primaryButton}
+        {faceLinkButton}
+      </div>
+    ) : null;
 
   const shell = (
     <div
@@ -102,14 +131,14 @@ export function CardGridCard({
       <div className={clsx('flex flex-1 flex-col p-5', horizontal && 'justify-center')}>
         <InlineHtml as="h3" html={card.title} className={clsx('text-2xl transition-colors', onNavy ? 'text-white' : 'text-ink group-hover:text-navy')} />
         {card.body && <div className={clsx('rich-inline mt-2 text-sm', horizontal ? 'line-clamp-2' : 'line-clamp-3', onNavy ? 'text-white/70' : 'text-ink/65')} dangerouslySetInnerHTML={{ __html: card.body }} />}
-        {button && <div className="mt-4">{button}</div>}
+        {footer}
       </div>
     </div>
   );
 
   // With an explicit button, the card body itself is never the trigger.
   let cardNode: React.ReactNode = shell;
-  if (!options.showButton) {
+  if (!useExplicitButtons) {
     if (action === 'popup') {
       cardNode = (
         <button type="button" onClick={() => setOpen(true)} className="block w-full text-left">
@@ -174,6 +203,15 @@ function buttonClass(onNavy: boolean) {
   );
 }
 
+/** Outlined secondary button — pairs with the solid primary in a card footer. */
+function outlineButtonClass(onNavy: boolean) {
+  return clsx(
+    'inline-flex items-center justify-center gap-2 rounded-md border px-4 py-2',
+    'font-condensed text-sm uppercase tracking-wide transition',
+    onNavy ? 'border-white/40 text-white hover:bg-white/10' : 'border-navy/30 text-navy hover:bg-navy/5',
+  );
+}
+
 /** Compact details popup for a single card. */
 function CardPopup({
   card,
@@ -222,15 +260,44 @@ function CardPopup({
         <div className="p-5">
           <InlineHtml as="h3" html={card.title} className="text-2xl" />
           {card.body && <div className="rich-inline mt-2 text-sm text-ink/70" dangerouslySetInnerHTML={{ __html: card.body }} />}
-          {showVisit && card.href && (
-            <div className="mt-5">
-              <CardLink
-                href={card.href}
-                external={external}
-                className="inline-flex items-center gap-1 font-condensed text-sm uppercase tracking-wide text-magenta hover:underline"
-              >
-                {viewLabel} →
-              </CardLink>
+
+          {(card.contactEmail || card.contactPhone) && (
+            <div className="mt-4 space-y-1.5 border-t border-ink/10 pt-4 text-sm text-ink/70">
+              {card.contactEmail && (
+                <a href={`mailto:${card.contactEmail}`} className="flex items-center gap-2 hover:text-magenta">
+                  <span aria-hidden className="text-ink/40">✉</span>
+                  <span className="truncate">{card.contactEmail}</span>
+                </a>
+              )}
+              {card.contactPhone && (
+                <a href={`tel:${card.contactPhone.replace(/[^+\d]/g, '')}`} className="flex items-center gap-2 hover:text-magenta">
+                  <span aria-hidden className="text-ink/40">☎</span>
+                  <span>{card.contactPhone}</span>
+                </a>
+              )}
+            </div>
+          )}
+
+          {(card.linkHref || (showVisit && card.href)) && (
+            <div className="mt-5 flex flex-wrap items-center gap-4">
+              {card.linkHref && (
+                <CardLink
+                  href={card.linkHref}
+                  external={card.linkHref.startsWith('http')}
+                  className={buttonClass(false)}
+                >
+                  <InlineHtml as="span" html={card.linkLabel || 'Open'} />
+                </CardLink>
+              )}
+              {showVisit && card.href && (
+                <CardLink
+                  href={card.href}
+                  external={external}
+                  className="inline-flex items-center gap-1 font-condensed text-sm uppercase tracking-wide text-magenta hover:underline"
+                >
+                  {viewLabel} →
+                </CardLink>
+              )}
             </div>
           )}
         </div>

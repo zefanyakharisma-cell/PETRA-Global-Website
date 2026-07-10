@@ -148,10 +148,16 @@ function ItemRow({
   const subtitle = [item.meta.institution, item.meta.country].filter(Boolean).join(' · ');
   const badges = isCourse ? [] : [item.meta.credential, item.meta.duration, item.meta.detail].filter(Boolean);
   const pill = clsx('rounded-full px-2 py-0.5 text-xs font-medium', onNavy ? 'bg-white/10 text-white/80' : 'bg-ink/10 text-ink/70');
+  const logo = item.meta.logo;
 
   return (
     <li className={clsx('flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-3 py-2 text-sm', onNavy ? 'bg-white/5' : 'bg-paper')}>
       {areaChipClass && <span className={clsx('rounded-full px-2 py-0.5 text-xs font-medium', areaChipClass)}>{areaLabel(item.area, locale)}</span>}
+      {logo && (
+        <span className={clsx('relative h-9 w-9 shrink-0 overflow-hidden rounded-md', onNavy ? 'bg-white' : 'bg-white ring-1 ring-ink/10')}>
+          <Image src={logo} alt={item.meta.institution ?? ''} fill sizes="36px" className="object-contain p-1" />
+        </span>
+      )}
       {item.code && (
         <span className={clsx('font-condensed uppercase tracking-wide', onNavy ? 'text-cyan' : 'text-magenta')}>{item.code}</span>
       )}

@@ -10,6 +10,8 @@
  *     meta.institution → accrediting body (BAN-PT, LAM Teknik, AUN-QA, …)
  *     meta.credential  → grade (Excellent / A / …) or accord (Washington/Canberra)
  *     meta.detail      → "Valid until DD/MM/YYYY"
+ *     meta.logo        → accreditor logo (uploaded from the asset folder; only
+ *                        bodies with a logo — BAN-PT + the international bodies)
  *     description      → decree number / international recognition note
  *
  * The CSV lists the university's *official* programs; the CMS study_programs
@@ -48,8 +50,39 @@ if (!url || !key) { console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_
 
 const supabase = createClient(url, key, { db: { schema: 'petra_io' } });
 
+const BUCKET = 'petra-io-media';
+const ASSET_DIR = resolve(process.cwd(), 'assets/Accreditation/Accreditation & Achievement');
+
 type L = { en: string; id: string };
 const t = (en: string, id: string): L => ({ en, id });
+
+// Accreditor body → logo file (in ASSET_DIR) → clean storage key. Only bodies
+// that have a logo in the asset folder appear here; the national LAM bodies
+// (LAM Teknik / LAM PTKes / LAMDIK / LAM INFOKOM / LAMEMBA) have none, so their
+// items simply render without a picture.
+const BODY_LOGOS: Record<string, { file: string; key: string }> = {
+  'BAN-PT': { file: 'Ban-Pt_edit.png', key: 'accreditation/bodies/ban-pt.png' },
+  AQAS: { file: 'AQAS-01.png', key: 'accreditation/bodies/aqas.png' },
+  'AUN-QA': { file: 'aun-qa.png', key: 'accreditation/bodies/aun-qa.png' },
+  IABEE: { file: 'IABEE Logo_Acc_Program_ENG.png', key: 'accreditation/bodies/iabee.png' },
+  KAAB: { file: 'KAAB full.png', key: 'accreditation/bodies/kaab.png' },
+};
+
+const publicUrl = (dbKey: string) => supabase.storage.from(BUCKET).getPublicUrl(dbKey).data.publicUrl;
+// body → public logo URL, filled by uploadLogos() before rows are built.
+const LOGO_URL: Record<string, string> = {};
+
+async function uploadLogos() {
+  for (const [body, { file, key }] of Object.entries(BODY_LOGOS)) {
+    const bytes = readFileSync(resolve(ASSET_DIR, file));
+    const { error } = await supabase.storage
+      .from(BUCKET)
+      .upload(key, bytes, { contentType: 'image/png', upsert: true });
+    if (error) throw new Error(`Logo upload failed for ${file}: ${error.message}`);
+    LOGO_URL[body] = publicUrl(key);
+    console.log(`  ↑ ${file}  →  ${key}`);
+  }
+}
 
 // --- 1. Study programs that exist in the accreditation list but not yet in the
 //        CMS. Created under their faculty (by faculty slug) so accreditation has
@@ -195,6 +228,7 @@ function buildRow(a: Accred, studyProgramId: string, position: number) {
   const credential = isNational ? a.result : INTL[a.body]?.accord;
   if (credential) meta.credential = credential;
   if (a.expiry) meta.detail = `Valid until ${a.expiry}`;
+  if (LOGO_URL[a.body]) meta.logo = LOGO_URL[a.body];
 
   let description: L;
   if (isNational) {
@@ -222,6 +256,10 @@ function buildRow(a: Accred, studyProgramId: string, position: number) {
 }
 
 async function main() {
+  // Upload the accreditor body logos (upsert) so meta.logo can point at them.
+  console.log('Uploading accreditor logos…');
+  await uploadLogos();
+
   // Resolve faculties by slug.
   const { data: facs, error: facErr } = await supabase.from('faculties').select('id, slug');
   if (facErr || !facs) throw new Error(`Failed to load faculties: ${facErr?.message}`);

@@ -12,6 +12,11 @@ interface ManualCard {
   body?: LocaleMap;
   image_url?: string;
   href?: string;
+  link_label?: LocaleMap;
+  link_url?: string;
+  link_file?: { url?: string; name?: string; size?: number };
+  contact_email?: string;
+  contact_phone?: string;
 }
 
 interface CardGridContent {
@@ -19,7 +24,16 @@ interface CardGridContent {
   buttonLabel?: LocaleMap;
 }
 
-type ResolvedCard = { title: string; body: string; image_url?: string; href?: string };
+type ResolvedCard = {
+  title: string;
+  body: string;
+  image_url?: string;
+  href?: string;
+  linkLabel?: string;
+  linkHref?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+};
 
 async function resolveCards(
   source: string,
@@ -33,6 +47,13 @@ async function resolveCards(
       body: t(c.body, locale),
       image_url: c.image_url,
       href: c.href,
+      linkLabel:
+        t(c.link_label, locale) ||
+        ((c.link_file?.url || c.link_url) ? (locale === 'id' ? 'Buka' : 'Open') : undefined),
+      // Prefer an uploaded document; fall back to a typed page/external URL.
+      linkHref: c.link_file?.url || c.link_url || undefined,
+      contactEmail: c.contact_email || undefined,
+      contactPhone: c.contact_phone || undefined,
     }));
   }
   const supabase = await createClient();
