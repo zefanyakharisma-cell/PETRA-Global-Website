@@ -550,6 +550,87 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
       ],
     },
   },
+  directions: {
+    type: 'directions', label: 'Directions / navigation', category: 'Content',
+    defaultConfig: { background: 'paper', spacing: 'normal', layout: 'split', travelMode: 'driving', height: 'md', accent: 'blue' },
+    defaultContent: { heading: {}, origin: '', destination: '', originLabel: {}, destLabel: {} },
+    editor: {
+      config: [
+        { key: 'layout', label: 'Layout', type: 'layout', default: 'split', options: [
+          { value: 'split', label: 'Info + map', shape: 'split-left' },
+          { value: 'stacked', label: 'Info above map', shape: 'split-stack' },
+          { value: 'map', label: 'Map only', shape: 'wide' },
+        ] },
+        { key: 'travelMode', label: 'Travel mode', type: 'select', default: 'driving', options: [
+          { value: 'driving', label: 'Driving' },
+          { value: 'walking', label: 'Walking' },
+          { value: 'transit', label: 'Public transit' },
+          { value: 'bicycling', label: 'Bicycling' },
+        ] },
+        { key: 'height', label: 'Map height', type: 'select', default: 'md', options: [
+          { value: 'sm', label: 'Small' },
+          { value: 'md', label: 'Medium' },
+          { value: 'lg', label: 'Large' },
+        ] },
+        ...UNIVERSAL,
+      ],
+      content: [
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
+        { key: 'origin', label: 'From (origin)', type: 'text',
+          help: 'An address or place name, e.g. “Petra Christian University, Surabaya”. Coordinates like “-7.2575, 112.7521” also work.' },
+        { key: 'originLabel', label: 'From — display name (optional)', type: 'text', localized: true,
+          help: 'Shown on the route card. Defaults to the origin text.' },
+        { key: 'destination', label: 'To (destination)', type: 'text',
+          help: 'An address or place name for the destination.' },
+        { key: 'destLabel', label: 'To — display name (optional)', type: 'text', localized: true },
+      ],
+    },
+  },
+  chart: {
+    type: 'chart', label: 'Chart', category: 'Content',
+    defaultConfig: { background: 'paper', spacing: 'normal', chartType: 'bar', source: 'manual', accent: 'blue', showLegend: true, showGrid: true, height: 'md' },
+    defaultContent: {
+      heading: {}, intro: {},
+      data: { headers: ['Category', 'Value'], rows: [['Inbound', 42], ['Outbound', 35], ['Partnership', 28]] },
+    },
+    editor: {
+      config: [
+        { key: 'chartType', label: 'Chart type', type: 'select', default: 'bar', options: [
+          { value: 'bar', label: 'Bar (vertical)' },
+          { value: 'bar-h', label: 'Bar (horizontal)' },
+          { value: 'line', label: 'Line' },
+          { value: 'area', label: 'Area' },
+          { value: 'pie', label: 'Pie' },
+          { value: 'donut', label: 'Donut' },
+          { value: 'stat', label: 'KPI tiles' },
+        ] },
+        { key: 'source', label: 'Data source', type: 'select', default: 'manual', options: [
+          { value: 'manual', label: 'Edit manually' },
+          { value: 'upload', label: 'Upload Excel / CSV' },
+          { value: 'database', label: 'Pull from database' },
+        ] },
+        { key: 'dbQuery', label: 'Database query', type: 'chartsource',
+          showFor: { field: 'source', equals: ['database'] },
+          help: 'Pick a table, what to group by, and how to aggregate. Only curated, safe tables are available.' },
+        { key: 'showLegend', label: 'Show legend', type: 'boolean' },
+        { key: 'showGrid', label: 'Show gridlines', type: 'boolean',
+          showFor: { field: 'chartType', equals: ['bar', 'bar-h', 'line', 'area'] } },
+        { key: 'height', label: 'Height', type: 'select', default: 'md', options: [
+          { value: 'sm', label: 'Small' },
+          { value: 'md', label: 'Medium' },
+          { value: 'lg', label: 'Large' },
+        ] },
+        ...UNIVERSAL,
+      ],
+      content: [
+        { key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true },
+        { key: 'intro', label: 'Intro', type: 'richtext', localized: true },
+        { key: 'data', label: 'Data', type: 'chartdata',
+          showFor: { field: 'source', equals: ['manual', 'upload'] },
+          help: 'Column 1 is the label; the remaining columns are numeric series. Upload an Excel/CSV to fill the grid.' },
+      ],
+    },
+  },
   downloads: {
     type: 'downloads', label: 'Downloads', category: 'Content', defaultConfig: { background: 'paper', spacing: 'normal', layout: 'list', columns: 1, accent: 'magenta' },
     defaultContent: { heading: {}, intro: {}, items: [] },

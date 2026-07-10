@@ -32,13 +32,18 @@ async function internationalLogos(
   }));
 }
 
-/** Domestic partners live in petra_io.domestic_partners, keyed by city. */
+/**
+ * Domestic partners live in petra_io.domestic_partners, keyed by city. Only the
+ * ones with a logo are shown — the marquee is a wall of recognizable brand logos
+ * (seeded by supabase/seed-domestic-partner-logos.ts), not the full text list.
+ */
 async function domesticLogos(
   supabase: Awaited<ReturnType<typeof createClient>>,
 ): Promise<MarqueePartner[]> {
   const { data } = await supabase
     .from('domestic_partners')
     .select('name,city,logo_url,url')
+    .not('logo_url', 'is', null)
     .order('name');
   return (data ?? []).map((r) => ({
     name: r.name,

@@ -20,6 +20,8 @@ import { PullQuoteBlock } from './PullQuoteBlock';
 import { LogoWallBlock } from './LogoWallBlock';
 import { EmbedBlock } from './EmbedBlock';
 import { MapBlock } from './MapBlock';
+import { DirectionsBlock } from './DirectionsBlock';
+import { ChartBlock } from './ChartBlock';
 import { DownloadsBlock } from './DownloadsBlock';
 import { EventsBlock } from './EventsBlock';
 import { PartnerMapBlock } from './PartnerMapBlock';
@@ -56,6 +58,8 @@ const COMPONENTS: Record<BlockMeta['type'], ComponentType<BlockComponentProps>> 
   logo_wall: LogoWallBlock,
   embed: EmbedBlock,
   map: MapBlock,
+  directions: DirectionsBlock,
+  chart: ChartBlock,
   downloads: DownloadsBlock,
   events: EventsBlock,
   partner_map: PartnerMapBlock,

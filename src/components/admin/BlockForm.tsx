@@ -8,6 +8,9 @@ import { FileField, type FileValue } from './fields/FileField';
 import { LinkField } from './fields/LinkField';
 import { LayoutField } from './fields/LayoutField';
 import { RichTextEditor, InlineRichTextEditor } from './fields/RichTextField';
+import { ChartDataField, type ChartData } from './fields/ChartDataField';
+import { ChartSourceField } from './fields/ChartSourceField';
+import type { ChartQuery } from '@/lib/chartSources';
 
 type Dict = Record<string, unknown>;
 
@@ -245,6 +248,10 @@ function FieldEditor({
         </div>
       );
     }
+    case 'chartdata':
+      return <ChartDataField label={field.label} help={'help' in field ? field.help : undefined} value={value as ChartData | undefined} onChange={onChange} />;
+    case 'chartsource':
+      return <ChartSourceField label={field.label} help={'help' in field ? field.help : undefined} value={value as ChartQuery | undefined} onChange={onChange} />;
     case 'list':
       return <ListField field={field} value={value} entities={entities} onChange={onChange} />;
     default:

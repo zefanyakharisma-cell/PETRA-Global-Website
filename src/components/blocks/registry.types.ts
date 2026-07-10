@@ -23,6 +23,8 @@ export const BLOCK_TYPES = [
   'logo_wall',
   'embed',
   'map',
+  'directions',
+  'chart',
   'downloads',
   'events',
   // Entity-bound
@@ -78,6 +80,12 @@ export type EditorField = FieldVisibility & (
   | { key: string; label: string; type: 'layout'; options: { value: string; label: string; shape: string }[]; default?: string; help?: string }
   // Pick many fixed options — value is a string[] of the chosen option values.
   | { key: string; label: string; type: 'multiselect'; options: { value: string; label: string }[]; help?: string }
+  // Editable data grid for the Chart block — manual rows/columns + Excel/CSV
+  // upload. Value is a { headers: string[]; rows: (string|number)[][] } dataset.
+  | { key: string; label: string; type: 'chartdata'; help?: string }
+  // Cascading Table → Group by → Aggregate → Value picker for the Chart block's
+  // database source. Value is a ChartQuery object. Options come from CHART_SOURCES.
+  | { key: string; label: string; type: 'chartsource'; help?: string }
   | { key: string; label: string; type: 'entity'; entity: 'staff' | 'programs'; help?: string }
   // Pick many rows of an entity — value is a string[] of the chosen row ids.
   | { key: string; label: string; type: 'entitymulti'; entity: 'staff' | 'programs' | 'faculties' | 'study_programs'; help?: string }
