@@ -14,7 +14,19 @@ import { useEffect, useRef } from 'react';
  * simply never fires without a pointer. Add a tap-pulse if mobile delight is
  * wanted later.
  */
-export function SpotlightOverlay({ hue = 'magenta' }: { hue?: 'magenta' | 'cyan' }) {
+/** Brand-accent glow colours (low-alpha so the sheen reads as light, not paint). */
+const HUE: Record<string, string> = {
+  magenta: 'rgba(236,0,140,0.14)',
+  cyan: 'rgba(84,254,235,0.16)',
+  blue: 'rgba(56,128,208,0.16)',
+  amber: 'rgba(255,188,0,0.18)',
+  red: 'rgba(237,28,36,0.14)',
+  orange: 'rgba(245,130,32,0.16)',
+  green: 'rgba(108,179,63,0.16)',
+  yellow: 'rgba(255,242,0,0.18)',
+};
+
+export function SpotlightOverlay({ hue = 'magenta' }: { hue?: keyof typeof HUE | (string & {}) }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,8 +52,7 @@ export function SpotlightOverlay({ hue = 'magenta' }: { hue?: 'magenta' | 'cyan'
     };
   }, []);
 
-  // Brand accents only — magenta on light surfaces, cyan on navy.
-  const color = hue === 'cyan' ? 'rgba(84,254,235,0.16)' : 'rgba(236,0,140,0.14)';
+  const color = HUE[hue] ?? HUE.magenta;
 
   return (
     <div

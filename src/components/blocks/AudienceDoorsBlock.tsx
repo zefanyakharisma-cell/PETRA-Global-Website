@@ -1,5 +1,6 @@
 import { Section, Container } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
+import { SpotlightOverlay } from '@/components/ui/SpotlightOverlay';
 import { Link } from '@/i18n/routing';
 import { InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
@@ -82,6 +83,8 @@ export function AudienceDoorsBlock({ block, locale }: BlockComponentProps) {
                     a.ring,
                   )}
                 >
+                  {/* Pointer-tracking glow in the door's own accent. */}
+                  <SpotlightOverlay hue={d.accent} />
                   <span
                     className={clsx('h-1.5 w-12 rounded-full transition-all duration-300 ease-out group-hover:w-20', a.bar)}
                   />
