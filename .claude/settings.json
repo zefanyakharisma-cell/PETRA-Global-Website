@@ -157,7 +157,16 @@
       "Read(//c/Users/KUI/.claude/skills/ccg/impeccable/adapt/**)",
       "PowerShell(npx tsc --noEmit -p tsconfig.json 2>&1 | Select-Object -First 40; \"EXIT: $LASTEXITCODE\")",
       "WebFetch(domain:samkonsulting.com)",
-      "WebFetch(domain:qogentglobal.com)"
+      "WebFetch(domain:qogentglobal.com)",
+      "WebFetch(domain:commons.wikimedia.org)",
+      "Bash(node -e \"require.resolve\\('sharp'\\); console.log\\('sharp OK'\\)\")",
+      "Bash(node -e \"require.resolve\\('@supabase/supabase-js'\\); console.log\\('supabase-js OK'\\)\")",
+      "Read(//c/Users/KUI/.claude/skills/ccg/domains/frontend-design/**)",
+      "Bash(node fetch-surabaya.mjs)",
+      "Bash(node \"C:/Users/KUI/AppData/Local/Temp/claude/e--PETRA-Global-Website/06aff898-c12b-434a-94b3-ef74673db35f/scratchpad/upload-surabaya.mjs\")",
+      "Bash(node tmp-upload-surabaya.mjs)",
+      "Bash(rm -f tmp-upload-surabaya.mjs)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type} %{size_download}\\\\n\" \"https://qxuvcopjyixdbtibxxjm.supabase.co/storage/v1/object/public/petra-io-media/seed/surabaya/skyline.jpg\")"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",

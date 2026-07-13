@@ -37,7 +37,7 @@ const t = (en: string, id: string): L => ({ en, id });
 type Block = { type: string; config: Record<string, unknown>; content: Record<string, unknown> };
 
 const hero = (
-  content: { eyebrow: L; heading: L; subcopy?: L; ctas?: unknown[] },
+  content: { eyebrow: L; heading: L; subcopy?: L; ctas?: unknown[]; image_url?: string },
   cfg: Record<string, unknown> = {},
 ): Block => ({
   type: 'hero',
@@ -57,7 +57,7 @@ const sectionHeader = (
 });
 
 const imageText = (
-  content: { heading: L; body: L; cta?: unknown[] },
+  content: { heading: L; body: L; cta?: unknown[]; image_url?: string },
   cfg: Record<string, unknown> = {},
 ): Block => ({
   type: 'image_text_split',
@@ -202,6 +202,11 @@ const logoWall = (heading: L, cfg: Record<string, unknown> = {}): Block => ({
 
 // Common CTA endpoints
 const APPLY = 'https://admission.petra.ac.id';
+
+// HD Surabaya photos seeded into the public storage bucket (see seed/surabaya/).
+// Sourced from Wikimedia Commons under CC BY / CC BY-SA — credited on the page.
+const SB = (name: string) =>
+  `https://qxuvcopjyixdbtibxxjm.supabase.co/storage/v1/object/public/petra-io-media/seed/surabaya/${name}.jpg`;
 
 // ---------------------------------------------------------------------------
 // The content map: page slug -> ordered blocks. Only empty pages are listed.
@@ -861,6 +866,118 @@ const PAGE_BLOCKS: Record<string, Block[]> = {
     cta({
       heading: t('Need help finding housing?', 'Butuh bantuan mencari tempat tinggal?'),
       ctas: [btn(t('Contact us', 'Hubungi kami'), '/about/contact-us', 'amber')],
+    }, { accent: 'cyan' }),
+  ],
+
+  // Rich, image-led introduction to Surabaya for prospective international
+  // students. Photos live in the public storage bucket (seed/surabaya/*) and are
+  // credited at the foot of the page. Keeps the existing landmark copy and adds
+  // an intro, city stats, image splits, a gallery, and food/culture.
+  'life-at-petra/surabaya': [
+    hero({
+      eyebrow: t('Welcome to your new home', 'Selamat datang di rumah baru Anda'),
+      heading: t('Discover Surabaya', 'Jelajahi Surabaya'),
+      subcopy: t(
+        'Warm, culturally rich, and remarkably affordable — with global academic quality. If you want to skip the hyper-crowded mega-cities, Surabaya is a vibrant, welcoming place to study and live.',
+        'Hangat, kaya budaya, dan sangat terjangkau — dengan kualitas akademik global. Jika Anda ingin menghindari kota mega yang terlalu padat, Surabaya adalah tempat yang penuh semangat dan ramah untuk belajar dan tinggal.',
+      ),
+      ctas: [btn(t('Explore programs', 'Jelajahi program'), '/mobility', 'magenta')],
+      image_url: SB('skyline'),
+    }, { accent: 'cyan', bgType: 'image' }),
+    imageText({
+      heading: t('Indonesia’s City of Heroes', 'Kota Pahlawan Indonesia'),
+      body: t(
+        'Surabaya is Indonesia’s second-largest city and the capital of East Java — a bustling port of more than three million people on the country’s busiest maritime and commercial gateway. It blends deep Javanese hospitality with a fast-moving, cosmopolitan energy: leafy parks and riverside promenades sit beside modern malls, coworking spaces, and one of Southeast Asia’s liveliest food scenes. For international students it offers big-city opportunity without big-city overwhelm.',
+        'Surabaya adalah kota terbesar kedua di Indonesia dan ibu kota Jawa Timur — kota pelabuhan yang ramai dengan lebih dari tiga juta penduduk di gerbang maritim dan komersial tersibuk negeri ini. Kota ini memadukan keramahan Jawa yang mendalam dengan energi kosmopolitan yang dinamis: taman-taman rindang dan pedestrian tepi sungai berdampingan dengan mal modern, ruang kerja bersama, dan salah satu ragam kuliner paling hidup di Asia Tenggara. Bagi mahasiswa internasional, kota ini menawarkan peluang kota besar tanpa hiruk-pikuk yang berlebihan.',
+      ),
+      image_url: SB('taman-bungkul'),
+    }, { imageSide: 'right' }),
+    statStrip([
+      { value: '3M+', label: t('City residents', 'Penduduk kota') },
+      { value: '#2', label: t('Largest city in Indonesia', 'Kota terbesar di Indonesia') },
+      { value: '~30°C', label: t('Warm all year round', 'Hangat sepanjang tahun') },
+      { value: '30 min', label: t('From Juanda Airport', 'Dari Bandara Juanda') },
+    ], { accent: 'cyan' }),
+    featureList({
+      heading: t('Why you’ll fall in love with Surabaya', 'Mengapa Anda akan jatuh cinta pada Surabaya'),
+      items: [
+        { icon: 'heart', title: t('Living cost efficiency', 'Efisiensi biaya hidup'), body: t('Enjoy a high standard of living and modern amenities at a fraction of the cost of other major Asian cities.', 'Nikmati standar hidup tinggi dan fasilitas modern dengan biaya jauh lebih rendah dibanding kota besar lain di Asia.') },
+        { icon: 'building', title: t('Industrial proximity', 'Kedekatan dengan industri'), body: t('As the “Gateway to the ASEAN market,” Surabaya’s status as a major commercial hub means unparalleled access to internships and multinational networks.', 'Sebagai “Gerbang menuju pasar ASEAN,” status Surabaya sebagai pusat komersial utama memberi akses tak tertandingi ke magang dan jejaring multinasional.') },
+        { icon: 'users', title: t('Cultural richness & Javanese hospitality', 'Kekayaan budaya & keramahan Jawa'), body: t('A city offering profound cultural immersion — blending deep traditional warmth with a modern, cosmopolitan environment.', 'Kota yang menawarkan pembauran budaya mendalam — memadukan kehangatan tradisional dengan lingkungan modern yang kosmopolitan.') },
+      ],
+    }, { accent: 'cyan', columns: 3 }),
+    sectionHeader({
+      eyebrow: t('Local attractions & getaways', 'Atraksi & wisata lokal'),
+      heading: t('Inside Surabaya', 'Di dalam Surabaya'),
+      intro: t('Iconic sights and experiences right where you live and study.', 'Pemandangan dan pengalaman ikonik tepat di tempat Anda tinggal dan belajar.'),
+    }, { accent: 'cyan', background: 'accent-tint' }),
+    imageText({
+      heading: t('The Suramadu Bridge', 'Jembatan Suramadu'),
+      body: t(
+        'Gliding 5.4 kilometres across the Madura Strait, Suramadu is the longest bridge in Indonesia — a soaring, cable-stayed landmark that links Surabaya to the island of Madura. It’s a favourite spot for evening photos, and the gateway to Madura’s beaches and famous sate.',
+        'Membentang 5,4 kilometer di atas Selat Madura, Suramadu adalah jembatan terpanjang di Indonesia — landmark kabel penahan yang menjulang dan menghubungkan Surabaya dengan Pulau Madura. Tempat favorit untuk foto malam hari, sekaligus gerbang menuju pantai-pantai Madura dan sate yang terkenal.',
+      ),
+      image_url: SB('suramadu'),
+    }, { imageSide: 'left' }),
+    featureList({
+      items: [
+        { icon: 'pin', title: t('Tugu Pahlawan', 'Tugu Pahlawan'), body: t('A historic 41-metre heroes’ monument at the heart of the city.', 'Monumen pahlawan bersejarah setinggi 41 meter di jantung kota.') },
+        { icon: 'building', title: t('Surabaya Old Town', 'Kota Tua Surabaya'), body: t('Classic Dutch colonial streets and the House of Sampoerna museum.', 'Jalan-jalan kolonial Belanda klasik dan museum House of Sampoerna.') },
+        { icon: 'heart', title: t('Al-Akbar National Mosque', 'Masjid Nasional Al-Akbar'), body: t('Surabaya’s grand mosque, famous for its iconic blue-green dome.', 'Masjid agung Surabaya, terkenal dengan kubah biru-hijaunya yang ikonik.') },
+        { icon: 'star', title: t('Monkasel', 'Monkasel'), body: t('A real historical navy submarine you can walk through.', 'Kapal selam angkatan laut bersejarah yang bisa Anda masuki.') },
+        { icon: 'globe', title: t('Kalimas Boat Tour', 'Wisata Perahu Kalimas'), body: t('A relaxing evening lantern cruise along the city river.', 'Pelayaran berlampion yang menenangkan di sepanjang sungai kota pada malam hari.') },
+        { icon: 'compass', title: t('Taman Bungkul', 'Taman Bungkul'), body: t('An award-winning central park for jogging, street food, and weekends.', 'Taman kota peraih penghargaan untuk lari pagi, jajanan, dan akhir pekan.') },
+      ],
+    }, { accent: 'cyan', columns: 3 }),
+    {
+      type: 'gallery',
+      config: { background: 'paper', spacing: 'normal', columns: 3, layout: 'masonry', accent: 'cyan' },
+      content: {
+        images: [
+          { url: SB('tugu-pahlawan'), alt: 'Tugu Pahlawan, the Heroes Monument' },
+          { url: SB('al-akbar-mosque'), alt: 'The blue-green dome of Al-Akbar National Mosque' },
+          { url: SB('house-of-sampoerna'), alt: 'House of Sampoerna, a Dutch colonial landmark' },
+          { url: SB('skyline'), alt: 'The modern Surabaya city skyline' },
+          { url: SB('taman-bungkul'), alt: 'Taman Bungkul, the city’s award-winning central park' },
+          { url: SB('suramadu'), alt: 'The Suramadu Bridge to Madura Island' },
+        ],
+      },
+    },
+    imageText({
+      heading: t('Weekend escapes', 'Liburan akhir pekan'),
+      body: t(
+        'Some of Indonesia’s most spectacular landscapes are a short trip from campus. Watch the sunrise break over the caldera of Mount Bromo, chase waterfalls at Madakaripura, spot wildlife in the savannah of Baluran National Park — the “Africa of Java” — or unwind on Madura’s quiet beaches. Adventure is never far away.',
+        'Beberapa lanskap paling menakjubkan di Indonesia hanya berjarak perjalanan singkat dari kampus. Saksikan matahari terbit di atas kaldera Gunung Bromo, kejar air terjun di Madakaripura, amati satwa di sabana Taman Nasional Baluran — “Afrika-nya Jawa” — atau bersantai di pantai-pantai tenang Madura. Petualangan selalu dekat.',
+      ),
+      image_url: SB('bromo'),
+    }, { imageSide: 'right' }),
+    featureList({
+      heading: t('Weekend breaks', 'Liburan akhir pekan'),
+      intro: t('Adventure is a short trip away from campus.', 'Petualangan hanya sejauh perjalanan singkat dari kampus.'),
+      items: [
+        { icon: 'compass', title: t('Mount Bromo', 'Gunung Bromo'), body: t('Breathtaking sunrises over a sea of clouds.', 'Matahari terbit menakjubkan di atas lautan awan.') },
+        { icon: 'pin', title: t('Madura Island', 'Pulau Madura'), body: t('Lombang Beach and authentic sate.', 'Pantai Lombang dan sate autentik.') },
+        { icon: 'globe', title: t('Baluran National Park', 'Taman Nasional Baluran'), body: t('The beautiful “Africa van Java”.', '“Africa van Java” yang indah.') },
+        { icon: 'star', title: t('Madakaripura Waterfall', 'Air Terjun Madakaripura'), body: t('Majestic cliff-canyon falls.', 'Air terjun ngarai tebing yang megah.') },
+        { icon: 'award', title: t('Mount Penanggungan', 'Gunung Penanggungan'), body: t('A ruin-lined peak ideal for beginner hikers.', 'Puncak berhias reruntuhan yang ideal untuk pendaki pemula.') },
+      ],
+    }, { accent: 'cyan', columns: 3 }),
+    imageText({
+      heading: t('A city that loves to eat', 'Kota yang gemar makan'),
+      body: t(
+        'Surabaya is a food-lover’s city. Try rawon, the dark, rich beef soup that’s the pride of East Java, or bold local classics like rujak cingur and rice with sate. Street stalls, night markets, and warungs near campus mean a delicious, filling meal rarely costs more than a few dollars.',
+        'Surabaya adalah kota surga kuliner. Cicipi rawon, sup daging berkuah hitam pekat yang menjadi kebanggaan Jawa Timur, atau hidangan lokal yang berani seperti rujak cingur dan nasi dengan sate. Warung kaki lima, pasar malam, dan warung di dekat kampus membuat santapan lezat dan mengenyangkan jarang berharga lebih dari beberapa dolar.',
+      ),
+      image_url: SB('rawon'),
+    }, { imageSide: 'left' }),
+    richText(t(
+      '<p><small>Photography: Surabaya skyline © Rifky2011 (CC BY 4.0); Tugu Pahlawan © Ardfeb (CC BY-SA 4.0); Suramadu Bridge © Yeremia Evian (CC BY-SA 3.0); Al-Akbar National Mosque © Indonesiagood (CC BY 4.0); House of Sampoerna & Taman Bungkul © consigliere ivan (CC BY-SA 2.0 / CC BY 2.0); Mount Bromo © Thomas Fuhrmann (CC BY-SA 4.0); Rawon © Bahnfrend (CC BY-SA 4.0). Sourced from Wikimedia Commons.</small></p>',
+      '<p><small>Fotografi: Panorama Surabaya © Rifky2011 (CC BY 4.0); Tugu Pahlawan © Ardfeb (CC BY-SA 4.0); Jembatan Suramadu © Yeremia Evian (CC BY-SA 3.0); Masjid Nasional Al-Akbar © Indonesiagood (CC BY 4.0); House of Sampoerna & Taman Bungkul © consigliere ivan (CC BY-SA 2.0 / CC BY 2.0); Gunung Bromo © Thomas Fuhrmann (CC BY-SA 4.0); Rawon © Bahnfrend (CC BY-SA 4.0). Bersumber dari Wikimedia Commons.</small></p>',
+    )),
+    cta({
+      eyebrow: t('Ready to make Surabaya home?', 'Siap menjadikan Surabaya rumah?'),
+      heading: t('Plan your life in Surabaya', 'Rencanakan kehidupan Anda di Surabaya'),
+      ctas: [btn(t('How to get to Petra', 'Cara menuju Petra'), '/life-at-petra/get-to-petra', 'amber')],
     }, { accent: 'cyan' }),
   ],
 

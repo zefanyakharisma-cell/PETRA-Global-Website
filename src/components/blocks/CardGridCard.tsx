@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { InlineHtml, stripHtml } from '@/components/ui/RichText';
 import { cardSurface } from '@/components/ui/Section';
+import { SpotlightOverlay } from '@/components/ui/SpotlightOverlay';
 import { clsx } from '@/lib/clsx';
 
 export interface CardGridCardData {
@@ -115,6 +116,8 @@ export function CardGridCard({
         cardSurface(cardStyle, onNavy),
       )}
     >
+      {/* Pointer-tracking brand glow — the card family's signature moment. */}
+      <SpotlightOverlay hue={onNavy ? 'cyan' : 'magenta'} />
       {/* Brand accent wipes in along the bottom edge on hover. */}
       <div
         className={clsx(

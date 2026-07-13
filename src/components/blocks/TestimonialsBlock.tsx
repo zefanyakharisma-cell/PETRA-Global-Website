@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
+import { SpotlightOverlay } from '@/components/ui/SpotlightOverlay';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { createClient } from '@/lib/supabase/server';
 import { clsx } from '@/lib/clsx';
@@ -55,6 +56,7 @@ export async function TestimonialsBlock({ block, locale }: BlockComponentProps) 
             {items.map((item, i) => (
               <Reveal key={i} delay={i * 0.05}>
                 <figure className={figureClass}>
+                  <SpotlightOverlay hue={onNavy ? 'cyan' : 'magenta'} />
                   <span
                     aria-hidden
                     className={clsx(
