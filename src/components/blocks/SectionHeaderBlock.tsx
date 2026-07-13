@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { RichText, InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
@@ -38,7 +38,7 @@ export function SectionHeaderBlock({ block, locale }: BlockComponentProps) {
   // `layout` supersedes the older `alignment` key; fall back for existing blocks.
   const layout = (block.config.layout as string) ?? (block.config.alignment as string) ?? 'left';
   const accent = (block.config.accent as string) ?? 'magenta';
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
   const boxed = layout === 'boxed';
 
   return (

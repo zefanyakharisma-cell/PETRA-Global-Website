@@ -145,7 +145,17 @@
       "Bash(node search2.mjs)",
       "Bash(node verify.mjs)",
       "Bash(node tmp-cleanup.mjs)",
-      "Bash(rm -f tmp-cleanup.mjs)"
+      "Bash(rm -f tmp-cleanup.mjs)",
+      "Read(//c/Users/KUI/**)",
+      "Bash(npx --yes ccg-workflow)",
+      "Bash(npx --yes ccg-workflow --help)",
+      "Bash(npx --yes ccg-workflow init --help)",
+      "Bash(npx --yes ccg-workflow init --skip-prompt --lang en)",
+      "Read(//c/Users/KUI/.claude/bin/**)",
+      "Read(//c/Users/KUI/.claude/.ccg/prompts/gemini/**)",
+      "Bash(grep -iE \"#[0-9a-f]{3,6}|navy-2|--\")",
+      "Read(//c/Users/KUI/.claude/skills/ccg/impeccable/adapt/**)",
+      "PowerShell(npx tsc --noEmit -p tsconfig.json 2>&1 | Select-Object -First 40; \"EXIT: $LASTEXITCODE\")"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",

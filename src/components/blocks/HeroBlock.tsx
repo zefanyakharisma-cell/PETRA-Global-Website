@@ -10,12 +10,15 @@ import type { BlockComponentProps } from './registry.types';
 import { HeroCarousel, type HeroSlide } from './HeroCarousel';
 import { HeroAurora } from './HeroAurora';
 import ScrollExpandHero from './ScrollExpandHero';
+import { KineticHero } from './KineticHero';
 import { normalizeImageUrl } from '@/lib/media';
 
 interface HeroContent {
   eyebrow?: LocaleMap;
   heading?: LocaleMap;
   subcopy?: LocaleMap;
+  // Looping keyword strip for the kinetic layout (e.g. "Innovation · Research").
+  marqueeText?: LocaleMap;
   image_url?: string;
   // Hand-picked carousel pictures (bgSource = 'custom').
   carouselImages?: { image?: string; title?: LocaleMap; href?: string }[];
@@ -72,6 +75,7 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as HeroContent;
   const layout = (block.config.layout as string) ?? 'centered';
   const split = layout === 'split-with-image';
+  const kinetic = layout === 'kinetic';
 
   // Immersive scroll-to-expand hero. Renders its own full-height, full-bleed
   // layout (a client component managing the scroll interaction), so we resolve
@@ -110,27 +114,55 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
   const showAuroraBg = !split && bgType === 'aurora';
   const hasBg = showImageBg || showCarouselBg || showAuroraBg;
 
+  // z-0 (not negative): the section sets `relative` without a z-index, so a
+  // negative-z child would slip behind the opaque section background and
+  // vanish. Keep it at 0 and lift the copy to z-10 instead.
+  const bgLayer = hasBg ? (
+    <div className="absolute inset-0 z-0">
+      {showImageBg && (
+        <>
+          <Image src={c.image_url!} alt="" fill priority sizes="100vw" className="object-cover" />
+          {/* Directional gradient: readable copy up top, image breathes below. */}
+          <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/75 to-navy/45" />
+        </>
+      )}
+      {showCarouselBg && <HeroCarousel slides={slides} />}
+      {showAuroraBg && <HeroAurora />}
+    </div>
+  ) : null;
+
+  // Kinetic statement layout: oversized headline + looping keyword marquee.
+  // Reuses the navy Section + optional backdrop; the motion lives in the client
+  // child. Placed after bg computation so image/carousel/aurora work here too.
+  if (kinetic) {
+    return (
+      <Section
+        config={{ ...block.config, background: block.config.background ?? 'navy' }}
+        className="relative overflow-hidden"
+      >
+        {bgLayer}
+        <KineticHero
+          eyebrow={t(c.eyebrow, locale)}
+          heading={t(c.heading, locale)}
+          subcopy={t(c.subcopy, locale)}
+          marquee={t(c.marqueeText, locale)}
+          ctas={(c.ctas ?? []).map((cta) => ({
+            label: t(cta.label, locale),
+            href: cta.href,
+            variant: cta.variant,
+            newTab: cta.newTab,
+          }))}
+        />
+      </Section>
+    );
+  }
+
   return (
     <Section
       config={{ ...block.config, background: block.config.background ?? 'navy' }}
       className="relative overflow-hidden"
     >
-      {hasBg && (
-        // z-0 (not negative): the section sets `relative` without a z-index, so a
-        // negative-z child would slip behind the opaque section background and
-        // vanish. Keep it at 0 and lift the copy to z-10 instead.
-        <div className="absolute inset-0 z-0">
-          {showImageBg && (
-            <>
-              <Image src={c.image_url!} alt="" fill priority sizes="100vw" className="object-cover" />
-              {/* Directional gradient: readable copy up top, image breathes below. */}
-              <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/75 to-navy/45" />
-            </>
-          )}
-          {showCarouselBg && <HeroCarousel slides={slides} />}
-          {showAuroraBg && <HeroAurora />}
-        </div>
-      )}
+      {bgLayer}
       <Container className="relative z-10">
         <div
           className={clsx(
@@ -147,7 +179,7 @@ export async function HeroBlock({ block, locale }: BlockComponentProps) {
               </Reveal>
             )}
             <Reveal delay={0.08}>
-              <InlineHtml as="h1" html={t(c.heading, locale)} fallback="Headline" className="mt-3 text-5xl leading-[0.95] md:text-7xl" />
+              <InlineHtml as="h1" html={t(c.heading, locale)} fallback="Headline" className="mt-3 text-4xl leading-[0.95] [overflow-wrap:anywhere] sm:text-5xl md:text-7xl" />
             </Reveal>
             {t(c.subcopy, locale) && (
               <Reveal delay={0.16}>

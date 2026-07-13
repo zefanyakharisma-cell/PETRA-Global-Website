@@ -52,7 +52,11 @@ export default async function LocaleLayout({
         {t('skipToContent')}
       </a>
       <Navbar locale={locale} />
-      <main id="main">{children}</main>
+      {/* overflow-x-clip is a safety net: it prevents any single wide block from
+          causing full-page horizontal scroll on mobile, without creating a
+          scroll container (so sticky headers and self-scrolling carousels still
+          work). Blocks should still fit on their own; this just contains slips. */}
+      <main id="main" className="overflow-x-clip">{children}</main>
       <Footer />
     </NextIntlClientProvider>
   );

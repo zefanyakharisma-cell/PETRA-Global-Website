@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { Cta } from '@/components/ui/Cta';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -16,7 +16,7 @@ import type { BlockComponentProps } from './registry.types';
 export async function StaffBlock({ block, locale, pageOwnerStaffId }: BlockComponentProps) {
   const mode = (block.config.mode as string) ?? 'single';
   const supabase = await createClient();
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
 
   if (mode === 'directory') {
     const { data } = await supabase

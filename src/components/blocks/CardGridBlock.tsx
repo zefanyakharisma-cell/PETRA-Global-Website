@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg, cardSurface } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { createClient } from '@/lib/supabase/server';
@@ -109,7 +109,8 @@ export async function CardGridBlock({ block, locale }: BlockComponentProps) {
   const layout = (block.config.layout as string) ?? 'grid';
   const content = block.content as CardGridContent;
   const cards = await resolveCards(source, content, locale, columns * 3);
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
+  const cardStyle = block.config.cardStyle as string | undefined;
 
   // Card behaviour — any combination may be enabled. linkToPage defaults on so
   // existing card grids keep their whole-card link behaviour.
@@ -142,7 +143,7 @@ export async function CardGridBlock({ block, locale }: BlockComponentProps) {
           <div className="mx-auto flex max-w-3xl flex-col gap-4">
             {cards.map((card, i) => (
               <Reveal key={i} delay={i * 0.05}>
-                <CardGridCard card={card} onNavy={onNavy} options={options} buttonLabel={buttonLabel} viewLabel={viewLabel} variant="horizontal" />
+                <CardGridCard card={card} onNavy={onNavy} options={options} buttonLabel={buttonLabel} viewLabel={viewLabel} cardStyle={cardStyle} variant="horizontal" />
               </Reveal>
             ))}
           </div>
@@ -150,7 +151,7 @@ export async function CardGridBlock({ block, locale }: BlockComponentProps) {
           <div className="flex flex-col gap-6">
             {/* First card spans full width as a horizontal hero card. */}
             <Reveal>
-              <CardGridCard card={cards[0]} onNavy={onNavy} options={options} buttonLabel={buttonLabel} viewLabel={viewLabel} variant="horizontal" />
+              <CardGridCard card={cards[0]} onNavy={onNavy} options={options} buttonLabel={buttonLabel} viewLabel={viewLabel} cardStyle={cardStyle} variant="horizontal" />
             </Reveal>
             <div
               className={clsx(
@@ -162,7 +163,7 @@ export async function CardGridBlock({ block, locale }: BlockComponentProps) {
             >
               {cards.slice(1).map((card, i) => (
                 <Reveal key={i} delay={i * 0.05}>
-                  <CardGridCard card={card} onNavy={onNavy} options={options} buttonLabel={buttonLabel} viewLabel={viewLabel} />
+                  <CardGridCard card={card} onNavy={onNavy} options={options} buttonLabel={buttonLabel} viewLabel={viewLabel} cardStyle={cardStyle} />
                 </Reveal>
               ))}
             </div>
@@ -183,7 +184,7 @@ export async function CardGridBlock({ block, locale }: BlockComponentProps) {
                   onNavy={onNavy}
                   options={options}
                   buttonLabel={buttonLabel}
-                  viewLabel={viewLabel}
+                  viewLabel={viewLabel} cardStyle={cardStyle}
                 />
               </Reveal>
             ))}

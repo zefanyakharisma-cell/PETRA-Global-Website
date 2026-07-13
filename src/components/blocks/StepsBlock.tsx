@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { RichText, InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
@@ -23,7 +23,7 @@ export function StepsBlock({ block, locale }: BlockComponentProps) {
   const orientation = (block.config.orientation as string) ?? 'vertical';
   const horizontal = orientation === 'horizontal';
   const isCards = orientation === 'cards';
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
 
   return (
     <Section config={block.config}>

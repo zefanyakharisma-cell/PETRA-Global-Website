@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
@@ -38,7 +38,7 @@ export function DirectionsBlock({ block, locale }: BlockComponentProps) {
 
   const origin = (c.origin ?? '').trim();
   const destination = (c.destination ?? '').trim();
-  const onDark = (cfg.background ?? 'paper') === 'navy';
+  const onDark = isDarkBg(cfg.background);
   const layout = (cfg.layout as string) ?? 'split';
   const height = HEIGHTS[(cfg.height as string) ?? 'md'] ?? HEIGHTS.md;
   const mode = MODES[(cfg.travelMode as string) ?? 'driving'] ?? MODES.driving;

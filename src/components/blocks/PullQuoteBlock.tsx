@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { InlineHtml, stripHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
@@ -15,7 +15,7 @@ interface PullQuoteContent {
 /** Editorial pull quote — the only block set in Baskerville (font-editorial). */
 export function PullQuoteBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as PullQuoteContent;
-  const onNavy = (block.config.background ?? 'navy') === 'navy';
+  const onNavy = isDarkBg(block.config.background ?? 'navy');
   // centered (default) · side (portrait beside, left-aligned) · card (boxed).
   const layout = (block.config.layout as string) ?? 'centered';
   const side = layout === 'side';

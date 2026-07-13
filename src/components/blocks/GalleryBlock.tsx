@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { clsx } from '@/lib/clsx';
 import { resolveEmbed, youtubeId } from '@/lib/media';
 import type { BlockComponentProps } from './registry.types';
@@ -40,7 +40,7 @@ export function GalleryBlock({ block }: BlockComponentProps) {
   const items = (c.images ?? []).filter((it) => it.url || it.video);
   const columns = Number(block.config.columns ?? 3);
   const layout = (block.config.layout as string) ?? 'grid';
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
   const [active, setActive] = useState<number | null>(null);
 
   const Tile = ({ i, className }: { i: number; className?: string }) => {

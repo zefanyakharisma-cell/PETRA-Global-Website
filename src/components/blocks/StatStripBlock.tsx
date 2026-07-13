@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { CountUp } from './CountUp';
 import { InlineHtml } from '@/components/ui/RichText';
@@ -22,7 +22,7 @@ interface StatStripContent {
 export async function StatStripBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as StatStripContent;
   const stats = c.stats ?? [];
-  const onNavy = (block.config.background ?? 'navy') === 'navy';
+  const onNavy = isDarkBg(block.config.background ?? 'navy');
 
   // Resolve any auto-count stats with a single pass of cheap head counts.
   const needsCounts = stats.some((s) => s.auto && s.auto !== 'none');
@@ -73,7 +73,7 @@ export async function StatStripBlock({ block, locale }: BlockComponentProps) {
                   isStacked && i > 0 && 'pt-8',
                 )}
               >
-                <dd className={clsx('text-5xl md:text-6xl tabular-nums', onNavy ? 'text-cyan' : 'text-magenta')}>
+                <dd className={clsx('text-4xl sm:text-5xl md:text-6xl tabular-nums', onNavy ? 'text-cyan' : 'text-magenta')}>
                   <CountUp value={resolve(s)} />
                 </dd>
                 <InlineHtml as="dt" html={t(s.label, locale)} className={clsx('mt-2 font-condensed uppercase tracking-wide', onNavy ? 'text-white/75' : 'text-ink/60')} />

@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { RichText, InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
@@ -43,7 +43,7 @@ export function TimelineBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as TimelineContent;
   const items = c.items ?? [];
   const accent = (block.config.accent as string) ?? 'magenta';
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
   // vertical (default) · alternating (left/right of a centre line) · horizontal.
   const layout = (block.config.layout as string) ?? 'vertical';
   const dotRing = onNavy ? 'ring-navy' : 'ring-paper';

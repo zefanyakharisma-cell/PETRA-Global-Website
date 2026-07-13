@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { InlineHtml, stripHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap } from '@/lib/types';
@@ -28,7 +28,7 @@ export function EmbedBlock({ block, locale }: BlockComponentProps) {
   // contained (default) · wide (extra-wide container) · framed (matted border).
   const layout = (block.config.layout as string) ?? 'contained';
   const framed = layout === 'framed';
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
   const captionColor = onNavy ? 'text-white/60' : 'text-ink/55';
 
   const player = embed ? (

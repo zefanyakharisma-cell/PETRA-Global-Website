@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { clsx } from '@/lib/clsx';
 import type { BlockComponentProps } from './registry.types';
 
@@ -17,7 +17,7 @@ const ACCENT_TEXT: Record<string, string> = {
 export function DividerBlock({ block }: BlockComponentProps) {
   const style = (block.config.style as string) ?? 'line';
   const accent = (block.config.accent as string) ?? 'magenta';
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
 
   return (
     <Section config={block.config}>

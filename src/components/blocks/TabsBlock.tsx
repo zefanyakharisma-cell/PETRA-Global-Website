@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { RichText, InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap } from '@/lib/types';
@@ -33,7 +33,7 @@ export function TabsBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as TabsContent;
   const tabs = c.tabs ?? [];
   const accent = (block.config.accent as string) ?? 'magenta';
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
   const [active, setActive] = useState(0);
 
   if (tabs.length === 0) {

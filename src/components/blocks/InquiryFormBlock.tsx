@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { InquiryForm } from './inquiry/InquiryForm';
 import { RichText, InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
@@ -23,7 +23,7 @@ export function InquiryFormBlock({ block, locale, pageOwnerStaffId }: BlockCompo
   const admissionsUrl = process.env.NEXT_PUBLIC_ADMISSIONS_URL;
   // centered (default) · split (intro beside form) · card (boxed panel).
   const layout = (block.config.layout as string) ?? 'centered';
-  const onNavy = (block.config.background ?? 'navy') === 'navy';
+  const onNavy = isDarkBg(block.config.background ?? 'navy');
 
   const header = (align: 'center' | 'left') => (
     <div className={clsx('mb-6', align === 'center' && 'text-center')}>

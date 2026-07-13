@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { RichText, InlineHtml } from '@/components/ui/RichText';
@@ -38,7 +38,7 @@ export async function FacultiesBlock({ block, locale }: BlockComponentProps) {
   // Optional per-block filters — empty means "show all".
   const pickFaculties = asStringArray(block.config.facultyIds);
   const pickPrograms = asStringArray(block.config.programIds);
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
   const supabase = await createClient();
 
   let facultyQuery = supabase

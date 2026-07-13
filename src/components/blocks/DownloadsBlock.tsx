@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg, cardSurface } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { RichText, InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
@@ -51,7 +51,8 @@ export function DownloadsBlock({ block, locale }: BlockComponentProps) {
   const items = (c.items ?? []).filter((it) => it.file?.url);
   const columns = Math.min(Math.max(Number(block.config.columns) || 1, 1), 2);
   const accent = (block.config.accent as string) ?? 'magenta';
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
+  const cardStyle = block.config.cardStyle as string | undefined;
   // list = rows (default) · cards = tiles grid · compact = dense divided panel.
   const layout = (block.config.layout as string) ?? 'list';
   const isCards = layout === 'cards';
@@ -83,8 +84,8 @@ export function DownloadsBlock({ block, locale }: BlockComponentProps) {
                   rel="noopener noreferrer"
                   download={it.file!.name || true}
                   className={clsx(
-                    'group flex h-full flex-col gap-3 rounded-2xl border p-6 transition duration-300 ease-out hover:-translate-y-1 hover:shadow-lift',
-                    onNavy ? 'border-white/15 bg-white/5 hover:bg-white/10' : 'border-ink/10 bg-white hover:border-ink/20',
+                    'group flex h-full flex-col gap-3 rounded-[var(--card-r,1rem)] p-6 transition duration-300 ease-out hover:-translate-y-1',
+                    cardSurface(cardStyle, onNavy),
                   )}
                 >
                   <span className={clsx('inline-flex h-12 w-12 items-center justify-center rounded-lg text-[11px] font-bold tracking-wide text-white transition-transform duration-300 ease-out group-hover:scale-105', ACCENT_BG[accent] ?? 'bg-magenta')}>
@@ -114,7 +115,7 @@ export function DownloadsBlock({ block, locale }: BlockComponentProps) {
         <div
           className={clsx(
             isCompact
-              ? clsx('divide-y overflow-hidden rounded-xl border', onNavy ? 'divide-white/10 border-white/15' : 'divide-ink/10 border-ink/10 bg-white')
+              ? clsx('divide-y overflow-hidden rounded-[var(--card-r,0.75rem)] border', onNavy ? 'divide-white/10 border-white/15' : 'divide-ink/10 border-ink/10 bg-white')
               : clsx('grid gap-3', columns === 2 && 'md:grid-cols-2'),
           )}
         >
@@ -129,7 +130,7 @@ export function DownloadsBlock({ block, locale }: BlockComponentProps) {
                   'group flex items-center gap-4 transition duration-300 ease-out',
                   isCompact
                     ? clsx('px-4 py-3', onNavy ? 'hover:bg-white/5' : 'hover:bg-paper/60')
-                    : clsx('rounded-xl border p-4 hover:-translate-y-0.5 hover:shadow-lift', onNavy ? 'border-white/15 bg-white/5 hover:bg-white/10' : 'border-ink/10 bg-white hover:border-ink/20'),
+                    : clsx('rounded-[var(--card-r,1rem)] p-4 hover:-translate-y-0.5', cardSurface(cardStyle, onNavy)),
                 )}
               >
                 <span className={clsx('inline-flex shrink-0 items-center justify-center rounded-lg font-bold tracking-wide text-white transition-transform duration-300 ease-out group-hover:scale-105', isCompact ? 'h-9 w-9 text-[10px]' : 'h-12 w-12 text-[11px]', ACCENT_BG[accent] ?? 'bg-magenta')}>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { InlineHtml, stripHtml } from '@/components/ui/RichText';
+import { cardSurface } from '@/components/ui/Section';
 import { clsx } from '@/lib/clsx';
 
 export interface CardGridCardData {
@@ -45,6 +46,7 @@ export function CardGridCard({
   buttonLabel,
   viewLabel,
   variant = 'vertical',
+  cardStyle,
 }: {
   card: CardGridCardData;
   onNavy: boolean;
@@ -53,6 +55,8 @@ export function CardGridCard({
   viewLabel: string;
   /** vertical = image on top (grid) · horizontal = image beside copy (list / featured). */
   variant?: 'vertical' | 'horizontal';
+  /** Card surface skin from the block's cardStyle option. */
+  cardStyle?: string;
 }) {
   const [open, setOpen] = useState(false);
   const horizontal = variant === 'horizontal';
@@ -106,9 +110,9 @@ export function CardGridCard({
   const shell = (
     <div
       className={clsx(
-        'group relative flex h-full overflow-hidden rounded-2xl border transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift',
+        'group relative flex h-full overflow-hidden rounded-[var(--card-r,1rem)] transition duration-300 ease-out hover:-translate-y-1.5',
         horizontal ? 'flex-col sm:flex-row' : 'flex-col',
-        onNavy ? 'border-white/15 bg-white/5 hover:border-white/30' : 'border-ink/10 bg-white hover:border-ink/20',
+        cardSurface(cardStyle, onNavy),
       )}
     >
       {/* Brand accent wipes in along the bottom edge on hover. */}

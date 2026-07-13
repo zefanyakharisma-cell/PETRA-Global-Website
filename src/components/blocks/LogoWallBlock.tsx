@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
@@ -43,7 +43,7 @@ export function LogoWallBlock({ block, locale }: BlockComponentProps) {
   const logos = c.logos ?? [];
   const grayscale = (block.config.style as string) !== 'color';
   const columns = Number(block.config.columns ?? 4);
-  const onNavy = (block.config.background ?? 'paper') === 'navy';
+  const onNavy = isDarkBg(block.config.background);
   const tileClass = clsx(
     'group flex items-center justify-center rounded-xl p-4 transition duration-300 ease-out hover:-translate-y-1',
     onNavy ? 'hover:bg-white/10' : 'hover:bg-white hover:shadow-sm',

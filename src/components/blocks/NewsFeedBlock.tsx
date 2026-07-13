@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { Link } from '@/i18n/routing';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -34,7 +34,7 @@ export async function NewsFeedBlock({ block, locale }: BlockComponentProps) {
 
   const { data } = await query;
   const items = data ?? [];
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
   // grid (default 3-up) · list (horizontal rows) · featured (first large).
   const layout = (block.config.layout as string) ?? 'grid';
 
@@ -46,7 +46,7 @@ export async function NewsFeedBlock({ block, locale }: BlockComponentProps) {
       <Link href={`/news/${n.slug}`} className={clsx('group', horizontal ? 'flex gap-5' : 'block')}>
         <div
           className={clsx(
-            'media-zoom relative overflow-hidden rounded-xl bg-ink/5 ring-1 ring-ink/5 transition-shadow duration-300 group-hover:shadow-lift',
+            'media-zoom relative overflow-hidden rounded-[var(--card-r,0.75rem)] bg-ink/5 ring-1 ring-ink/5 transition-shadow duration-300 group-hover:shadow-lift',
             horizontal ? 'aspect-[16/10] w-40 shrink-0 sm:w-56' : hero ? 'aspect-[16/8]' : 'aspect-[16/10]',
           )}
         >

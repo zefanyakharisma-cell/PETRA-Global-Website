@@ -6,11 +6,15 @@ import { PROGRAM_AREAS } from '@/lib/programAreas';
 // in the live preview or stepped in the panel header — not via a form field.
 // See blockSize.ts and the SizeStepper in Editor.tsx.
 
-// Universal options every block carries (background + spacing + accent).
+// Universal options every block carries (background + spacing + accent + edge).
 const UNIVERSAL: EditorField[] = [
   { key: 'background', label: 'Background', type: 'select', options: [
     { value: 'paper', label: 'Paper (light)' },
+    { value: 'paper-warm', label: 'Paper warm' },
     { value: 'navy', label: 'Navy' },
+    { value: 'navy-gradient', label: 'Navy gradient' },
+    { value: 'mesh', label: 'Mesh glow (light)' },
+    { value: 'dots', label: 'Dot grid (light)' },
     { value: 'accent-tint', label: 'Accent tint' },
   ] },
   { key: 'spacing', label: 'Spacing', type: 'select', options: [
@@ -28,7 +32,28 @@ const UNIVERSAL: EditorField[] = [
     { value: 'green', label: 'Green (SBM)' },
     { value: 'yellow', label: 'Yellow (PGSD)' },
   ] },
+  { key: 'edge', label: 'Section edge', type: 'select', options: [
+    { value: 'none', label: 'Flat (default)' },
+    { value: 'angle', label: 'Angled' },
+    { value: 'curve', label: 'Curved' },
+    { value: 'fade', label: 'Fade' },
+  ] },
 ];
+
+// Card-surface controls, spread into the card-based blocks. `cardStyle` skins the
+// tile; `radius` sets the shared --card-r corner (applied by <Section>).
+const CARD_STYLE_FIELD: EditorField = { key: 'cardStyle', label: 'Card style', type: 'select', options: [
+  { value: 'elevated', label: 'Elevated (default)' },
+  { value: 'flat', label: 'Flat' },
+  { value: 'outlined', label: 'Outlined' },
+  { value: 'glass', label: 'Glass' },
+] };
+const RADIUS_FIELD: EditorField = { key: 'radius', label: 'Corner radius', type: 'select', options: [
+  { value: 'sharp', label: 'Sharp' },
+  { value: 'soft', label: 'Soft (default)' },
+  { value: 'round', label: 'Round' },
+] };
+const SURFACE: EditorField[] = [CARD_STYLE_FIELD, RADIUS_FIELD];
 
 // Reusable button definition — label + smart link + style + new-tab toggle.
 const BUTTON_FIELDS: EditorField[] = [
@@ -61,18 +86,19 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           { value: 'left', label: 'Left', shape: 'hero-left' },
           { value: 'split-with-image', label: 'Split w/ image', shape: 'hero-split' },
           { value: 'scroll-expand', label: 'Immersive', shape: 'hero-immersive' },
+          { value: 'kinetic', label: 'Kinetic', shape: 'hero-kinetic' },
         ] },
         // Standard-hero background options — hidden for the scroll-expand layout,
         // which brings its own media + backdrop fields below.
         { key: 'bgType', label: 'Background (centered/left)', type: 'select',
-          showFor: { field: 'layout', equals: ['centered', 'left', 'split-with-image'] }, options: [
+          showFor: { field: 'layout', equals: ['centered', 'left', 'split-with-image', 'kinetic'] }, options: [
           { value: 'none', label: 'Solid colour' },
           { value: 'aurora', label: 'Aurora (animated glow)' },
           { value: 'image', label: 'Uploaded image' },
           { value: 'carousel', label: 'Carousel (auto-rotating)' },
         ] },
         { key: 'bgSource', label: 'Carousel source', type: 'select',
-          showFor: { field: 'layout', equals: ['centered', 'left', 'split-with-image'] }, options: [
+          showFor: { field: 'layout', equals: ['centered', 'left', 'split-with-image', 'kinetic'] }, options: [
           { value: 'programs', label: 'Programs (featured first)' },
           { value: 'news', label: 'News & announcements' },
           { value: 'custom', label: 'Uploaded pictures (hand-picked)' },
@@ -94,7 +120,11 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         { key: 'subcopy', label: 'Subcopy', type: 'richtext', localized: true },
         // Standard-hero content (hidden for scroll-expand).
         { key: 'image_url', label: 'Background / split image', type: 'image',
-          showFor: { field: 'layout', equals: ['centered', 'left', 'split-with-image'] } },
+          showFor: { field: 'layout', equals: ['centered', 'left', 'split-with-image', 'kinetic'] } },
+        // Kinetic-only: looping keyword strip beneath the headline.
+        { key: 'marqueeText', label: 'Keyword strip (kinetic)', type: 'text', localized: true,
+          showFor: { field: 'layout', equals: ['kinetic'] },
+          help: 'Looping words beneath the headline. Separate with · , or |  — e.g. “Innovation · Research · Global Impact”.' },
         // Hand-picked carousel pictures — shown only when the carousel source is
         // "Uploaded pictures". Each image uploads to storage or is chosen from the
         // media library (of everything already uploaded to Supabase).
@@ -106,7 +136,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
             { key: 'href', label: 'Link (optional)', type: 'link' },
           ] },
         { key: 'ctas', label: 'Buttons (max 2)', type: 'list', itemFields: BUTTON_FIELDS,
-          showFor: { field: 'layout', equals: ['centered', 'left', 'split-with-image'] } },
+          showFor: { field: 'layout', equals: ['centered', 'left', 'split-with-image', 'kinetic'] } },
         // Scroll-to-expand content (shown only for that layout).
         { key: 'scrollVideoUrl', label: 'YouTube video URL', type: 'url',
           showFor: { field: 'layout', equals: ['scroll-expand'] },
@@ -271,6 +301,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
         { key: 'linkToPage', label: 'Card links to its page', type: 'boolean' },
         { key: 'enablePopup', label: 'Card opens a popup (compact details)', type: 'boolean' },
         { key: 'showButton', label: 'Show a clickable button on the card', type: 'boolean' },
+        ...SURFACE,
         ...UNIVERSAL,
       ],
       content: [
@@ -301,6 +332,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           { value: 'inline', label: 'Inline rows', shape: 'rows-thumb' },
         ] },
         { key: 'columns', label: 'Columns', type: 'number', help: 'Used by the grid & cards layouts.' },
+        ...SURFACE,
         ...UNIVERSAL,
       ],
       content: [
@@ -642,6 +674,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           { value: 'compact', label: 'Compact', shape: 'rows' },
         ] },
         { key: 'columns', label: 'Columns', type: 'number', help: 'Used by the list & cards layouts.' },
+        ...SURFACE,
         ...UNIVERSAL,
       ],
       content: [
@@ -666,6 +699,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           { value: 'compact', label: 'Compact', shape: 'rows-thumb' },
         ] },
         { key: 'hidePast', label: 'Hide past events', type: 'boolean' },
+        ...SURFACE,
         ...UNIVERSAL,
       ],
       content: [
@@ -755,6 +789,7 @@ export const BLOCK_META: Record<BlockMeta['type'], BlockMeta> = {
           { value: 'outbound', label: '#outbound' },
           { value: 'partnership', label: '#partnership' },
         ] },
+        RADIUS_FIELD,
         ...UNIVERSAL,
       ],
       content: [{ key: 'heading', label: 'Heading', type: 'richtext-inline', localized: true }],

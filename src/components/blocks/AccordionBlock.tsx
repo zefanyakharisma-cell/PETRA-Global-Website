@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { RichText, InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap } from '@/lib/types';
@@ -23,7 +23,7 @@ export function AccordionBlock({ block, locale }: BlockComponentProps) {
   const multi = (block.config.openMode as string) !== 'single';
   const items = c.items ?? [];
   const [open, setOpen] = useState<Set<number>>(new Set());
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
   // bordered = single panel (default) · plain = dividers only · cards = each
   // Q&A in its own separated card.
   const layout = (block.config.layout as string) ?? 'bordered';

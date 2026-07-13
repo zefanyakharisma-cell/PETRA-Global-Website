@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg, cardSurface } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { Link } from '@/i18n/routing';
 import { RichText, InlineHtml } from '@/components/ui/RichText';
@@ -56,7 +56,8 @@ export function EventsBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as EventsContent;
   const accent = (block.config.accent as string) ?? 'magenta';
   const hidePast = !!block.config.hidePast;
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
+  const cardStyle = block.config.cardStyle as string | undefined;
   // list = divided rows (default) · cards = tiles grid · compact = dense rows.
   const layout = (block.config.layout as string) ?? 'list';
   const isCards = layout === 'cards';
@@ -117,7 +118,7 @@ export function EventsBlock({ block, locale }: BlockComponentProps) {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {rows.map((it, i) => (
               <Reveal key={i} delay={Math.min(i, 6) * 0.04}>
-                <div className={clsx('flex h-full flex-col gap-2 rounded-2xl border p-5', isPast(it) && 'opacity-55', onNavy ? 'border-white/15 bg-white/5' : 'border-ink/10 bg-white shadow-sm')}>
+                <div className={clsx('flex h-full flex-col gap-2 rounded-[var(--card-r,1rem)] p-5', isPast(it) && 'opacity-55', cardSurface(cardStyle, onNavy))}>
                   {dateBadge(it)}
                   <div>{titleLink(it)}</div>
                   {t(it.location, locale) && (

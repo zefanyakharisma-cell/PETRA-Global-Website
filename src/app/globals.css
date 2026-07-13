@@ -3,6 +3,24 @@
 @tailwind utilities;
 
 /* ----------------------------------------------------------------------------
+   Decorative section surfaces (used by <Section background="mesh|dots">).
+   Kept as plain utility classes so they need no extra DOM — the pattern is the
+   element's own background-image, painting behind content with no z-index work.
+---------------------------------------------------------------------------- */
+.bg-mesh {
+  background-color: #f4f1ec;
+  background-image:
+    radial-gradient(42rem 42rem at 12% -12%, rgba(236, 0, 140, 0.10), transparent 60%),
+    radial-gradient(38rem 38rem at 100% 0%, rgba(56, 128, 208, 0.12), transparent 58%),
+    radial-gradient(30rem 30rem at 62% 118%, rgba(84, 254, 235, 0.10), transparent 60%);
+}
+.bg-dots {
+  background-color: #f0f0f0;
+  background-image: radial-gradient(rgba(19, 50, 86, 0.10) 1px, transparent 1.6px);
+  background-size: 22px 22px;
+}
+
+/* ----------------------------------------------------------------------------
    Self-hosted brand fonts. Files live in /public/fonts (see README there).
    `font-display: swap` keeps text visible during load; system fallbacks keep
    the site legible before the licensed binaries are committed.

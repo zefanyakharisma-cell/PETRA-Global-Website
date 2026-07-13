@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { Cta } from '@/components/ui/Cta';
 import { RichText, InlineHtml, stripHtml } from '@/components/ui/RichText';
@@ -22,7 +22,7 @@ export function ImageTextSplitBlock({ block, locale }: BlockComponentProps) {
   const layout = (block.config.imageSide as string) ?? 'left';
   const imageRight = layout === 'right';
   const stacked = layout === 'stacked';
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
   const cta = Array.isArray(c.cta) ? c.cta[0] : c.cta;
 
   const media = (

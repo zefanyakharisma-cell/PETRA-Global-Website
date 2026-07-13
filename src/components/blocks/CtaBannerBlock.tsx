@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { Cta } from '@/components/ui/Cta';
 import { RichText, InlineHtml } from '@/components/ui/RichText';
@@ -30,7 +30,7 @@ export function CtaBannerBlock({ block, locale }: BlockComponentProps) {
   // center (default) · split (text left, buttons right) · stacked (buttons below).
   const align = (block.config.alignment as string) ?? 'center';
   const accent = (block.config.accent as string) ?? 'cyan';
-  const onNavy = (block.config.background ?? 'navy') === 'navy';
+  const onNavy = isDarkBg(block.config.background ?? 'navy');
   const center = align === 'center';
   const stacked = align === 'stacked';
 

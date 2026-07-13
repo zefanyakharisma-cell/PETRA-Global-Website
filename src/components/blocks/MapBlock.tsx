@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { InlineHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
@@ -71,7 +71,7 @@ export function MapBlock({ block, locale }: BlockComponentProps) {
       ]
     : [112.7521, -7.2575]; // Petra / Surabaya
 
-  const onDark = (cfg.background ?? 'paper') === 'navy';
+  const onDark = isDarkBg(cfg.background);
 
   return (
     <Section config={cfg}>

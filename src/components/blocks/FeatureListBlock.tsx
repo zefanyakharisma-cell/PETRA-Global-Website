@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg, cardSurface } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { RichText, InlineHtml, stripHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
@@ -64,7 +64,8 @@ export function FeatureListBlock({ block, locale }: BlockComponentProps) {
   const items = c.items ?? [];
   const columns = Math.min(Math.max(Number(block.config.columns) || 3, 1), 4);
   const accent = (block.config.accent as string) ?? 'magenta';
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
+  const cardStyle = block.config.cardStyle as string | undefined;
   // grid = icon over text (default) · cards = bordered tiles · inline = icon
   // beside text in rows.
   const layout = (block.config.layout as string) ?? 'grid';
@@ -143,8 +144,8 @@ export function FeatureListBlock({ block, locale }: BlockComponentProps) {
             // equal height regardless of body length.
             const cardClass = isCards
               ? clsx(
-                  'h-full rounded-2xl border p-6 transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift',
-                  onNavy ? 'border-white/15 bg-white/5 hover:border-white/30' : 'border-ink/10 bg-white shadow-sm hover:border-ink/20',
+                  'h-full rounded-[var(--card-r,1rem)] p-6 transition duration-300 ease-out hover:-translate-y-1.5',
+                  cardSurface(cardStyle, onNavy),
                 )
               : 'transition duration-300 ease-out hover:-translate-y-1';
             return (

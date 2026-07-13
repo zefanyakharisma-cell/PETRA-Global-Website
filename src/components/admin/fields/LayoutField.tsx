@@ -67,6 +67,8 @@ const SHAPES: Record<string, Rect[]> = {
   'hero-left': [[8, 10, 30, 6, 'strong'], [8, 20, 36, 4], [8, 29, 12, 5, 'dark']],
   'hero-split': [[7, 11, 22, 4, 'strong'], [7, 18, 22, 4], [7, 26, 12, 4, 'dark'], [33, 8, 20, 24, 'strong']],
   'hero-immersive': [[4, 5, 52, 30, 'dark'], [18, 16, 24, 4, 'soft'], [22, 24, 16, 3, 'soft']],
+  // Oversized two-line headline + CTA, with a full-width looping keyword strip.
+  'hero-kinetic': [[8, 7, 40, 7, 'strong'], [8, 16, 30, 7, 'strong'], [8, 27, 12, 4, 'dark'], [4, 34, 52, 3, 'soft']],
 
   // Tabs
   'tabs-top': [[8, 8, 10, 4, 'strong'], [20, 8, 10, 4], [32, 8, 10, 4], [8, 15, 44, 18, 'soft']],

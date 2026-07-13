@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { InlineHtml, RichText } from '@/components/ui/RichText';
 import { createClient } from '@/lib/supabase/server';
@@ -37,7 +37,7 @@ export async function ChartBlock({ block, locale }: BlockComponentProps) {
 
   const source = (cfg.source as string) ?? 'manual';
   const type = ((cfg.chartType as string) ?? 'bar') as ChartType;
-  const onDark = (cfg.background ?? 'paper') === 'navy';
+  const onDark = isDarkBg(cfg.background);
 
   let data: ChartData;
   if (source === 'database') {

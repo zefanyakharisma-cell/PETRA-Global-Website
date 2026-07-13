@@ -1,4 +1,4 @@
-import { Section, Container } from '@/components/ui/Section';
+import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { RichText } from '@/components/ui/RichText';
 import { t, type LocaleMap } from '@/lib/types';
 import type { BlockComponentProps } from './registry.types';
@@ -16,7 +16,7 @@ export function RichTextBlock({ block, locale }: BlockComponentProps) {
   const width = (block.config.width as string) ?? 'narrow';
   const narrow = width === 'narrow';
   const twoColumn = width === 'two-column';
-  const onNavy = block.config.background === 'navy';
+  const onNavy = isDarkBg(block.config.background);
   const html = t(c.html, locale);
 
   return (
