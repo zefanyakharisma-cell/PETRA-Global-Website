@@ -1,5 +1,6 @@
 import { Section, Container, isDarkBg } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
+import { SpotlightOverlay } from '@/components/ui/SpotlightOverlay';
 import { CountUp } from './CountUp';
 import { InlineHtml } from '@/components/ui/RichText';
 import { createClient } from '@/lib/supabase/server';
@@ -69,10 +70,11 @@ export async function StatStripBlock({ block, locale }: BlockComponentProps) {
             <Reveal key={i} delay={i * 0.06}>
               <div
                 className={clsx(
-                  isCards && clsx('rounded-2xl p-6', onNavy ? 'bg-white/5 ring-1 ring-white/10' : 'bg-white shadow-sm ring-1 ring-ink/5'),
+                  isCards && clsx('relative overflow-hidden rounded-2xl p-6', onNavy ? 'bg-white/5 ring-1 ring-white/10' : 'bg-white shadow-sm ring-1 ring-ink/5'),
                   isStacked && i > 0 && 'pt-8',
                 )}
               >
+                {isCards && <SpotlightOverlay hue={onNavy ? 'cyan' : 'magenta'} />}
                 <dd className={clsx('text-4xl sm:text-5xl md:text-6xl tabular-nums', onNavy ? 'text-cyan' : 'text-magenta')}>
                   <CountUp value={resolve(s)} />
                 </dd>

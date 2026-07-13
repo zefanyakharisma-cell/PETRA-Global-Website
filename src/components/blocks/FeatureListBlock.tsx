@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { Section, Container, isDarkBg, cardSurface } from '@/components/ui/Section';
 import { Reveal } from '@/components/ui/Reveal';
+import { SpotlightOverlay } from '@/components/ui/SpotlightOverlay';
 import { RichText, InlineHtml, stripHtml } from '@/components/ui/RichText';
 import { clsx } from '@/lib/clsx';
 import { t, type LocaleMap } from '@/lib/types';
@@ -144,7 +145,7 @@ export function FeatureListBlock({ block, locale }: BlockComponentProps) {
             // equal height regardless of body length.
             const cardClass = isCards
               ? clsx(
-                  'h-full rounded-[var(--card-r,1rem)] p-6 transition duration-300 ease-out hover:-translate-y-1.5',
+                  'relative overflow-hidden h-full rounded-[var(--card-r,1rem)] p-6 transition duration-300 ease-out hover:-translate-y-1.5',
                   cardSurface(cardStyle, onNavy),
                 )
               : 'transition duration-300 ease-out hover:-translate-y-1';
@@ -152,10 +153,14 @@ export function FeatureListBlock({ block, locale }: BlockComponentProps) {
               <Reveal key={i} delay={i * 0.05} className={clsx(isCards && 'h-full')}>
                 {f.href ? (
                   <Link href={f.href} className={clsx('group block', cardClass)}>
+                    {isCards && <SpotlightOverlay hue={accent} />}
                     {inner}
                   </Link>
                 ) : (
-                  <div className={clsx('group', isCards ? cardClass : 'h-full')}>{inner}</div>
+                  <div className={clsx('group', isCards ? cardClass : 'h-full')}>
+                    {isCards && <SpotlightOverlay hue={accent} />}
+                    {inner}
+                  </div>
                 )}
               </Reveal>
             );
