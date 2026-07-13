@@ -28,7 +28,14 @@ export function LogoWallBlock({ block, locale }: BlockComponentProps) {
   const c = block.content as LogoWallContent;
 
   if (block.config.layout === 'marquee') {
-    const partners = c.partners ?? [];
+    // Enriched partner tiles (seeded on /partnership) take priority; otherwise
+    // scroll the plain logos the editor collects so a CMS-authored scrolling
+    // wall still renders.
+    const partners: MarqueePartner[] = c.partners?.length
+      ? c.partners
+      : (c.logos ?? [])
+          .filter((l) => l.url)
+          .map((l) => ({ name: l.name ?? '', logoUrl: l.url, url: l.href ?? null }));
     if (partners.length === 0) return null;
     return (
       <PartnerMarquee
