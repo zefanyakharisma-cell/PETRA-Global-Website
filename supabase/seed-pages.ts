@@ -864,50 +864,95 @@ const PAGE_BLOCKS: Record<string, Block[]> = {
     }, { accent: 'cyan' }),
   ],
 
+  // Comprehensive 2026 student-visa guidance. Facts verified against the
+  // Directorate General of Immigration's eVisa system (E30 education series /
+  // Student KITAS, evisa.imigrasi.go.id, All Indonesia Arrival Declaration).
+  // Codes/fees change — the page routes students to the IO + official portal.
   'life-at-petra/immigration': [
     hero({
       eyebrow: t('Life at PETRA', 'Kehidupan di PETRA'),
-      heading: t('Immigration', 'Imigrasi'),
+      heading: t('Immigration & Student Visa', 'Imigrasi & Visa Pelajar'),
       subcopy: t(
-        'A clear overview of the visas and permits you’ll need to study legally in Indonesia — and how we help.',
-        'Gambaran jelas tentang visa dan izin yang Anda perlukan untuk belajar secara legal di Indonesia — dan bagaimana kami membantu.',
+        'Everything international students need to study legally in Indonesia in 2026 — the right visa, the documents, the steps, and how Petra’s International Office guides you through every one of them.',
+        'Semua yang diperlukan mahasiswa internasional untuk belajar secara legal di Indonesia pada 2026 — visa yang tepat, dokumen, langkah-langkah, dan bagaimana International Office Petra memandu Anda di setiap tahap.',
+      ),
+      ctas: [btn(t('Contact the International Office', 'Hubungi International Office'), '/about/contact-us', 'cyan')],
+    }, { accent: 'cyan' }),
+    sectionHeader({
+      eyebrow: t('Overview', 'Ikhtisar'),
+      heading: t('Your 2026 student visa, step by step', 'Visa pelajar 2026 Anda, langkah demi langkah'),
+      intro: t(
+        'Indonesia has moved visa applications fully online. Most international students at Petra study on a Student KITAS — a limited-stay permit sponsored by the university. Below is the visa you need, what to prepare, and the exact order of steps.',
+        'Indonesia telah memindahkan permohonan visa sepenuhnya secara daring. Sebagian besar mahasiswa internasional di Petra belajar dengan Student KITAS — izin tinggal terbatas yang disponsori universitas. Berikut visa yang Anda perlukan, apa yang harus disiapkan, dan urutan langkahnya.',
       ),
     }, { accent: 'cyan' }),
     imageText({
-      heading: t('Visas & permits', 'Visa & izin'),
+      heading: t('What visa do you need?', 'Visa apa yang Anda perlukan?'),
       body: t(
-        'International students generally need a student visa and a stay permit. Requirements depend on your program length and nationality — the International Office guides you through each step and document.',
-        'Mahasiswa internasional umumnya memerlukan visa pelajar dan izin tinggal. Persyaratan tergantung durasi program dan kewarganegaraan Anda — International Office memandu Anda di setiap langkah dan dokumen.',
+        'For a full degree or study lasting more than about six months, you need a Student KITAS, issued under Indonesia’s E30 education visa series (the successor to the former Index 316 / C316). You first receive a VITAS (limited-stay visa) applied for online, which is converted into a KITAS residence permit after you arrive. Petra Christian University acts as your official immigration sponsor throughout. For a single short exchange or a program under six months, a short-stay visit visa may be sufficient — the International Office confirms the correct type for your program length and nationality before you apply.',
+        'Untuk gelar penuh atau studi lebih dari sekitar enam bulan, Anda memerlukan Student KITAS yang diterbitkan dalam seri visa pendidikan E30 Indonesia (penerus Indeks 316 / C316 sebelumnya). Anda terlebih dahulu menerima VITAS (visa tinggal terbatas) yang diajukan secara daring, lalu dikonversi menjadi izin tinggal KITAS setelah Anda tiba. Universitas Kristen Petra menjadi sponsor imigrasi resmi Anda selama proses ini. Untuk satu pertukaran singkat atau program di bawah enam bulan, visa kunjungan tinggal singkat mungkin sudah cukup — International Office memastikan jenis yang tepat sesuai durasi program dan kewarganegaraan Anda sebelum Anda mengajukan.',
       ),
     }),
+    statStrip([
+      { value: 'E30', label: t('Student visa series', 'Seri visa pelajar') },
+      { value: 'Up to 2 yrs', label: t('Validity, extendable', 'Masa berlaku, dapat diperpanjang') },
+      { value: '2–4 wks', label: t('Typical approval time', 'Perkiraan waktu persetujuan') },
+      { value: '3–4 mo', label: t('Apply before you start', 'Ajukan sebelum mulai') },
+    ], { accent: 'cyan' }),
+    featureList({
+      heading: t('What you’ll need', 'Yang perlu Anda siapkan'),
+      intro: t('Prepare clear scans of each item before starting your online application.', 'Siapkan pindaian yang jelas untuk setiap dokumen sebelum memulai permohonan daring Anda.'),
+      items: [
+        { icon: 'globe', title: t('Valid passport', 'Paspor yang berlaku'), body: t('Valid for at least 18 months beyond your arrival, with blank pages.', 'Berlaku minimal 18 bulan setelah kedatangan, dengan halaman kosong.') },
+        { icon: 'graduation', title: t('Letter of Acceptance', 'Surat Penerimaan'), body: t('Your official LoA from Petra — the basis of the whole application.', 'LoA resmi dari Petra — dasar dari seluruh permohonan.') },
+        { icon: 'award', title: t('Proof of funds', 'Bukti dana'), body: t('Bank statement showing roughly IDR 12,000,000 per month of study.', 'Rekening koran yang menunjukkan sekitar IDR 12.000.000 per bulan studi.') },
+        { icon: 'heart', title: t('Health insurance', 'Asuransi kesehatan'), body: t('Valid coverage for your stay in Indonesia is required.', 'Diperlukan pertanggungan yang berlaku selama Anda tinggal di Indonesia.') },
+      ],
+    }, { columns: 4, accent: 'cyan' }),
     steps({
       heading: t('The immigration process', 'Proses imigrasi'),
       steps: [
-        { title: t('Receive your Letter of Acceptance', 'Terima Surat Penerimaan'), body: t('Your LoA is the basis for your visa application.', 'LoA Anda menjadi dasar permohonan visa.') },
-        { title: t('Prepare documents', 'Siapkan dokumen'), body: t('Gather your passport, photos, and required forms.', 'Kumpulkan paspor, foto, dan formulir yang diperlukan.') },
-        { title: t('Apply for your visa', 'Ajukan visa'), body: t('The IO assists with sponsorship and the application.', 'IO membantu proses sponsor dan pengajuan.') },
-        { title: t('Register on arrival', 'Registrasi saat tiba'), body: t('Complete your stay permit and reporting in Surabaya.', 'Selesaikan izin tinggal dan pelaporan di Surabaya.') },
+        { title: t('Receive your Letter of Acceptance', 'Terima Surat Penerimaan'), body: t('Once admitted, Petra issues your LoA. This is the document your visa is built on. Start immigration steps 3–4 months before your program begins.', 'Setelah diterima, Petra menerbitkan LoA Anda. Dokumen ini menjadi dasar visa Anda. Mulai proses imigrasi 3–4 bulan sebelum program dimulai.') },
+        { title: t('Prepare your documents', 'Siapkan dokumen Anda'), body: t('Scan your passport, photo, proof of funds, and health insurance. The International Office reviews everything and prepares Petra’s sponsorship as your guarantor.', 'Pindai paspor, foto, bukti dana, dan asuransi kesehatan. International Office memeriksa semuanya dan menyiapkan sponsor Petra sebagai penjamin Anda.') },
+        { title: t('Apply online & pay', 'Ajukan daring & bayar'), body: t('Your Student KITAS (VITAS) is applied for at the official portal evisa.imigrasi.go.id and the fee is paid online by card. Petra guides you through the form.', 'Student KITAS (VITAS) Anda diajukan di portal resmi evisa.imigrasi.go.id dan biayanya dibayar daring dengan kartu. Petra memandu Anda mengisi formulir.') },
+        { title: t('Wait for approval', 'Tunggu persetujuan'), body: t('Immigration approval usually takes 2–4 weeks. You receive an e-Visa approval you can print — no embassy visit is needed in most cases.', 'Persetujuan imigrasi biasanya memakan waktu 2–4 minggu. Anda menerima persetujuan e-Visa yang dapat dicetak — tanpa perlu ke kedutaan dalam banyak kasus.') },
+        { title: t('Complete arrival declaration & travel', 'Isi deklarasi kedatangan & berangkat'), body: t('Within 3 days before you fly, complete Indonesia’s mandatory online Arrival Declaration to get your QR code, then travel to Surabaya.', 'Dalam 3 hari sebelum terbang, lengkapi Arrival Declaration daring wajib Indonesia untuk mendapatkan kode QR, lalu berangkat ke Surabaya.') },
+        { title: t('Report & collect your KITAS', 'Lapor & ambil KITAS Anda'), body: t('Report to the Surabaya immigration office within 7 days of arrival for biometrics. Your visa is converted into your KITAS residence card, and Petra helps with local reporting.', 'Lapor ke kantor imigrasi Surabaya dalam 7 hari setelah tiba untuk biometrik. Visa Anda dikonversi menjadi kartu KITAS, dan Petra membantu pelaporan setempat.') },
       ],
     }, { accent: 'cyan' }),
+    richText(t(
+      '<p><strong>Important:</strong> Indonesian visa categories, fees, and financial thresholds are set by the Directorate General of Immigration and can change. Always confirm the current requirements for your case with Petra’s International Office and the official portal <a href="https://evisa.imigrasi.go.id">evisa.imigrasi.go.id</a> before you apply or pay any fee. The International Office is your single point of contact for accurate, up-to-date guidance.</p>',
+      '<p><strong>Penting:</strong> Kategori visa, biaya, dan ambang finansial Indonesia ditetapkan oleh Direktorat Jenderal Imigrasi dan dapat berubah. Selalu konfirmasikan persyaratan terkini untuk kasus Anda dengan International Office Petra dan portal resmi <a href="https://evisa.imigrasi.go.id">evisa.imigrasi.go.id</a> sebelum mengajukan atau membayar biaya apa pun. International Office adalah titik kontak utama Anda untuk panduan yang akurat dan terbaru.</p>',
+    ), { background: 'accent-tint' }),
     accordion({
       heading: t('Frequently asked questions', 'Pertanyaan yang sering diajukan'),
       items: [
-        { q: t('What visa do I need?', 'Visa apa yang saya perlukan?'), a: t('It depends on your program and duration. The IO advises the correct visa type for your case.', 'Tergantung program dan durasi Anda. IO menyarankan jenis visa yang tepat untuk kasus Anda.') },
-        { q: t('Does Petra sponsor my visa?', 'Apakah Petra menjadi sponsor visa saya?'), a: t('Yes — for accepted students, the International Office supports the sponsorship process.', 'Ya — bagi mahasiswa yang diterima, International Office mendukung proses sponsor.') },
-        { q: t('How early should I start?', 'Seberapa awal saya harus memulai?'), a: t('Begin as soon as you receive your LoA — immigration steps take time.', 'Mulailah segera setelah menerima LoA — proses imigrasi membutuhkan waktu.') },
+        { q: t('What visa do I actually need?', 'Visa apa yang sebenarnya saya perlukan?'), a: t('For a degree or study longer than about six months, a Student KITAS in the E30 education series. For a single short exchange or program under six months, a short-stay visit visa may be enough. The International Office confirms the exact type for your program and nationality.', 'Untuk gelar atau studi lebih dari sekitar enam bulan, Student KITAS dalam seri pendidikan E30. Untuk satu pertukaran singkat atau program di bawah enam bulan, visa kunjungan tinggal singkat mungkin cukup. International Office memastikan jenis yang tepat untuk program dan kewarganegaraan Anda.') },
+        { q: t('Does Petra sponsor my visa?', 'Apakah Petra menjadi sponsor visa saya?'), a: t('Yes. For accepted students, Petra Christian University acts as your official immigration sponsor (guarantor) and the International Office supports the whole application and reporting process.', 'Ya. Bagi mahasiswa yang diterima, Universitas Kristen Petra menjadi sponsor imigrasi resmi (penjamin) Anda dan International Office mendukung seluruh proses permohonan dan pelaporan.') },
+        { q: t('How early should I start?', 'Seberapa awal saya harus memulai?'), a: t('Begin as soon as you have your Letter of Acceptance — ideally 3–4 months before your program starts. Approval alone typically takes 2–4 weeks, and documents take time to prepare.', 'Mulailah segera setelah Anda memiliki Surat Penerimaan — idealnya 3–4 bulan sebelum program dimulai. Persetujuan saja biasanya memakan waktu 2–4 minggu, dan penyiapan dokumen butuh waktu.') },
+        { q: t('How much does it cost?', 'Berapa biayanya?'), a: t('Government visa fees vary by duration and are paid online during the e-Visa application (commonly around USD 150 for a one-year student visa). Confirm the current fee with the International Office, as rates change.', 'Biaya visa pemerintah bervariasi menurut durasi dan dibayar daring saat permohonan e-Visa (umumnya sekitar USD 150 untuk visa pelajar satu tahun). Konfirmasikan biaya terkini dengan International Office karena tarif dapat berubah.') },
+        { q: t('How much money do I need to show?', 'Berapa dana yang harus saya tunjukkan?'), a: t('You are generally asked to show proof of funds of roughly IDR 12,000,000 per month of study, via a recent bank statement. This demonstrates you can support yourself during your stay.', 'Anda umumnya diminta menunjukkan bukti dana sekitar IDR 12.000.000 per bulan studi, melalui rekening koran terbaru. Ini menunjukkan Anda dapat membiayai diri selama tinggal.') },
+        { q: t('Do I need health insurance?', 'Apakah saya memerlukan asuransi kesehatan?'), a: t('Yes. Valid health insurance covering your time in Indonesia is required. Keep your policy details with you; the International Office can point you to trusted options.', 'Ya. Asuransi kesehatan yang berlaku dan mencakup masa tinggal Anda di Indonesia diperlukan. Simpan detail polis Anda; International Office dapat menunjukkan pilihan tepercaya.') },
+        { q: t('What is the Arrival Declaration?', 'Apa itu Arrival Declaration?'), a: t('Since late 2025, all travellers — including visa and KITAS holders — must complete Indonesia’s online All Indonesia Arrival Declaration within 3 days before arrival. It generates a QR code you show at the airport.', 'Sejak akhir 2025, semua pelancong — termasuk pemegang visa dan KITAS — wajib mengisi All Indonesia Arrival Declaration daring dalam 3 hari sebelum kedatangan. Ini menghasilkan kode QR yang Anda tunjukkan di bandara.') },
+        { q: t('Can I extend my KITAS?', 'Apakah KITAS saya dapat diperpanjang?'), a: t('Yes. A Student KITAS is typically valid up to one or two years and can be extended for the length of your studies, with the International Office assisting each renewal.', 'Ya. Student KITAS biasanya berlaku hingga satu atau dua tahun dan dapat diperpanjang selama masa studi Anda, dengan International Office membantu setiap perpanjangan.') },
+        { q: t('What if I need to leave and re-enter Indonesia?', 'Bagaimana jika saya perlu keluar dan masuk kembali ke Indonesia?'), a: t('A multiple re-entry permit is normally included with your KITAS so you can travel home during breaks and return. Always confirm your permit is valid with the International Office before you travel.', 'Izin masuk kembali (multiple re-entry) biasanya sudah termasuk dalam KITAS Anda sehingga Anda dapat pulang saat libur dan kembali. Selalu pastikan izin Anda berlaku dengan International Office sebelum bepergian.') },
+        { q: t('Can I work on a Student KITAS?', 'Bisakah saya bekerja dengan Student KITAS?'), a: t('A Student KITAS is for study, not employment. Internships that are part of your program may be allowed — check with the International Office before taking on any paid work.', 'Student KITAS ditujukan untuk studi, bukan bekerja. Magang yang menjadi bagian program Anda mungkin diperbolehkan — konsultasikan dengan International Office sebelum mengambil pekerjaan berbayar apa pun.') },
       ],
     }),
     downloads({
-      heading: t('Immigration documents', 'Dokumen imigrasi'),
-      intro: t('Upload the relevant forms and checklists here in the editor.', 'Unggah formulir dan daftar periksa terkait di editor.'),
+      heading: t('Immigration documents & checklists', 'Dokumen & daftar periksa imigrasi'),
+      intro: t('Download the forms you’ll need, or upload the latest versions here in the editor.', 'Unduh formulir yang Anda perlukan, atau unggah versi terbaru di editor.'),
       items: [
-        { title: t('Visa application checklist', 'Daftar periksa permohonan visa'), description: t('Add the file in the editor.', 'Tambahkan berkasnya di editor.') },
-        { title: t('Stay permit guide', 'Panduan izin tinggal'), description: t('Add the file in the editor.', 'Tambahkan berkasnya di editor.') },
+        { title: t('Student visa document checklist', 'Daftar periksa dokumen visa pelajar'), description: t('Everything to prepare before your e-Visa application.', 'Semua yang perlu disiapkan sebelum permohonan e-Visa Anda.') },
+        { title: t('KITAS & stay-permit guide', 'Panduan KITAS & izin tinggal'), description: t('What happens after you arrive in Surabaya.', 'Apa yang terjadi setelah Anda tiba di Surabaya.') },
+        { title: t('Arrival declaration walkthrough', 'Panduan Arrival Declaration'), description: t('How to complete the online declaration and get your QR code.', 'Cara mengisi deklarasi daring dan mendapatkan kode QR Anda.') },
       ],
     }, { accent: 'cyan' }),
     cta({
+      eyebrow: t('We’re here to help', 'Kami siap membantu'),
       heading: t('Questions about your visa?', 'Ada pertanyaan tentang visa Anda?'),
-      ctas: [btn(t('Contact us', 'Hubungi kami'), '/about/contact-us', 'amber')],
+      subcopy: t('The International Office guides every international student through immigration — from your first document to your KITAS card.', 'International Office memandu setiap mahasiswa internasional melewati proses imigrasi — dari dokumen pertama hingga kartu KITAS Anda.'),
+      ctas: [btn(t('Contact the International Office', 'Hubungi International Office'), '/about/contact-us', 'cyan')],
     }, { accent: 'cyan' }),
   ],
 

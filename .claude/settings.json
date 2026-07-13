@@ -155,7 +155,9 @@
       "Read(//c/Users/KUI/.claude/.ccg/prompts/gemini/**)",
       "Bash(grep -iE \"#[0-9a-f]{3,6}|navy-2|--\")",
       "Read(//c/Users/KUI/.claude/skills/ccg/impeccable/adapt/**)",
-      "PowerShell(npx tsc --noEmit -p tsconfig.json 2>&1 | Select-Object -First 40; \"EXIT: $LASTEXITCODE\")"
+      "PowerShell(npx tsc --noEmit -p tsconfig.json 2>&1 | Select-Object -First 40; \"EXIT: $LASTEXITCODE\")",
+      "WebFetch(domain:samkonsulting.com)",
+      "WebFetch(domain:qogentglobal.com)"
     ],
     "additionalDirectories": [
       "E:\\PETRA-Global-Website\\src\\app\\editor-preview",

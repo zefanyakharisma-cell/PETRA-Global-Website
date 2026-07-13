@@ -14,6 +14,7 @@
     "db:seed:icop": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed-icop-page.ts",
     "db:seed:spectrum": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed-spectrum-page.ts",
     "db:seed:accreditation": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed-accreditation-page.ts",
+    "db:seed:predeparture": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed-predeparture-page.ts",
     "db:seed:accreditation-data": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed-accreditation-data.ts",
     "db:seed:domestic-logos": "cross-env NODE_OPTIONS=--require=./scripts/patch-readlink.cjs tsx supabase/seed-domestic-partner-logos.ts"
   },
