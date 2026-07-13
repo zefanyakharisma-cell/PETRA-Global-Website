@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { t, type LocaleMap } from '@/lib/types';
 import { partnerLogo } from '@/lib/partnerLogos';
+import { normalizePartnerName } from '@/lib/partnerLogoMatch';
 import type { BlockComponentProps } from './registry.types';
 import { PartnerMarquee, type MarqueePartner } from './partner-marquee/PartnerMarquee';
 
@@ -9,10 +10,45 @@ interface PartnerMarqueeContent {
 }
 
 /**
+ * Curated "popularity" weights for the international marquee. Keys are the
+ * normalized institution name (same matcher as the logos). A weight of N makes
+ * that partner's tile appear N times in the scroll, so the most globally
+ * recognizable partners recur more often; everything else defaults to 1.
+ * Edit here to promote/demote a partner.
+ */
+const POPULAR_WEIGHT: Record<string, number> = {
+  'national university of singapore': 3,
+  'yonsei university': 3,
+  'city university of hong kong': 3,
+  'monash university': 3,
+  'school of economics fudan university': 3,
+  'xiamen university': 3,
+  'singapore management university': 2,
+  'singapore university of technology and design': 2,
+  'macquarie university': 2,
+  'queensland university of technology': 2,
+  'university of tasmania': 2,
+  'swinburne university of technology': 2,
+  'coventry university': 2,
+  'sophia university': 2,
+  'pusan national university': 2,
+  'hankuk university of foreign studies': 2,
+  'national central university': 2,
+  'national sun yat sen university': 2,
+  'national taiwan university of science and technology': 2,
+  'xi an jiatong liverpool university': 2,
+  'universiti sains malaysia': 2,
+  'vellore institute of technology': 2,
+  'james cook university': 2,
+  'ngee ann polytechnic': 2,
+  'lingnan university': 2,
+};
+
+/**
  * International partners carry their country directly on petra_io.partners.
- * Partners without an uploaded logo still appear — the marquee renders a text
- * tile for them (see <PartnerMarquee>), so the block works before any logos
- * are uploaded.
+ * Only partners with a logo are shown (admin upload, or a match in the bundled
+ * logo manifest) — the marquee is a wall of recognizable logos. Curated
+ * "popular" partners recur more often via POPULAR_WEIGHT.
  */
 async function internationalLogos(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -22,14 +58,21 @@ async function internationalLogos(
     .select('name,country,logo_url,url')
     .eq('kind', 'international')
     .order('name');
-  return (data ?? []).map((r) => ({
-    name: r.name,
-    country: r.country,
-    // An admin-uploaded logo_url wins; otherwise fall back to the bundled logo
-    // manifest matched by institution name (public/partners/*).
-    logoUrl: r.logo_url ?? partnerLogo(r.name),
-    url: r.url,
-  }));
+  return (data ?? [])
+    .map((r) => ({
+      name: r.name,
+      country: r.country,
+      // An admin-uploaded logo_url wins; otherwise fall back to the bundled logo
+      // manifest matched by institution name (public/partners/*).
+      logoUrl: r.logo_url ?? partnerLogo(r.name),
+      url: r.url,
+    }))
+    .filter((p) => p.logoUrl) // logo-only wall — drop partners without a logo
+    // Repeat popular partners so they appear more often across the lanes.
+    .flatMap((p) => Array.from(
+      { length: POPULAR_WEIGHT[normalizePartnerName(p.name)] ?? 1 },
+      () => p,
+    ));
 }
 
 /**

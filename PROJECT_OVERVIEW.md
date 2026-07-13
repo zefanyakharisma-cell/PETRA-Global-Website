@@ -21,12 +21,13 @@ To give Petra's International Office a self-managed, multilingual digital platfo
 
 ## Features
 
-- **Block-based page builder** — ~27 reusable block types (hero, rich text, image/text splits, stat strips, card grids, accordions, tabs, timelines, galleries, logo walls, CTA banners, and more) assembled into any page layout.
+- **Block-based page builder** — ~30 reusable block types (hero, rich text, image/text splits, stat strips, card grids, accordions, tabs, timelines, galleries, logo walls, location & directions maps, data charts, CTA banners, and more) assembled into any page layout.
 - **Live drag-and-drop editor** — reorder, duplicate, and delete blocks with dnd-kit; side-panel forms generated per block; live iframe preview of the real draft.
 - **Full bilingual content (EN / ID)** — all translatable content stored as JSONB locale maps; per-field EN/ID editing tabs; Chinese can be added with no data-model change; hreflang alternates emitted automatically.
 - **Auto-building navigation** — menus construct themselves from published pages grouped by section and nested via parent/child hierarchy into dropdown → flyout menus.
 - **Schema-driven entity CRUD** — a single generic admin screen manages staff, programs, partners, domestic partners, news, testimonials, faculties, study programs, and courses.
 - **Interactive partner world map** — the signature block, code-split out of the critical path for performance.
+- **Location maps & data charts** — MapLibre-powered location/directions blocks and recharts-powered chart blocks (from manual data or a saved database query).
 - **Inquiry capture & routing** — validated inquiry forms (with honeypot spam protection) that store submissions and send best-effort email notifications to the right recipient.
 - **Rich-text editing** — TipTap editor with links, highlights, alignment, and styling.
 - **Media management** — image upload with cropping to a public storage bucket, served through optimized `next/image`.
@@ -43,7 +44,8 @@ To give Petra's International Office a self-managed, multilingual digital platfo
 - **next-intl** for internationalization (en, id, zh-ready)
 - **framer-motion** for animation
 - **TipTap** (rich-text editing) · **dnd-kit** (drag-and-drop)
-- **react-simple-maps** / **maplibre-gl** (partner map)
+- **react-simple-maps** / **maplibre-gl** (partner & location maps)
+- **recharts** (data-chart block)
 - **react-hook-form** + **zod** (forms & validation)
 
 ### Backend

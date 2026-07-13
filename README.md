@@ -9,9 +9,10 @@ Editors sign in to `/admin` to manage those pages with a live, drag-and-drop
 visual editor plus schema-driven CRUD for staff, programs, partners, news,
 faculties and more.
 
-> **No real content is seeded.** Per the client brief, every list/entity block
-> ships with an on-brand empty state. An optional, clearly-labelled `[Placeholder]`
-> seed exists but is **not** run by default.
+> **Nothing is seeded by default.** Every list/entity block ships with an on-brand
+> empty state. Opt-in seed scripts (`npm run db:seed*`) exist to populate real,
+> structured pages (partnership, ICOP, Spectrum, accreditation, pre-departure, …)
+> and a clearly-labelled `[Placeholder]` entity seed — none run automatically.
 
 ---
 
@@ -25,7 +26,8 @@ faculties and more.
 | Database / auth    | **Supabase** (Postgres + Row-Level Security + Auth + Storage)|
 | Rich text          | **TipTap**                                                   |
 | Drag & drop        | **dnd-kit**                                                  |
-| Maps               | **react-simple-maps** / **maplibre-gl** (partner map)       |
+| Maps               | **react-simple-maps** (partner map) / **maplibre-gl** (location & directions blocks) |
+| Charts             | **recharts** (chart block)                                   |
 | Animation          | **framer-motion**                                            |
 | Transactional mail | **Resend** (inquiry notifications)                           |
 | Validation         | **zod**                                                      |
@@ -73,11 +75,12 @@ lives in a dedicated `petra_io` Postgres schema — never `public`.** The client
 are pinned to it via `db: { schema: 'petra_io' }`.
 
 1. **Run the migrations** in [`supabase/migrations/`](supabase/migrations) in
-   order (`0001` → `0011`), via the Supabase SQL editor or `supabase db push`.
+   order (`0001` → `0018`), via the Supabase SQL editor or `supabase db push`.
    `0001_petra_io_schema.sql` creates the schema, enums, tables, indexes,
    `updated_at` triggers, RLS policies, and the public `petra-io-media` storage
    bucket. Later migrations add features (domestic partners, faculties, more
-   block types, events/downloads, program areas, etc.).
+   block types, events/downloads, program areas, block presets, map/chart/
+   directions blocks, program-area accreditation & study-abroad data, etc.).
 2. **Expose the schema to the API:** Dashboard → *Project Settings → API →
    Exposed schemas* → add `petra_io`.
 3. **Create an admin user:** *Authentication → Users → Add user*. Any
@@ -137,15 +140,20 @@ importing server components:
 | `src/components/blocks/registry.tsx`          | Maps `type` → React component                               |
 | `src/components/blocks/BlockRenderer.tsx`     | Renders the same components for **public** and **preview**  |
 
-**Block catalogue** (`~27` types) grouped by category:
+**Block catalogue** (`~30` types) grouped by category:
 
 - **Layout & hero** — `hero`, `section_header`, `audience_doors`, `divider`
 - **Content** — `rich_text`, `image_text_split`, `stat_strip`, `card_grid`,
   `feature_list`, `accordion`, `tabs`, `steps`, `timeline`, `gallery`,
-  `pull_quote`, `logo_wall`, `embed`, `downloads`, `events`
+  `pull_quote`, `logo_wall`, `embed`, `map`, `directions`, `chart`,
+  `downloads`, `events`
 - **Entity-bound** — `partner_map`, `partner_marquee`, `testimonials`,
   `news_feed`, `staff`, `faculties`
 - **Conversion** — `cta_banner`, `inquiry_form`
+
+> `map`/`directions` render a MapLibre location map (markers, auto-fit,
+> light/dark styles); `chart` renders a recharts graph from manual data or a
+> saved database query.
 
 > The **signature feature** is the interactive `partner_map`
 > (react-simple-maps), code-split out of the public critical path via
@@ -231,8 +239,8 @@ src/
   middleware.ts        Auth gate + locale routing
 messages/              UI string catalogues (en, id)
 supabase/
-  migrations/          0001–0011 schema evolution
-  seed*.ts / *.sql     Optional placeholder + partner data seeds
+  migrations/          0001–0018 schema evolution
+  seed*.ts / *.sql     Optional placeholder, page, partner & accreditation seeds
 scripts/               build-partner-logos, patch-readlink (Node 24 shim)
 assets/                Source partner logos + CSV data (not served directly)
 public/fonts/          Self-hosted fonts (see public/fonts/README.md)
@@ -250,12 +258,23 @@ public/fonts/          Self-hosted fonts (see public/fonts/README.md)
 | `npm run lint`      | `next lint`                                                      |
 | `npm run typecheck` | `tsc --noEmit`                                                   |
 | `npm run db:seed`   | **Optional** — insert clearly-labelled `[Placeholder]` rows      |
+| `npm run db:seed:*` | **Optional** — seed real, structured pages & reference data      |
 
-### Optional placeholder seed (NOT run by default)
+### Optional seeds (NOT run by default)
 
 ```bash
-npm run db:seed   # inserts "[Placeholder]" rows; delete them later in /admin
+npm run db:seed                    # "[Placeholder]" entity rows; delete later in /admin
+npm run db:seed:pages              # core page compositions
+npm run db:seed:icop               # ICOP program page
+npm run db:seed:spectrum           # Spectrum page
+npm run db:seed:accreditation      # accreditation page
+npm run db:seed:accreditation-data # accreditation reference data
+npm run db:seed:predeparture       # pre-departure page
+npm run db:seed:domestic-logos     # domestic partner logos
 ```
+
+> Seed scripts need server env vars (`SUPABASE_SERVICE_ROLE_KEY`) — they do **not**
+> auto-load `.env.local`; export the vars in your shell or prefix the command.
 
 ---
 

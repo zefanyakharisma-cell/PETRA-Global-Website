@@ -21,12 +21,13 @@ Memberikan International Office Petra sebuah platform digital multibahasa yang d
 
 ## Fitur
 
-- **Pembangun halaman berbasis blok** — sekitar 27 jenis blok yang dapat digunakan ulang (hero, teks kaya, gabungan gambar/teks, strip statistik, grid kartu, accordion, tab, timeline, galeri, dinding logo, banner CTA, dan lainnya) yang dirangkai menjadi tata letak halaman apa pun.
+- **Pembangun halaman berbasis blok** — sekitar 30 jenis blok yang dapat digunakan ulang (hero, teks kaya, gabungan gambar/teks, strip statistik, grid kartu, accordion, tab, timeline, galeri, dinding logo, peta lokasi & petunjuk arah, grafik data, banner CTA, dan lainnya) yang dirangkai menjadi tata letak halaman apa pun.
 - **Editor drag-and-drop langsung** — mengurutkan ulang, menggandakan, dan menghapus blok dengan dnd-kit; formulir panel samping yang dibuat per blok; pratinjau langsung dalam iframe dari draf sesungguhnya.
 - **Konten dwibahasa penuh (EN / ID)** — semua konten yang dapat diterjemahkan disimpan sebagai peta lokal JSONB; tab pengeditan EN/ID per kolom; bahasa Mandarin dapat ditambahkan tanpa perubahan model data; alternatif hreflang dihasilkan otomatis.
 - **Navigasi yang terbangun otomatis** — menu terbentuk sendiri dari halaman yang dipublikasikan, dikelompokkan per bagian dan disusun bertingkat melalui hierarki induk/anak menjadi menu dropdown → flyout.
 - **CRUD entitas berbasis skema** — satu layar admin generik mengelola staf, program, mitra, mitra domestik, berita, testimoni, fakultas, program studi, dan mata kuliah.
 - **Peta dunia mitra interaktif** — blok andalan, dipisah kodenya (code-split) dari jalur kritis demi performa.
+- **Peta lokasi & grafik data** — blok peta lokasi/petunjuk arah bertenaga MapLibre dan blok grafik bertenaga recharts (dari data manual atau kueri basis data tersimpan).
 - **Penangkapan & penerusan inquiry** — formulir pertanyaan tervalidasi (dengan proteksi spam honeypot) yang menyimpan kiriman dan mengirim notifikasi email secara best-effort ke penerima yang tepat.
 - **Pengeditan teks kaya** — editor TipTap dengan tautan, sorotan, perataan, dan penataan gaya.
 - **Manajemen media** — unggah gambar dengan pemotongan (crop) ke bucket penyimpanan publik, disajikan melalui `next/image` yang teroptimasi.
@@ -43,7 +44,8 @@ Memberikan International Office Petra sebuah platform digital multibahasa yang d
 - **next-intl** untuk internasionalisasi (en, id, siap zh)
 - **framer-motion** untuk animasi
 - **TipTap** (pengeditan teks kaya) · **dnd-kit** (drag-and-drop)
-- **react-simple-maps** / **maplibre-gl** (peta mitra)
+- **react-simple-maps** / **maplibre-gl** (peta mitra & lokasi)
+- **recharts** (blok grafik data)
 - **react-hook-form** + **zod** (formulir & validasi)
 
 ### Backend
