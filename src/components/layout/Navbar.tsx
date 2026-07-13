@@ -8,6 +8,7 @@ import { t as localize, type Locale } from '@/lib/types';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { SearchTrigger } from './Search';
 import { MobileNav, type MobileSection } from './MobileNav';
+import { StickyHeader } from './StickyHeader';
 
 /** Localized nav node used by the rendered menus. */
 interface MenuItem {
@@ -41,7 +42,7 @@ export async function Navbar({ locale }: { locale: string }) {
   }));
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-navy text-white">
+    <StickyHeader>
       <nav className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-5 md:px-8" aria-label="Primary">
         <Link
           href="/"
@@ -101,7 +102,7 @@ export async function Navbar({ locale }: { locale: string }) {
           <MobileNav sections={sections satisfies MobileSection[]} menuLabel={t('menu')} />
         </div>
       </nav>
-    </header>
+    </StickyHeader>
   );
 }
 

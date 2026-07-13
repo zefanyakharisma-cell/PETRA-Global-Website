@@ -49,11 +49,17 @@ export function Cta({
   className?: string;
 }) {
   const cls = clsx(
+    'relative overflow-hidden',
     'inline-flex items-center justify-center gap-2 rounded-md',
     'font-condensed uppercase tracking-wide',
     'transition duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:brightness-95',
     SIZES[size],
     VARIANTS[variant],
+    // Shine sweep on hover — a soft skewed light bar glides across solid fills.
+    // Skipped on outline (no surface to catch the light). Adapted from 21st.dev
+    // "Shining Button" (hextaui); reduced-motion neutralises the transition.
+    variant !== 'outline' &&
+      'before:pointer-events-none before:absolute before:top-0 before:h-[200%] before:w-10 before:-translate-x-[6rem] before:-skew-x-12 before:bg-white/25 before:blur-md before:transition-transform before:duration-700 before:ease-out hover:before:translate-x-[22rem]',
     className,
   );
 
